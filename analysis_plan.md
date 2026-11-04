@@ -477,4 +477,39 @@ They may run once the confirmatory core is complete, before or after submission,
 
 | Date | Section | Change | Reason | Results seen before the change? |
 |---|---|---|---|---|
-| | | | | |
+| 2026-11-04 | §10 | Added a dry run: after the rehearsal, the full test-year script (`scripts/run_test_year.py`) runs end to end with 2019 as the test year, on 12-month windows, excluding pairs whose day two is in 2020. It produces no 2020 number and is not evidence; it tests the code, so that nothing is debugged with 2020 results in view. 2019 is already an evaluated year (§14). | Recommended by an independent code review before unblinding | No |
+| 2026-11-04 | §14, §16 | Appended §16 with the specifications of the SPY (item 9) and Heston (item 7) extensions, as §14 requires before an extension runs. | The author's choices of 2026-11-04 | No |
+
+## 16. Extension specifications (appended under §14's rule)
+
+### 16.1 SPY (§14, item 9). Specified 2026-11-04, before any SPY hedging outcome
+
+The author's choices of 2026-11-04: American pricing with the Lecture 12 library, and public data for SPY's close and distributions.
+- **Data.**
+  - OptionsDX SPY, step-3 panel built with the SPX rules (`DATA.md`). SPY is P.M.-settled throughout, and no stamp window is defined.
+  - **Closes:** SPY's exchange close from Nasdaq's historical quotes (`data/external/nasdaq_SPY_history.csv`, from 2016-11). Sensitivity B is the vendor's snapshot.
+  - **Distributions:** ex-dates and cash amounts from the sponsor's SPDR distributions file (`data/external/ssga_SPY_distributions.csv`).
+  - The light audit of §7 runs on SPY 2018–2021 first.
+- **Rates and dividends.**
+  - **The rate** r(τ) is that session's SPX parity curve (§4).
+  - **The yield.** q(τ) is SPX's implied carry, r(τ) − ln(F_e/S_A)/τ_e, from the SPX expiries 30 days to 2 years out, fitted linearly in τ (flat beyond), less SPY's 0.0945% expense ratio. S_A is the options-implied SPX level of §2, used so that the index-timing mismatch does not enter q.
+- **Implied volatility and Greeks** at the mid:
+  - **puts:** Lecture 12's American `bs_american_put_iv`, a CRR tree with 150 steps and the control variate, using r(τ) and q(τ). δ and ν are central differences on the same tree, with S bumped by ±0.5% and σ by ±0.01;
+  - **calls:** Lecture 12's `bs_euro_iv` and `bs_euro_greeks`, with continuous yield q, as the lecture prices SPY calls. Early exercise of calls before ex-dates is ignored, a stated limitation;
+  - only day-one candidates are solved: τ ≥ 14 days, two-sided, and E7 as for SPX.
+- **The hedge P&L** includes the distribution: e = (Δf − h·(ΔS + Div·1{day two is an ex-date}))/S_t.
+- **Design:** the SPX protocol of §5–§9 unchanged: E1–E8, W12 refitted monthly, 2019 training and 2020 test, rules R0–R5 (R6 needs vanna, which the tree does not give), the same bootstrap and Gains. Exploratory: no verdict. Results are reported beside SPX's, with SPY's own attrition.
+- **Limitations stated in advance.** Continuous yield in the tree, not the discrete schedule; American calls priced as European; SPY options may trade after the 16:00 close (unverified).
+
+### 16.2 Heston (§14, item 7). Specified 2026-11-04, before any Heston hedging outcome
+
+The author's choices of 2026-11-04: both the lecture's calibration and a broader one; daily calibration over 2019–2020, compared on 2020.
+- **The model and code:** Lecture 12's `heston_call` and `heston_european_greeks` (Gauss–Legendre, 256 nodes, the library's integration-limit heuristic). r and q per expiry come from that expiry's parity D and F, so the pricing forward matches §4's.
+- **Calibration L (the lecture's).** SPX calls only, 50–100 days to expiry, 0.8 < S/K < 1.2, bid and ask sizes above 10, the Lecture 12 size-weighted price. Two fits each session with `scipy.optimize.least_squares` and the lecture's bounds (v₀ ∈ [10⁻⁴, 2.25], κ ∈ [0.1, 10], θ ∈ [10⁻⁴, 1], ξ ∈ [0.05, 5], ρ ∈ [−0.999, 0]): price errors, and implied-volatility errors.
+- **Calibration B (broad).** SPX out-of-the-money calls and puts (calls K ≥ F, puts K < F), 14 days to 1 year, two-sided, E7, mids; implied-volatility errors; the same bounds.
+- **Starting values.** January 2019 starts at (v₀, κ, θ, ξ, ρ) = (0.04, 2, 0.04, 0.5, −0.7). Every fit in a later month starts from the median of the previous month's successful calibration-B solutions, so the sessions within a month can run in parallel. A fit needs at least 10 options. A fit is *failed* if least_squares does not converge or any parameter sits within 10⁻⁶ of a bound. Fit quality and failures are reported per session.
+- **Hedging, on the 2020 analysis sample,** with the day-one parameters of calibration B:
+  - the Heston model delta, C_S;
+  - the Heston minimum-variance delta, C_S + (ρξ/S)·C_v. C_v is a central difference in v₀ (±1% of v₀), and S moves with the forward fixed in carry.
+  - Both are compared with R1 and R2 on the pairs where calibration B succeeded on day one, using the same bootstrap. Exploratory: no verdict. 2019 serves as the calibration warm-up and parameter-path illustration, not as a test.
+- **Compute.** Calibrations run in parallel within each month and are logged in the runtime log.
