@@ -31,8 +31,9 @@ def main() -> None:
     op = option_pricing()
     prm = pd.read_csv(OUT / "params.csv", parse_dates=["session"])
     prm = prm[(prm.fit == "B-iv") & prm.ok.fillna(False).astype(bool)].set_index("session")
-    P = h.load_pairs([2020])
+    P = h.load_pairs(range(2015, 2021))  # the same load as the 2020 run, so its errors' index labels match
     fr = h.ingredients(P)
+    P = P[P.quote_date.dt.year == 2020]
     prim = pd.read_parquet(ROOT / "results/2020/errors.parquet")
     with timed("heston_hedge", inputs="spx 2020, calibration B", rows_in=len(P)) as run:
         out = []
@@ -60,10 +61,17 @@ def main() -> None:
                                          "delta_model": d_model, "delta_mv": d_mv}, index=ii))
         E = pd.concat(out).join(prim[["R1", "R2", "month"]], how="inner")
         E.to_parquet(OUT / "hedge_errors.parquet")
-        index = pd.DatetimeIndex(np.sort(fr.loc[E.index, "session"].unique()))
-        sse = h.aligned_sse(E, fr, ["R1", "R2", "H_model", "H_mv"], index)
-        counts = h.bootstrap_counts(index, B=10_000, block=10, seed=2026)
-        G = h.gain_table(sse, [("H_model", "R1"), ("H_mv", "R1"), ("R2", "R1"), ("H_mv", "R2"), ("H_mv", "H_model")], counts)
+        comps = [("H_model", "R1"), ("H_mv", "R1"), ("R2", "R1"), ("H_mv", "R2"), ("H_mv", "H_model")]
+        rows = []
+        # all converged fits, then (deviation log, 2026-11-04) only the fits with no parameter at a bound
+        for label, keep in (("all converged fits", np.ones(len(E), bool)),
+                            ("fits with no bound hit", ~P.loc[E.index, "quote_date"].map(prm.at_bound.astype(bool)).to_numpy())):
+            e = E[keep]
+            index = pd.DatetimeIndex(np.sort(fr.loc[e.index, "session"].unique()))
+            sse = h.aligned_sse(e, fr, ["R1", "R2", "H_model", "H_mv"], index)
+            g = h.gain_table(sse, comps, h.bootstrap_counts(index, B=10_000, block=10, seed=2026))
+            rows.append(g.assign(sample=label, sessions=len(index)))
+        G = pd.concat(rows, ignore_index=True)
         G.to_csv(OUT / "gains.csv", index=False)
         run["rows_out"] = len(E)
         print(G.round(4).to_string(index=False))

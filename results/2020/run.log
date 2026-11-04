@@ -1,0 +1,17 @@
+D:\My Code\Erdos quant-finance project\src\erdos_quant_finance_project\hedging.py:43: RuntimeWarning: invalid value encountered in divide
+  "wm": lambda b, a, qb, qa: (b * qa + a * qb) / (qb + qa),
+D:\My Code\Erdos quant-finance project\src\erdos_quant_finance_project\hedging.py:45: RuntimeWarning: invalid value encountered in divide
+  "sw": lambda b, a, qb, qa: (b * qb + a * qa) / (qb + qa),
+      variant      verdict    H1      G_C    G_C_lo   G_C_hi           C_vs_R3           C_vs_R4       G_P    G_P_lo   G_P_hi           P_vs_R3           P_vs_R4
+      primary Inconclusive False 0.185162 -0.357175 0.462691 not distinguished not distinguished  0.119753 -0.446743 0.457229 not distinguished not distinguished
+            A Inconclusive False 0.147280 -0.398860 0.458244 not distinguished not distinguished  0.219287 -0.546713 0.551981 not distinguished not distinguished
+            B Inconclusive False 0.177983 -0.377465 0.459285 not distinguished not distinguished  0.119112 -0.405174 0.446464 not distinguished not distinguished
+        P-bid Inconclusive False 0.149467 -0.246248 0.370032 not distinguished not distinguished  0.100962 -0.316738 0.369626 not distinguished not distinguished
+        P-ask Inconclusive False 0.140075 -0.246984 0.392183 not distinguished not distinguished  0.099818 -0.357412 0.413929 not distinguished not distinguished
+            F Inconclusive False 0.177508 -0.088456 0.328613 not distinguished not distinguished  0.144770 -0.134742 0.322230          R2 beats          R2 beats
+          W36 Inconclusive False 0.178240 -0.249125 0.395476 not distinguished not distinguished  0.142376 -0.310428 0.412258 not distinguished not distinguished
+          W60 Inconclusive False 0.176480 -0.230941 0.384202 not distinguished not distinguished  0.143688 -0.285070 0.400015 not distinguished not distinguished
+           S3 Inconclusive False 0.095001 -0.356298 0.412461 not distinguished not distinguished -0.028151 -0.479608 0.383720 not distinguished not distinguished
+ rest of 2020 Inconclusive False 0.125635 -0.235110 0.343984 not distinguished          R2 beats  0.161486 -0.194133 0.343173 not distinguished not distinguished
+ endpoint low Inconclusive False 0.183521 -0.343016 0.451954 not distinguished not distinguished  0.120333 -0.434961 0.451370 not distinguished not distinguished
+endpoint high Inconclusive False 0.184312 -0.355196 0.459796 not distinguished not distinguished  0.119850 -0.446365 0.454348 not distinguished not distinguished

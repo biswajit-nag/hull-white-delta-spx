@@ -1,0 +1,15 @@
+diagnostic,value
+A overlap: pairs with <= 10 days left on day two,363.0
+"A overlap: of those, whose expiry fed day two's tier-2 level fit",0.0
+C R0: SSE(WM) - SSE(SW),0.2622050288991318
+C R0: relative to SSE(mid),0.005118214004012673
+"C R0: n*Cov(e,u) / sum(e*u) (1 = mean product negligible)",0.9993094212663921
+C R1: SSE(WM) - SSE(SW),-0.08012405694405622
+C R1: relative to SSE(mid),-0.02045122027162766
+"C R1: n*Cov(e,u) / sum(e*u) (1 = mean product negligible)",1.0008039895006609
+P R0: SSE(WM) - SSE(SW),0.3992183152061557
+P R0: relative to SSE(mid),0.0036419639266968506
+"P R0: n*Cov(e,u) / sum(e*u) (1 = mean product negligible)",1.000208369255222
+P R1: SSE(WM) - SSE(SW),-0.10330778916903771
+P R1: relative to SSE(mid),-0.017808224297166515
+"P R1: n*Cov(e,u) / sum(e*u) (1 = mean product negligible)",1.0015277725361877

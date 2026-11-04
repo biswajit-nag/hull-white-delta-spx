@@ -44,8 +44,8 @@ def folds(fr, P, z, ok, months, cp):
 def main(years: list[int]) -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     P = h.load_pairs(sorted({y - 1 for y in years} | set(years)))
-    if max(years) < 2020:
-        P = P[P.next_session < h.UNBLIND]  # no 2020 outcome before unblinding (the 2019-12-31 pairs)
+    # validation pairs end before the first session after the tuning years (2020-01-02 for 2019: no 2020 outcome)
+    P = P[P.next_session.dt.year <= max(years)]
     fr = h.ingredients(P)
     z = L.features(fr, P)
     ok = L.complete(fr, z)

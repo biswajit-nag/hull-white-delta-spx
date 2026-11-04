@@ -83,3 +83,12 @@ started_at,step,status,wall_seconds,peak_mem_gb,rows_in,rows_out,inputs,git_hash
 2026-11-04T02:28:46-05:00,test_year_2019,ok,160.5,2.95,569967,569967,spx 2019,22da4ea,False,3.14.10,Windows-11,plan dry-run
 2026-11-04T02:25:01-05:00,tune_r8,ok,431.8,2.55,,,spx 2019 P,22da4ea,False,3.14.10,Windows-11,"60 trials, TPE seed 2026; best 0.0598042"
 2026-11-04T02:33:00-05:00,test_year_2019,ok,115.3,3.04,569967,569967,spx 2019,22da4ea,False,3.14.10,Windows-11,plan dry-run
+2026-11-04T02:37:44-05:00,test_year_2020,ok,212.7,3.28,1057455,1057455,spx 2020,b661d6a,False,3.14.10,Windows-11,plan 77b030e (addendum 22da4ea; implementation b661d6a)
+2026-11-04T02:43:31-05:00,spy_2020,ok,12.2,2.28,,1020695,"spy 2019-2020, W12, R0-R5",b661d6a,True,3.14.10,Windows-11,
+2026-11-04T02:46:00-05:00,audit_light,ok,12.3,1.06,,48,spx 2020-2023,b661d6a,True,3.14.10,Windows-11,
+2026-11-04T02:46:26-05:00,audit_light,ok,3.8,0.43,,60,spx 2010-2014,b661d6a,True,3.14.10,Windows-11,
+2026-11-04T02:46:58-05:00,walkforward,ok,384.1,4.50,7725621,22263691,"spx 2010-2023, W12 W36 W60",b661d6a,True,3.14.10,Windows-11,
+2026-11-04T02:56:19-05:00,tune_r8,ok,141.6,1.68,,,spx 2015_2016 C,b661d6a,True,3.14.10,Windows-11,"60 trials, TPE seed 2026; best 0.104223"
+2026-11-04T02:58:45-05:00,tune_r8,ok,177.9,1.68,,,spx 2015_2016 P,b661d6a,True,3.14.10,Windows-11,"60 trials, TPE seed 2026; best 0.189131"
+2026-11-04T03:01:54-05:00,walkforward_r8,ok,180.7,4.52,,6642372,"spx 2016-2023, R8 tuned on 2015-2016",b661d6a,True,3.14.10,Windows-11,
+2026-11-04T02:24:18-05:00,heston_calibrate,ok,8709.3,0.13,497,1491,"spx 2019-2020, fits L-price, L-iv, B-iv",b661d6a,True,3.14.10,Windows-11,L-price ok 442; L-iv ok 405; B-iv ok 243

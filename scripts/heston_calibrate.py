@@ -1,9 +1,11 @@
 """Daily Heston calibrations of SPX, 2019–2020, in the style of Lecture 12 (analysis_plan.md §16.2).
 
 Calibration L (the lecture's): calls 50–100 days, 0.8 < S/K < 1.2, sizes > 10, the size-weighted price;
-fitted twice, to price errors and to implied-volatility errors. Calibration B (broad): out-of-the-money
-calls and puts 14 days to 1 year, two-sided, E7, mids; implied-volatility errors. scipy least_squares
-with the lecture's bounds; sessions within a month in parallel, warm-started from the previous month.
+fitted twice, to price errors and to implied-volatility errors, from the default start. Calibration B
+(broad): out-of-the-money calls and puts 14 days to 1 year, two-sided, E7, mids; implied-volatility errors;
+three starts (that session's L-iv solution, the default, the previous month's median B), keeping the
+lowest cost (deviation log, 2026-11-04). scipy least_squares with the lecture's bounds; success means
+convergence, with bound hits flagged. Sessions within a month run in parallel.
 Writes results/heston/params.csv.
 
 Usage: uv run python -I scripts/heston_calibrate.py
@@ -71,10 +73,10 @@ def fit(d: pd.DataFrame, target: str, x0) -> dict:
             iv = bs.implied_vol(model_price(x, d, op), d.S_close.values, d.F.values, d.strike.values, d.D.values, d.tau.values, d.sgn.values)[0]
             return np.where(np.isfinite(iv), iv - ivm, 1.0)  # an unpriceable model price costs 100 vol points
     res = least_squares(fun, x0=np.clip(x0, LB + 1e-6, UB - 1e-6), bounds=(LB, UB))
-    at_bound = bool(np.any(np.minimum(res.x - LB, UB - res.x) < 1e-6))
+    at_bound = bool(np.any(np.minimum(res.x - LB, UB - res.x) < 1e-3 * (UB - LB)))
     iv = bs.implied_vol(model_price(res.x, d, op), d.S_close.values, d.F.values, d.strike.values, d.D.values, d.tau.values, d.sgn.values)[0]
     return {**dict(zip(NAMES, res.x)), "n": len(d), "nfev": res.nfev, "converged": bool(res.success), "at_bound": at_bound,
-            "ok": bool(res.success) and not at_bound, "iv_rmse": float(np.sqrt(np.nanmean((iv - ivm) ** 2))),
+            "ok": bool(res.success), "cost": float(res.cost), "iv_rmse": float(np.sqrt(np.nanmean((iv - ivm) ** 2))),
             "price_rmse": float(np.sqrt(np.mean((model_price(res.x, d, op) - d.px.values) ** 2)))}
 
 
@@ -91,11 +93,22 @@ def calibrate_day(args) -> list[dict]:
           & (((d.cp == "C") & (d.strike >= d.F)) | ((d.cp == "P") & (d.strike < d.F)))].copy()
     B["px"] = (B.bid + B.ask) / 2
     B["sgn"] = np.where(B.cp == "C", 1.0, -1.0)
-    for name, data, target in (("L-price", L, "price"), ("L-iv", L, "iv"), ("B-iv", B, "iv")):
+    for name, data, target in (("L-price", L, "price"), ("L-iv", L, "iv")):
         if len(data) >= 10:
-            out.append({"session": day, "fit": name, **fit(data, target, x0)})
+            out.append({"session": day, "fit": name, **fit(data, target, X0)})
         else:
             out.append({"session": day, "fit": name, "n": len(data), "ok": False})
+    # calibration B (deviation log, 2026-11-04): three starts, keep the lowest cost
+    if len(B) >= 10:
+        starts = [X0, x0]
+        liv = [r for r in out if r["fit"] == "L-iv" and r.get("ok")]
+        if liv:
+            starts.insert(0, np.array([liv[0][k] for k in NAMES]))
+        fits = [fit(B, "iv", x) for x in starts]
+        best = min(fits, key=lambda r: r["cost"])
+        out.append({"session": day, "fit": "B-iv", **best, "starts": len(starts)})
+    else:
+        out.append({"session": day, "fit": "B-iv", "n": len(B), "ok": False})
     return out
 
 
@@ -106,7 +119,7 @@ def main() -> None:
     x0 = {f: X0 for f in ("L-price", "L-iv", "B-iv")}
     rows = []
     with timed("heston_calibrate", inputs="spx 2019-2020, fits L-price, L-iv, B-iv", rows_in=len(days)) as run:
-        with ProcessPoolExecutor(max_workers=6) as pool:
+        with ProcessPoolExecutor(max_workers=14) as pool:
             for m, md in pd.Series(days, index=days).groupby(days.to_period("M")):
                 # within a month every session starts from last month's median solution; the B fit is the reference
                 res = list(pool.map(calibrate_day, [(d, x0["B-iv"]) for d in md]))
