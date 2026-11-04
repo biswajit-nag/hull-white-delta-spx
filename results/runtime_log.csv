@@ -92,3 +92,5 @@ started_at,step,status,wall_seconds,peak_mem_gb,rows_in,rows_out,inputs,git_hash
 2026-11-04T02:58:45-05:00,tune_r8,ok,177.9,1.68,,,spx 2015_2016 P,b661d6a,True,3.14.10,Windows-11,"60 trials, TPE seed 2026; best 0.189131"
 2026-11-04T03:01:54-05:00,walkforward_r8,ok,180.7,4.52,,6642372,"spx 2016-2023, R8 tuned on 2015-2016",b661d6a,True,3.14.10,Windows-11,
 2026-11-04T02:24:18-05:00,heston_calibrate,ok,8709.3,0.13,497,1491,"spx 2019-2020, fits L-price, L-iv, B-iv",b661d6a,True,3.14.10,Windows-11,L-price ok 442; L-iv ok 405; B-iv ok 243
+2026-11-04T07:13:57-05:00,heston_calibrate,ok,23627.0,0.12,497,1491,"spx 2019-2020, fits L-price, L-iv, B-iv",29a9fd3,True,3.14.10,Windows-11,L-price ok 496; L-iv ok 496; B-iv ok 448
+2026-11-04T13:48:32-05:00,heston_hedge,ok,63.8,2.94,1057455,969451,"spx 2020, calibration B",29a9fd3,True,3.14.10,Windows-11,

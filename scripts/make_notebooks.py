@@ -497,9 +497,15 @@ for ax, c in zip(axes, ["v0", "rho", "xi"]):
 plt.tight_layout()"""),
     code("""pd.read_csv(R / "heston/gains.csv").round(3)"""),
     md("""
-**Reading** (`H_model`: the Heston delta C_S; `H_mv`: the Heston minimum-variance delta):
-- **The fit.** The parameters move as expected through March 2020: v₀ spikes and ρ stays strongly negative.
-- **The hedging comparison** shows whether a model calibrated to each day's smile captures the spot–volatility co-movement that Hull and White estimate from history.
+**Reading** (`H_model`: the Heston model delta C_S; `H_mv`: the Heston minimum-variance delta):
+- **The calibrations.**
+  - The lecture's fit (L, 50–100-day calls) converges on 99.8% of sessions, with errors of 0.35–0.41 vol points.
+  - The broad fit (B, out-of-the-money calls and puts, 14 days to a year) converges on 90%, with a median error of 1.9 vol points. Three-quarters of its fits put κ at the bound of 10: Heston strains to fit SPX's skew across maturities.
+  - Through March 2020, v₀ rises to 0.3–0.9 (55–95% volatility) and ρ stays near −0.8.
+- **The Heston model delta is far worse than Black–Scholes,** roughly doubling the squared error (Gains −1.30 and −1.11). As calibrated, Heston implies a smile that moves with the index (close to sticky delta), so its delta over-hedges calls and under-hedges puts.
+- **Heston's minimum-variance delta repairs most of that,** through its ρξ·C_v/S term, and ends level with Black–Scholes (Gains +0.04 and +0.02, intervals spanning zero).
+- **It is significantly worse than Hull and White's empirical rule:** −0.20 [−0.46, −0.13] for calls and −0.12 [−0.39, −0.01] for puts. This matches Hull and White's comparison with SABR: a correction estimated from historical co-movement beats one read off each day's smile.
+- **The 57 sessions whose fits hit no bound.** For calls the ordering is the same: the Heston minimum-variance delta is worse than R2, −0.05 [−0.35, −0.01]. For puts, the model delta, the minimum-variance delta and R2 cannot be told apart, and all are below Black–Scholes on those days. Those sessions are not a random subset: a fit without bound hits is a day on which Heston happens to fit well.
 """),
 ])
 
@@ -537,6 +543,20 @@ g[(g.rule == "R2") & g.base.isin(["R1", "R4"]) & (g.year >= 2021)][["window", "y
 - **The earlier analogue.** 2017, the earlier low-slope year, also had the smallest earlier Gains.
 
 This is a descriptive reading. A model validator would take it as the case for monitoring the spot–volatility slope alongside the hedge.
+"""),
+    md("""
+## The boosted challenger in the walk-forward
+
+R8 is retuned once on 2015–2016, with validation pairs ending before 2017, then refitted monthly on the 12-month window from 2017 on. Each row is its relative Gain over R2.
+"""),
+    code("""
+w = pd.read_csv(R / "walkforward/r8_by_year.csv")
+w[w.rule == "R8"][["year", "cp", "gain", "lo", "hi"]].round(3)"""),
+    md("""
+**Reading.**
+- **The tuning chose a minimal model:** 51 trees, a learning rate of 0.01, 4 leaves.
+- **In most years R8 is within a few percent of R2.**
+- **2020 puts are the exception.** The crash pushed the features far outside their training range, and even this small correction more than doubled R2's squared error (relative Gain −1.98). The same failure appears in the 2020 test (notebook 05).
 """),
 ])
 

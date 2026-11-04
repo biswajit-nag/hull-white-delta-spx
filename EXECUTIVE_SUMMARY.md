@@ -30,7 +30,7 @@ An options dealer hedges its book with the underlying index, using each option's
 4. **The simpler rules are not beaten.** Against the fixed and fitted scaling rules the MV delta is not distinguished, overall or on out-of-the-money options. Outside the crash it beat the fitted scaling rule for calls by 5%, with an interval of [3%, 8%].
 5. **Perspective.** The Black–Scholes delta alone removed 92–95% of the unhedged variance. The MV correction works on the remainder, worth about $100 per contract in RMS error.
 6. **Across years, the advantage is not stable.** A walk-forward over 2011–2023 finds positive Gains in every year through 2021, mostly 0.10–0.25, including the clean held-out year 2021 (calls 0.15 [0.02, 0.26]). It vanishes in 2022–2023: about 0 with a 12-month window, and negative (−0.16 to −0.23) with 36- and 60-month windows in 2022. That coincides with the near-the-money spot–volatility slope falling from 0.25–0.55 to 0.13 vol points per 1% index fall.
-7. **Extensions.** SPY (American options, dividends) shows the same picture as SPX in 2020. A gradient-boosted challenger tuned on calm 2019 failed in March 2020, when its inputs left their training range: a concrete model-risk lesson.
+7. **Extensions.** SPY (American options, dividends) shows the same picture as SPX in 2020. A gradient-boosted challenger tuned on calm 2019 failed in March 2020, when its inputs left their training range: a concrete model-risk lesson. A Heston model calibrated daily, in the style of the last lecture, gives a minimum-variance delta only level with Black–Scholes, and significantly worse than Hull and White's empirical rule.
 
 ## Important limitations
 

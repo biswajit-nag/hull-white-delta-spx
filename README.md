@@ -85,7 +85,7 @@ The years' status matters: 2015–2020 had been used for fitting or evaluation b
 ## Extensions
 
 - **SPY** (American options, quarterly dividends; Lecture 12's American pricer). The same picture: point Gains of 0.10 (calls) and 0.25 (puts), intervals spanning zero.
-- **Heston,** calibrated daily in the style of Lecture 12: running at this commit; results to follow in `results/heston/` and notebook 05.
+- **Heston,** calibrated daily in the style of Lecture 12, on the lecture's sample and on a broad out-of-the-money one. Heston's own delta roughly doubles the Black–Scholes squared error, because its implied smile dynamics are wrong for SPX. Its minimum-variance delta is only level with Black–Scholes, and significantly worse than Hull and White's empirical rule (−0.20 for calls, −0.12 for puts). That matches Hull and White's comparison with SABR.
 - **Machine-learning challengers.** A depth-3 regression tree is not distinguished from Hull–White. Gradient boosting tuned on 2019 failed for puts in March 2020, when its features left the range it was trained on.
 
 ## What this does not establish
