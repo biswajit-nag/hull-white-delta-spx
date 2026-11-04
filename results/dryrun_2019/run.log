@@ -1,0 +1,16 @@
+D:\My Code\Erdos quant-finance project\src\erdos_quant_finance_project\hedging.py:43: RuntimeWarning: invalid value encountered in divide
+  "wm": lambda b, a, qb, qa: (b * qa + a * qb) / (qb + qa),
+D:\My Code\Erdos quant-finance project\src\erdos_quant_finance_project\hedging.py:45: RuntimeWarning: invalid value encountered in divide
+  "sw": lambda b, a, qb, qa: (b * qb + a * qa) / (qb + qa),
+      variant      verdict    H1      G_C    G_C_lo   G_C_hi           C_vs_R3           C_vs_R4      G_P    G_P_lo   G_P_hi           P_vs_R3           P_vs_R4
+      primary Inconclusive False 0.114287 -0.051629 0.239492 not distinguished not distinguished 0.098964 -0.259573 0.295444 not distinguished not distinguished
+            A Inconclusive False 0.085107 -0.142680 0.238601 not distinguished          R2 beats 0.168121 -0.121366 0.333146 not distinguished not distinguished
+            B Inconclusive False 0.116236 -0.045652 0.239305 not distinguished not distinguished 0.091043 -0.262831 0.287351 not distinguished not distinguished
+        P-bid Inconclusive False 0.094596 -0.009487 0.182417 not distinguished          R2 beats 0.063601 -0.123225 0.182661 not distinguished not distinguished
+        P-ask Inconclusive False 0.071885 -0.067412 0.190998 not distinguished not distinguished 0.086591 -0.289144 0.299667 not distinguished not distinguished
+            F Inconclusive False 0.160895 -0.061824 0.326340          R2 beats not distinguished 0.137214 -0.291662 0.377367 not distinguished not distinguished
+          W36 Inconclusive False 0.157191 -0.044626 0.307740          R2 beats          R2 beats 0.157822 -0.201422 0.359562 not distinguished not distinguished
+          W60 Inconclusive False 0.158518 -0.042109 0.308001          R2 beats          R2 beats 0.159069 -0.194323 0.357956 not distinguished not distinguished
+           S3 Inconclusive False 0.119872 -0.036623 0.238003 not distinguished          R2 beats 0.097994 -0.255793 0.293713 not distinguished not distinguished
+ endpoint low Inconclusive False 0.114277 -0.051630 0.239477 not distinguished not distinguished 0.098961 -0.259571 0.295428 not distinguished not distinguished
+endpoint high Inconclusive False 0.114291 -0.051629 0.239486 not distinguished not distinguished 0.098965 -0.259571 0.295443 not distinguished not distinguished

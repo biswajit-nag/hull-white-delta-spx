@@ -1,0 +1,27 @@
+variant,cp,months
+primary,C,12
+primary,P,12
+A,C,12
+A,P,12
+B,C,12
+B,P,12
+P-bid,C,12
+P-bid,P,12
+P-ask,C,12
+P-ask,P,12
+P-WM,C,12
+P-WM,P,12
+P-SW,C,12
+P-SW,P,12
+T,C,12
+T,P,12
+F,C,12
+F,P,12
+W36,C,12
+W36,P,12
+W60,C,12
+W60,P,12
+OTM-refit,C,12
+OTM-refit,P,12
+carried variants,C,12
+carried variants,P,12

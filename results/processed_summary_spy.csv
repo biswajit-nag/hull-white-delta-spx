@@ -1,0 +1,5 @@
+quote_dates,rows,underlying,year,S_close_missing,am_settled,f_crossed,f_dup_key,f_non_session,f_one_sided,f_post_settlement,f_restamped,f_settle_uncertain,f_stamp_not_session,f_stamp_window,next_contract_absent,next_expired,next_non_session_row,next_ok,next_one_sided_next,next_vendor_missing_session
+252,1510258,spy,2018,5648,0,4246,0,5648,108220,0,0,0,3028,0,1762,30094,5648,1361593,111161,0
+248,1668150,spy,2019,0,0,6114,0,0,105803,0,0,0,0,0,1596,30706,0,1502200,108628,25020
+250,2328802,spy,2020,0,0,6526,0,0,104128,0,0,0,0,0,18,41588,0,2151198,108066,27932
+252,2555396,spy,2021,0,0,322,0,0,120221,0,0,0,0,0,366,44020,0,2391425,119585,0

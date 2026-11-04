@@ -1,0 +1,38 @@
+[project]
+name = "erdos-quant-finance-project"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Biswajit Nag", email = "biswajit.nag.math@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "lightgbm>=4.7.0",
+    "matplotlib>=3.11.2",
+    "numpy>=2.5.4",
+    "openpyxl>=3.1.5",
+    "optuna>=5.0.0",
+    "pandas>=3.1.0",
+    "pandas-market-calendars>=5.5.0",
+    "psutil>=7.2.2",
+    "pyarrow>=26.0.0",
+    "scikit-learn>=1.9.1",
+    "scipy>=1.18.1",
+    "statsmodels>=0.15.0",
+]
+
+[project.scripts]
+erdos-quant-finance-project = "erdos_quant_finance_project:main"
+
+[build-system]
+requires = ["uv_build>=0.13.6,<0.14.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.4.0",
+    "nbclient>=0.11.0",
+    "nbformat>=5.11.1",
+    "pytest>=9.2.0",
+]

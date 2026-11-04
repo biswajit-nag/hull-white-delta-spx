@@ -1,0 +1,19 @@
+# Vendor data and copyrighted papers
+data/
+docs/
+
+# Private working files
+notes/
+CLAUDE.md
+CLAUDE.local.md
+Jarugula/
+
+# Python and uv
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Per-pair outputs: regenerable and large
+results/**/*.parquet
