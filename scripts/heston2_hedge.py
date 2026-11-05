@@ -71,8 +71,11 @@ def year_errors(year: int) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     P = h.load_pairs(yrs)
     fr = h.ingredients(P)
     G = pd.concat([pd.read_parquet(CACHE / f"greeks_{y}.parquet") for y in yrs], ignore_index=True)
-    G["quote_date"], G["settle_date"] = pd.to_datetime(G.quote_date), pd.to_datetime(G.settle_date)
-    j = P[KEY].reset_index().merge(G, on=KEY, how="left").set_index("index")
+    keys = P[KEY].reset_index()
+    for d in (keys, G):  # the same datetime resolution on both sides of the join
+        d["quote_date"], d["settle_date"] = pd.to_datetime(d.quote_date).astype("datetime64[ns]"), pd.to_datetime(d.settle_date).astype("datetime64[ns]")
+        d["cp"] = d.cp.astype(str)
+    j = keys.merge(G, on=KEY, how="left").set_index("index")
     prm = pd.concat([params(y) for y in yrs])
     rx = P.quote_date.map(prm.rho * prm.xi)
     S1 = P.S_close.to_numpy(float)
