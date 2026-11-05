@@ -480,6 +480,11 @@ They may run once the confirmatory core is complete, before or after submission,
 | 2026-11-04 | §10 | Added a dry run: after the rehearsal, the full test-year script (`scripts/run_test_year.py`) runs end to end with 2019 as the test year, on 12-month windows, excluding pairs whose day two is in 2020. It produces no 2020 number and is not evidence; it tests the code, so that nothing is debugged with 2020 results in view. 2019 is already an evaluated year (§14). | Recommended by an independent code review before unblinding | No |
 | 2026-11-04 | §14, §16 | Appended §16 with the specifications of the SPY (item 9) and Heston (item 7) extensions, as §14 requires before an extension runs. | The author's choices of 2026-11-04 | No |
 | 2026-11-04 | §16.2 | Calibration B changed. (1) Each session's fit runs from three starts (that session's L-iv solution, the default (0.04, 2, 0.04, 0.5, −0.7), and the previous month's median B solution), keeping the lowest cost. (2) A fit counts as successful when least_squares converges. Parameters at a bound and the IV RMSE are reported, not excluded; the hedging comparison is repeated on the fits with no parameter within 0.1% of a bound. | The first run's warm start from the previous month trapped the optimizer: 49% success, March 2020 fits with v₀ ≈ 0.02 and IV errors of 20–37 vol points. Fresh starts converge to sensible solutions (2020-03-16: v₀ = 0.89, ρ = −0.86). For SPX across 14 days to a year, Heston fits sit at κ = 10 or ξ ≈ 5 on many days. That is the model's misfit to the skew, not an optimizer failure, so excluding bound hits would leave mainly calm days | Calibration fit quality only; no Heston hedging outcome |
+| 2026-11-05 | §16.1, §16.3 | SPY becomes a full replication of the SPX protocol (§16.3), no longer an exploratory extension: every §§5–10 and §14 item 2 procedure that applies to SPY, the verdict table included. | The author's decision of 2026-11-05 | Yes: SPY's 2020 Gains for R0–R5 (primary and B) were computed on 2026-11-04. So the SPY 2020 verdict is reported as post hoc. The SPY years untouched until now are the clean evidence (§16.3) |
+| 2026-11-05 | §16.1, §16.3 | SPY's index level before 2016-11-03 comes from Stooq's daily closes, with their dividend adjustment reversed (§16.3); Nasdaq's close from 2016-11-03 on. | Nasdaq's history starts on 2016-11-03. Stooq's closes are dividend-adjusted, so they fail a cent-for-cent check. Reversed, they match Nasdaq within 0.43 bp in level and 0.14 bp in one-session return (medians, 1,821 sessions), against the vendor snapshot's 1.05 and 1.46 bp. The author chose them over the agreed fallback, the vendor snapshot, on that evidence | No SPY outcome before 2019 has been computed |
+| 2026-11-05 | §6, §7, §14, §16.4 | R5–R8 run under every protocol that R0–R4 run under: all Table 8.1 variants in 2020 (R7 and R8 included), and the 2010–2023 walk-forward on all three windows (§16.4). | The author's request of 2026-11-05 | Yes: R5–R8 in the 2020 primary, R5 and R6 under the 2020 variants, and R8 in the 12-month walk-forward 2017–2023 |
+| 2026-11-05 | §16.2, §16.5 | Heston: the project's own pricer and calibrator replace the Lecture 12 functions; calibration extended to 2010–2023; a fitted minimum-variance delta added (§16.5). | The library's pricer uses 256 nodes whatever the integration range (5.9 vol points wrong at 14 days, K/S = 0.6, ξ = 5). The calibration took 6.6 hours, and its 49 failures all hit scipy's 500-evaluation cap | Yes: the library-based 2020 Heston Gains (§16.2) |
+| 2026-11-05 | §14 item 3, §16.6 | Short-dated SPX options (under 14 days) specified (§16.6). | The author's request of 2026-11-05 | No |
 
 ## 16. Extension specifications (appended under §14's rule)
 
@@ -514,3 +519,111 @@ The author's choices of 2026-11-04: both the lecture's calibration and a broader
   - the Heston minimum-variance delta, C_S + (ρξ/S)·C_v. C_v is a central difference in v₀ (±1% of v₀), and S moves with the forward fixed in carry.
   - Both are compared with R1 and R2 on the pairs where calibration B succeeded on day one, using the same bootstrap. Exploratory: no verdict. 2019 serves as the calibration warm-up and parameter-path illustration, not as a test.
 - **Compute.** Calibrations run in parallel within each month and are logged in the runtime log.
+
+### 16.3 SPY, a full replication of the SPX protocol. Specified 2026-11-05
+
+This replaces §16.1's design; §16.1's pricing choices stand except where stated here.
+
+**Data**
+- **Panels:** step-3 panels for 2010–2023 under the SPX rules (`DATA.md`). SPY is P.M.-settled, and no stamp window is defined.
+- **The index level `S_close`:**
+  - from 2016-11-03: Nasdaq's close;
+  - before 2016-11-03: Stooq's daily close (`data/external/stooq_spy_us_d.csv`), with its dividend adjustment reversed. Going back from the file's last session with a factor f = 1, at each SSGA ex-date e the factor for every earlier session becomes f / (1 + f·Div_e / C̃_{e−1}), where C̃_{e−1} is Stooq's adjusted close on the session before e. The close is then C̃/f.
+  - **The check, on 2016-11-03 to 2024-01-31 (1,821 sessions):** the level gap to Nasdaq has median 0.43 bp and maximum 2.3 bp, with a bias of −0.4 bp that grows further back. The one-session return gap has median 0.14 bp and 99th percentile 1.7 bp.
+  - `S_close_source` records which series each session uses. Sensitivity B remains the vendor's snapshot.
+- **Light audit:** §7's audit on every SPY year, 2010–2023, before any of that year's outcomes is computed.
+- **Greeks:** §16.1's method for every year: puts on the 150-step CRR tree with the control variate, calls European. For puts, two more central differences on the same tree:
+  - **vanna,** ∂δ/∂σ with σ ± 0.01, each δ from S ± 0.5% (for R6);
+  - **theta,** from the price at τ and at τ − 1/365 (for sensitivity T).
+  - **The attribution of §8 is run for calls only.** It is a European forward-form expansion and is not defined for the tree's puts.
+- **Pairs:** as in §16.1, with each pair's day-two distribution in the hedge P&L.
+
+**The protocol** is that of §§5–10 and §14 item 2, with these differences:
+- **Sensitivity A is not applicable.** American put–call parity gives only bounds, so there is no options-implied level. A leaves both Table 8.1 and the robustness set.
+- **The endpoint band for vanished quotes** is [L, ask]. L is the day-two intrinsic value: an American option is worth at least that. No parity band is used.
+- **The rehearsal (§10)** runs on SPY 2018 and 2019, specification checks included. The variants that contradict R2's form there are carried to SPY's 2020.
+- **R8** is tuned on SPY 2019 with §7's design (60 trials per type) and then frozen for 2020.
+- **The dry run:** the test-year script with SPY 2019 as the test year.
+- **2020:** the test year, with R0–R8, every Table 8.1 variant except A, and the verdict table with its robustness set (without A).
+- **The walk-forward, 2010–2023:**
+  - windows of 12, 36 and 60 months, testing from 2011, 2013 and 2015;
+  - rules R0–R8;
+  - R8's hyperparameters as in §16.4: tuned on SPY 2010 for test months up to 2016-12, and on SPY 2015–2016 for months from 2017-01.
+
+**Status**
+- **SPY 2020 is post hoc.** Its Gains for R0–R5 (primary and B) were seen on 2026-11-04. Its verdict is therefore reported as the confirmatory procedure applied after the outcome was seen.
+- **The SPY year ledger:**
+  - 2018 and 2019 are evaluated in the rehearsal, and 2019 is also the R8 tuning year;
+  - 2010 and 2015–2016 are R8 tuning years for the walk-forward;
+  - 2020 has been seen;
+  - **2011–2014, 2017 and 2021–2023 are the clean held-out SPY years.**
+- The results are reported beside SPX's, with SPY's own attrition, and the ex-date pairs are reported separately each year.
+
+### 16.4 R5–R8 under every protocol. Specified 2026-11-05
+
+**2020, SPX**
+- **Variants that refit:** R7 and R8 join every Table 8.1 variant that refits: A, B, P-bid, P-ask, P-WM, P-SW, T, F, W36 and W60. They are refitted on that variant's training data, with R8's 2019 hyperparameters frozen. Under F, the one fit uses 2019 pairs ending before 2020-01-02.
+- **Subsample variants** use the primary R7 and R8 fits: S3, V, OTM, stress, the rest of 2020, the day-two-volume split, and block lengths 5 and 20. OTM-refit keeps the primary R7 and R8 fits, as it does for R5 and R6.
+- **R7 and R8 are compared on each variant's feature-complete pairs,** with R2 re-reported there.
+- **The endpoint scenarios are not run for R7 and R8.** Their effect on R2 was in the third decimal (2026-11-04).
+
+**The walk-forward, SPX 2010–2023**
+- R5 and R6 (least squares), R7 and R8 for W12, W36 and W60, over each window's test span.
+- **R8's hyperparameters:**
+  - for test months from 2017-01: the 2015–2016 tuning;
+  - for test months up to 2016-12: a new tuning on 2010, using §7's design moved to 2010. That means trailing 6-month windows, test months 2010-07 to 12, validation pairs ending before 2011-01-03, and 60 TPE trials per type (seed 2026), then frozen.
+- **Reported:** per year and window, the Gains of R5–R8 over R1 and over R2, with session-block intervals, and the median yearly Gains over 2015–2023.
+
+**Status:** exploratory, with no verdict. Their 2020 primary results, and R8's 12-month walk-forward for 2017–2023, were seen before this specification.
+
+### 16.5 Heston, rewritten. Specified 2026-11-05
+
+This replaces §16.2's code; its sample and bounds are kept.
+
+**The pricer:** project code, `erdos_quant_finance_project/heston.py`.
+- **The formula:** Lewis's formula with the Black–Scholes control variate, using the Albrecher et al. form of the characteristic function, as in Lecture 12's library.
+- **The integration:** composite Gauss–Legendre panels whose width resolves the strike oscillation, out to the library's integration-range heuristic.
+- **Its outputs:** C_S at fixed variance, as the library defines it, and C_v = ∂C/∂v₀ in closed form.
+- **Tests:** within 0.01 vol points of an adaptive-quadrature reference on a grid of 14 days to 1 year, K/F 0.6–1.3, and parameters spanning the lecture's bounds, including 2020's fits.
+
+**Calibration B2**
+- **Sample and bounds:** calibration B's sample, unchanged: out-of-the-money calls and puts, 14 days to 1 year, two-sided, E7, mids, at least 10 options. The lecture's bounds.
+- **The residuals:** (model − mid)/ν, where ν is the option's Black–Scholes vega at its own IV, floored at 1% of the at-the-money vega of its expiry. That is a first-order implied-volatility error, with no inversion inside the loop.
+- **The solver:** scipy's `least_squares` (trf, bounds, `x_scale="jac"`), with a central-difference Jacobian. The strike terms are precomputed per session, and at most 300 function evaluations are allowed.
+- **A fit succeeds** when `least_squares` stops on a tolerance (status ≥ 1).
+- **Starts:** two per session, keeping the lower cost:
+  1. the previous session's solution in the same calendar year;
+  2. a data start, v₀ = θ = σ_ATM² of the nearest expiry at least 14 days out, with κ = 2, ξ = 1, ρ = −0.7.
+
+  The first session of each year uses the data start and the lecture default (0.04, 2, 0.04, 0.5, −0.7).
+- **Reported per session:**
+  - wall and CPU time;
+  - function and Jacobian evaluations;
+  - the cost;
+  - the exact IV RMSE at the solution;
+  - bound hits (within 0.1% of the range);
+  - an accuracy check at the solution, comparing a doubled range and node count. Any change above 0.05 vol points is flagged.
+
+**Timing, before the full run.** The old calibration B (library, three starts) and B2 run alone, in one process, on the same 20 sessions: every 25th session of 2019–2020, plus 2020-03-16. Then the full run goes one process per calendar year, years in parallel, and is logged in the runtime log.
+
+**Years:** calibration on every session of 2010–2023.
+
+**Hedging,** per year on the SPX analysis sample, using pairs whose day-one calibration succeeded:
+- **The three Heston deltas:**
+  - H_model = C_S;
+  - H_mv = C_S + (ρξ/S)·C_v;
+  - H_fit = C_S + β̂·C_v/S, with β̂ fitted per option type by least squares without intercept. The regression is of (Δf − C_S·ΔS)/S_t on C_v·ΔS/S_t², over the trailing 12 months with §7's boundary rule, applied one month out. Test months start in 2011-01.
+- **Comparisons:** with R1 and with R2 (the walk-forward's 12-month fits) on the same pairs, per year, with the session bootstrap.
+- **The β̂ path** is reported beside the calibrated ρξ, which is what H_mv uses. 2020 is also compared with §16.2's library-based results.
+
+**Status:** exploratory, with no verdict. The library-based 2020 results have been seen.
+
+### 16.6 Short-dated SPX options (§14, item 3). Specified 2026-11-05
+
+- **The sample:** §5, with E5 replaced by τ < 14 days on day one and τ > 0 at day two's snapshot. So the pair ends before settlement: for a P.M. contract the last pair ends on the session before expiry, and for an A.M. monthly on the session before its settlement morning. Every other rule is unchanged.
+- **The rules:**
+  - R1;
+  - **R2s,** R2 refitted on short-dated training pairs (12-month window, monthly refits, §7's boundary rule, at least 150 sessions);
+  - **R2m,** R2 with the main study's 12-month coefficients, fitted on options of at least 14 days, applied to the short-dated pairs.
+- **The tests:** 2020, and the 12-month walk-forward over 2011–2023. Reported: the Gains of R2s and R2m over R1, and of R2s over R2m, per year, with the session bootstrap, plus day-one maturity buckets of 1–2, 3–6 and 7–13 days.
+- **Status:** exploratory.
