@@ -1,0 +1,9 @@
+years,exposure,date,run
+2010,fit-only (walk-forward's first windows); tuned: R8 for test months to 2016-12,2026-11-05,scripts/tune_r8.py --spy 2010; scripts/run_walkforward.py --spy
+2011-2014,"evaluated: the walk-forward, clean held-out",2026-11-05,scripts/run_walkforward.py --spy; scripts/run_walkforward_r5_r8.py --spy
+2015-2016,tuned: R8 for test months from 2017-01; evaluated: the walk-forward (not clean),2026-11-05,scripts/tune_r8.py --spy 2015 2016
+2017,"evaluated: the walk-forward, clean held-out",2026-11-05,scripts/run_walkforward.py --spy
+2018,"evaluated: rehearsal 2018-07 to 12 (6-month windows), then the walk-forward",2026-11-05,scripts/run_rehearsal.py --spy
+2019,fit-only for §16.1 (2026-11-04); evaluated: rehearsal 2019-07 to 12; tuned: R8 (60 trials per type); evaluated: dry run,2026-11-05,scripts/run_rehearsal.py --spy; scripts/tune_r8.py --spy 2019; scripts/run_test_year.py 2019 --spy
+2020,"evaluated: §16.1 R0-R5 (2026-11-04), so the §16.3 verdict is post hoc; evaluated: the full test year",2026-11-04 and 2026-11-05,scripts/run_spy.py; scripts/run_test_year.py 2020 --spy
+2021-2023,"evaluated: the walk-forward, clean held-out",2026-11-05,scripts/run_walkforward.py --spy

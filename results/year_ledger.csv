@@ -7,3 +7,8 @@ years,planned_exposure,actual_exposure,date,run
 2019,evaluated (rehearsal); tuned (R8),evaluated: rehearsal 2019-07 to 12; tuned: R8 (60 trials per type); evaluated: dry run of the test-year script (all of 2019; pairs ending 2020-01-02 excluded),2026-11-04,scripts/run_rehearsal.py; tune_r8.py; run_test_year.py 2019
 2020,evaluated at unblinding,evaluated: unblinding run (plan 77b030e; implementation b661d6a),2026-11-04T02:37,scripts/run_test_year.py 2020
 2021-2023,untouched until the walk-forward,evaluated: the walk-forward (clean held-out years),2026-11-04T02:50,scripts/run_walkforward.py
+2010,R8 tuning for the walk-forward (§16.4),"tuned: R8, 60 trials per type, test months 2010-07 to 12 (in-sample R7/R8 rows in results/rehearsal/learners_2010.csv)",2026-11-05,scripts/tune_r8.py 2010
+2011-2023,short-dated options under 14 days (§16.6),"evaluated: R1, R2s, R2m on the short-dated population, a population not used before",2026-11-05,scripts/run_short_dated.py
+2011-2023,R5-R8 in the walk-forward (§16.4),"evaluated: R5-R8, W12 W36 W60",2026-11-05,scripts/run_walkforward_r5_r8.py
+2010-2023,Heston deltas (§16.5),"evaluated: H_model, H_mv (2010-2023), H_fit (2011-2023) under calibration B2",2026-11-05,scripts/heston2_hedge.py
+2020,R7/R8 under the Table 8.1 variants (§16.4),evaluated,2026-11-05,scripts/run_learners_variants.py 2020

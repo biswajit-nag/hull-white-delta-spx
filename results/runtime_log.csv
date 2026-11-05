@@ -1,96 +1,188 @@
 started_at,step,status,wall_seconds,peak_mem_gb,rows_in,rows_out,inputs,git_hash,git_dirty,python,machine,notes
-2026-10-27,build_interim,ok,48,,,,spx+spy 2010-2023 (42 archives),,,3.14,Windows-11,"Backfilled from notes: step 2, 336 monthly Parquet files"
-2026-11-02,build_processed,ok,240,3.4,,31112954,spx 2010-2023,,,3.14,Windows-11,"Backfilled from notes: step 3, about 4 minutes; rows_out = contract-days"
-2026-11-04T01:35:33-05:00,build_greeks,ok,11.5,1.77,2904524,2475564,spx 2019,,False,3.14.10,Windows-11,converged 2475564; outside_price_bounds 190782; one_sided 181302; expired 56818; above_volatility_bracket 58
-2026-11-04T01:36:07-05:00,build_greeks,ok,1.5,0.48,466496,374266,spx 2010,,False,3.14.10,Windows-11,converged 374266; one_sided 44673; outside_price_bounds 31134; no_forward 14668; expired 1738; above_volatility_bracket 17
-2026-11-04T01:36:08-05:00,build_greeks,ok,1.6,0.63,496764,412779,spx 2011,,False,3.14.10,Windows-11,converged 412779; one_sided 44198; outside_price_bounds 33861; expired 4490; no_forward 1384; above_volatility_bracket 52
-2026-11-04T01:36:10-05:00,build_greeks,ok,2.0,0.74,643200,530351,spx 2012,,False,3.14.10,Windows-11,converged 530351; one_sided 65640; outside_price_bounds 41382; expired 5764; above_volatility_bracket 63
-2026-11-04T01:36:12-05:00,build_greeks,ok,2.4,0.97,822544,671975,spx 2013,,False,3.14.10,Windows-11,converged 671975; one_sided 84404; outside_price_bounds 58500; expired 7602; above_volatility_bracket 57; no_forward 6
-2026-11-04T01:36:15-05:00,build_greeks,ok,3.7,1.25,1253550,1057849,spx 2014,,False,3.14.10,Windows-11,converged 1057849; one_sided 99817; outside_price_bounds 83687; expired 11630; no_forward 506; above_volatility_bracket 61
-2026-11-04T01:36:18-05:00,build_greeks,ok,6.1,1.83,1969414,1672753,spx 2015,,False,3.14.10,Windows-11,converged 1672753; one_sided 147751; outside_price_bounds 131557; expired 17282; above_volatility_bracket 71
-2026-11-04T01:36:25-05:00,build_greeks,ok,5.2,1.90,1881192,1578909,spx 2016,,False,3.14.10,Windows-11,converged 1578909; one_sided 147666; outside_price_bounds 125908; expired 28608; above_volatility_bracket 101
-2026-11-04T01:36:30-05:00,build_greeks,ok,5.8,2.00,2047210,1700594,spx 2017,,False,3.14.10,Windows-11,converged 1700594; one_sided 152483; outside_price_bounds 150283; expired 42938; no_forward 846; above_volatility_bracket 66
-2026-11-04T01:36:36-05:00,build_greeks,ok,8.4,2.52,2753082,2412401,spx 2018,,False,3.14.10,Windows-11,converged 2412401; outside_price_bounds 147580; one_sided 138037; expired 54982; above_volatility_bracket 82
-2026-11-04T01:36:44-05:00,build_greeks,ok,8.5,2.78,2904524,2475564,spx 2019,,False,3.14.10,Windows-11,converged 2475564; outside_price_bounds 190782; one_sided 181302; expired 56818; above_volatility_bracket 58
-2026-11-04T01:36:53-05:00,build_greeks,ok,10.0,3.09,3473554,3061617,spx 2020,,False,3.14.10,Windows-11,converged 3061617; outside_price_bounds 175191; one_sided 160859; expired 75620; above_volatility_bracket 261; no_forward 6
-2026-11-04T01:37:03-05:00,build_greeks,ok,12.1,3.65,4181990,3676675,spx 2021,,False,3.14.10,Windows-11,converged 3676675; one_sided 217807; outside_price_bounds 203468; expired 83638; above_volatility_bracket 336; no_forward 66
-2026-11-04T01:37:15-05:00,build_greeks,ok,11.4,3.75,4039512,3667508,spx 2022,,False,3.14.10,Windows-11,converged 3667508; one_sided 141371; outside_price_bounds 140189; expired 90170; above_volatility_bracket 262; no_forward 12
-2026-11-04T01:37:26-05:00,build_greeks,ok,11.8,3.75,4018166,3602446,spx 2023,,False,3.14.10,Windows-11,converged 3602446; outside_price_bounds 167436; one_sided 155884; expired 91806; no_forward 448; above_volatility_bracket 146
-2026-11-04T01:38:47-05:00,build_pairs,ok,14.8,3.32,,1252003,spx 2019,,False,3.14.10,Windows-11,E7 1109247; ok 1091262
-2026-11-04T01:43:21-05:00,build_pairs,ok,2.3,0.76,,207384,spx 2010,,False,3.14.10,Windows-11,E7 82599; ok 81534
-2026-11-04T01:43:23-05:00,build_pairs,ok,3.5,1.05,,236076,spx 2011,,False,3.14.10,Windows-11,E7 92245; ok 91001
-2026-11-04T01:43:27-05:00,build_pairs,ok,4.3,1.24,,287382,spx 2012,,False,3.14.10,Windows-11,E7 104326; ok 103379
-2026-11-04T01:43:31-05:00,build_pairs,ok,5.6,1.47,,340191,spx 2013,,False,3.14.10,Windows-11,E7 120972; ok 120484
-2026-11-04T01:43:37-05:00,build_pairs,ok,7.7,1.74,,518860,spx 2014,,False,3.14.10,Windows-11,E7 160873; ok 159329
-2026-11-04T01:43:45-05:00,build_pairs,ok,10.5,2.43,,861262,spx 2015,,False,3.14.10,Windows-11,E7 243791; ok 243637
-2026-11-04T01:43:55-05:00,build_pairs,ok,10.5,2.64,,741959,spx 2016,,False,3.14.10,Windows-11,E7 284922; ok 283886
-2026-11-04T01:44:06-05:00,build_pairs,ok,11.9,2.86,,752927,spx 2017,,False,3.14.10,Windows-11,E7 341074; ok 339758
-2026-11-04T01:44:17-05:00,build_pairs,ok,14.6,3.48,,1261084,spx 2018,,False,3.14.10,Windows-11,E7 590125; ok 589735
-2026-11-04T01:44:32-05:00,build_pairs,ok,16.0,3.81,,1252003,spx 2019,,False,3.14.10,Windows-11,E7 581913; ok 573263
-2026-11-04T01:44:48-05:00,build_pairs,ok,19.4,4.54,,1823624,spx 2020,,False,3.14.10,Windows-11,E7 1071018; ok 1057455
-2026-11-04T01:45:08-05:00,build_pairs,ok,22.4,4.54,,2132854,spx 2021,,False,3.14.10,Windows-11,E7 1289007; ok 1259788
-2026-11-04T01:45:30-05:00,build_pairs,ok,22.9,4.54,,2259455,spx 2022,,False,3.14.10,Windows-11,E7 1417453; ok 1387221
-2026-11-04T01:45:53-05:00,build_pairs,ok,18.6,4.54,,2053771,spx 2023,,False,3.14.10,Windows-11,E7 1441270; ok 1435152
-2026-11-04T01:58:22-05:00,build_greeks,ok,1.5,0.49,466496,361619,spx 2010,,False,3.14.10,Windows-11,converged 361619; one_sided 43030; no_forward 30140; outside_price_bounds 29952; expired 1738; above_volatility_bracket 17
-2026-11-04T01:58:24-05:00,build_greeks,ok,1.7,0.64,496764,412779,spx 2011,,False,3.14.10,Windows-11,converged 412779; one_sided 44198; outside_price_bounds 33861; expired 4490; no_forward 1384; above_volatility_bracket 52
-2026-11-04T01:58:26-05:00,build_greeks,ok,2.7,0.75,643200,530351,spx 2012,,False,3.14.10,Windows-11,converged 530351; one_sided 65640; outside_price_bounds 41382; expired 5764; above_volatility_bracket 63
-2026-11-04T01:58:28-05:00,build_greeks,ok,3.0,0.94,822544,671975,spx 2013,,False,3.14.10,Windows-11,converged 671975; one_sided 84404; outside_price_bounds 58500; expired 7602; above_volatility_bracket 57; no_forward 6
-2026-11-04T01:58:32-05:00,build_greeks,ok,4.7,1.28,1253550,1057849,spx 2014,,False,3.14.10,Windows-11,converged 1057849; one_sided 99817; outside_price_bounds 83687; expired 11630; no_forward 506; above_volatility_bracket 61
-2026-11-04T01:58:36-05:00,build_greeks,ok,7.2,1.85,1969414,1672753,spx 2015,,False,3.14.10,Windows-11,converged 1672753; one_sided 147751; outside_price_bounds 131557; expired 17282; above_volatility_bracket 71
-2026-11-04T01:58:44-05:00,build_greeks,ok,7.1,1.91,1881192,1578909,spx 2016,,False,3.14.10,Windows-11,converged 1578909; one_sided 147666; outside_price_bounds 125908; expired 28608; above_volatility_bracket 101
-2026-11-04T01:58:51-05:00,build_greeks,ok,8.0,2.03,2047210,1700594,spx 2017,,False,3.14.10,Windows-11,converged 1700594; one_sided 152483; outside_price_bounds 150283; expired 42938; no_forward 846; above_volatility_bracket 66
-2026-11-04T01:58:59-05:00,build_greeks,ok,10.2,2.34,2753082,2406509,spx 2018,,False,3.14.10,Windows-11,converged 2406509; outside_price_bounds 147087; one_sided 137634; expired 54982; no_forward 6788; above_volatility_bracket 82
-2026-11-04T01:59:09-05:00,build_greeks,ok,10.9,2.64,2904524,2465688,spx 2019,,False,3.14.10,Windows-11,converged 2465688; outside_price_bounds 190157; one_sided 180757; expired 56818; no_forward 11046; above_volatility_bracket 58
-2026-11-04T01:59:20-05:00,build_greeks,ok,13.5,3.08,3473554,3061617,spx 2020,,False,3.14.10,Windows-11,converged 3061617; outside_price_bounds 175191; one_sided 160859; expired 75620; above_volatility_bracket 261; no_forward 6
-2026-11-04T01:59:33-05:00,build_greeks,ok,16.4,3.38,4181990,3676675,spx 2021,,False,3.14.10,Windows-11,converged 3676675; one_sided 217807; outside_price_bounds 203468; expired 83638; above_volatility_bracket 336; no_forward 66
-2026-11-04T01:59:50-05:00,build_greeks,ok,15.5,3.66,4039512,3667508,spx 2022,,False,3.14.10,Windows-11,converged 3667508; one_sided 141371; outside_price_bounds 140189; expired 90170; above_volatility_bracket 262; no_forward 12
-2026-11-04T02:00:05-05:00,build_greeks,ok,14.1,3.66,4018166,3602446,spx 2023,,False,3.14.10,Windows-11,converged 3602446; outside_price_bounds 167436; one_sided 155884; expired 91806; no_forward 448; above_volatility_bracket 146
-2026-11-04T02:00:21-05:00,build_pairs,ok,2.1,0.76,,207377,spx 2010,,False,3.14.10,Windows-11,E7 82598; ok 81533
-2026-11-04T02:00:23-05:00,build_pairs,ok,2.5,1.03,,236076,spx 2011,,False,3.14.10,Windows-11,E7 92245; ok 91001
-2026-11-04T02:00:26-05:00,build_pairs,ok,2.9,1.16,,287382,spx 2012,,False,3.14.10,Windows-11,E7 104326; ok 103379
-2026-11-04T02:00:29-05:00,build_pairs,ok,3.8,1.50,,340191,spx 2013,,False,3.14.10,Windows-11,E7 120972; ok 120484
-2026-11-04T02:00:33-05:00,build_pairs,ok,5.6,2.05,,518860,spx 2014,,False,3.14.10,Windows-11,E7 160873; ok 159329
-2026-11-04T02:00:38-05:00,build_pairs,ok,7.7,2.73,,861262,spx 2015,,False,3.14.10,Windows-11,E7 243791; ok 243637
-2026-11-04T02:00:46-05:00,build_pairs,ok,7.8,2.89,,741959,spx 2016,,False,3.14.10,Windows-11,E7 284922; ok 283886
-2026-11-04T02:00:54-05:00,build_pairs,ok,8.6,3.09,,752927,spx 2017,,False,3.14.10,Windows-11,E7 341074; ok 339758
-2026-11-04T02:01:03-05:00,build_pairs,ok,11.1,3.80,,1261084,spx 2018,,False,3.14.10,Windows-11,E7 590125; ok 589735
-2026-11-04T02:01:14-05:00,build_pairs,ok,11.8,3.98,,1252003,spx 2019,,False,3.14.10,Windows-11,E7 581913; ok 573263
-2026-11-04T02:01:26-05:00,build_pairs,ok,19.1,4.16,,1823624,spx 2020,,False,3.14.10,Windows-11,E7 1071018; ok 1057455
-2026-11-04T02:01:45-05:00,build_pairs,ok,22.0,4.80,,2132854,spx 2021,,False,3.14.10,Windows-11,E7 1289007; ok 1259788
-2026-11-04T02:02:07-05:00,build_pairs,ok,18.7,4.80,,2259455,spx 2022,,False,3.14.10,Windows-11,E7 1417453; ok 1387221
-2026-11-04T02:02:26-05:00,build_pairs,ok,14.5,4.80,,2053771,spx 2023,,False,3.14.10,Windows-11,E7 1441270; ok 1435152
-2026-11-04T02:03:15-05:00,audit_light,ok,4.7,0.86,,60,spx 2015-2019,,False,3.14.10,Windows-11,
-2026-11-04T02:09:54-05:00,attrition,ok,8.2,3.29,3075627,1630718,spx 2019-2020,,False,3.14.10,Windows-11,
-2026-11-04T02:08:24-05:00,build_greeks_spy,ok,218.1,1.23,,701740,"spy 2019, CRR 150 steps",,False,3.14.10,Windows-11,
-2026-11-04T02:16:52-05:00,build_pairs,ok,6.2,1.68,,518860,spx 2014,,False,3.14.10,Windows-11,E7 160873; ok 159329
-2026-11-04T02:16:58-05:00,build_pairs,ok,8.5,2.47,,861262,spx 2015,,False,3.14.10,Windows-11,E7 243791; ok 243637
-2026-11-04T02:17:06-05:00,build_pairs,ok,8.4,2.65,,741959,spx 2016,,False,3.14.10,Windows-11,E7 284922; ok 283886
-2026-11-04T02:17:15-05:00,build_pairs,ok,9.7,2.95,,752927,spx 2017,,False,3.14.10,Windows-11,E7 341074; ok 339758
-2026-11-04T02:17:24-05:00,build_pairs,ok,12.0,3.51,,1261084,spx 2018,,False,3.14.10,Windows-11,E7 590125; ok 589735
-2026-11-04T02:17:37-05:00,build_pairs,ok,12.8,4.05,,1252003,spx 2019,,False,3.14.10,Windows-11,E7 581913; ok 573263
-2026-11-04T02:17:49-05:00,build_pairs,ok,15.6,4.89,,1823624,spx 2020,,False,3.14.10,Windows-11,E7 1071018; ok 1057455
-2026-11-04T02:18:05-05:00,build_pairs,ok,18.5,5.24,,2132854,spx 2021,,False,3.14.10,Windows-11,E7 1289007; ok 1259788
-2026-11-04T02:12:02-05:00,build_greeks_spy,ok,394.7,2.07,,1316169,"spy 2020, CRR 150 steps",,False,3.14.10,Windows-11,
-2026-11-04T02:23:33-05:00,rehearsal,ok,4.1,2.43,569967,,"spx 2019, 6-month windows",22da4ea,False,3.14.10,Windows-11,
-2026-11-04T02:23:37-05:00,rehearsal,ok,5.0,2.43,589735,,"spx 2018, 6-month windows",22da4ea,False,3.14.10,Windows-11,
+2026-10-27,build_interim,ok,48.0,,,,spx+spy 2010-2023 (42 archives),,,3.14,Windows-11,"Backfilled from notes: step 2, 336 monthly Parquet files"
+2026-11-02,build_processed,ok,240.0,3.4,,31112954.0,spx 2010-2023,,,3.14,Windows-11,"Backfilled from notes: step 3, about 4 minutes; rows_out = contract-days"
+2026-11-04T01:35:33-05:00,build_greeks,ok,11.5,1.77,2904524.0,2475564.0,spx 2019,,False,3.14.10,Windows-11,converged 2475564; outside_price_bounds 190782; one_sided 181302; expired 56818; above_volatility_bracket 58
+2026-11-04T01:36:07-05:00,build_greeks,ok,1.5,0.48,466496.0,374266.0,spx 2010,,False,3.14.10,Windows-11,converged 374266; one_sided 44673; outside_price_bounds 31134; no_forward 14668; expired 1738; above_volatility_bracket 17
+2026-11-04T01:36:08-05:00,build_greeks,ok,1.6,0.63,496764.0,412779.0,spx 2011,,False,3.14.10,Windows-11,converged 412779; one_sided 44198; outside_price_bounds 33861; expired 4490; no_forward 1384; above_volatility_bracket 52
+2026-11-04T01:36:10-05:00,build_greeks,ok,2.0,0.74,643200.0,530351.0,spx 2012,,False,3.14.10,Windows-11,converged 530351; one_sided 65640; outside_price_bounds 41382; expired 5764; above_volatility_bracket 63
+2026-11-04T01:36:12-05:00,build_greeks,ok,2.4,0.97,822544.0,671975.0,spx 2013,,False,3.14.10,Windows-11,converged 671975; one_sided 84404; outside_price_bounds 58500; expired 7602; above_volatility_bracket 57; no_forward 6
+2026-11-04T01:36:15-05:00,build_greeks,ok,3.7,1.25,1253550.0,1057849.0,spx 2014,,False,3.14.10,Windows-11,converged 1057849; one_sided 99817; outside_price_bounds 83687; expired 11630; no_forward 506; above_volatility_bracket 61
+2026-11-04T01:36:18-05:00,build_greeks,ok,6.1,1.83,1969414.0,1672753.0,spx 2015,,False,3.14.10,Windows-11,converged 1672753; one_sided 147751; outside_price_bounds 131557; expired 17282; above_volatility_bracket 71
+2026-11-04T01:36:25-05:00,build_greeks,ok,5.2,1.9,1881192.0,1578909.0,spx 2016,,False,3.14.10,Windows-11,converged 1578909; one_sided 147666; outside_price_bounds 125908; expired 28608; above_volatility_bracket 101
+2026-11-04T01:36:30-05:00,build_greeks,ok,5.8,2.0,2047210.0,1700594.0,spx 2017,,False,3.14.10,Windows-11,converged 1700594; one_sided 152483; outside_price_bounds 150283; expired 42938; no_forward 846; above_volatility_bracket 66
+2026-11-04T01:36:36-05:00,build_greeks,ok,8.4,2.52,2753082.0,2412401.0,spx 2018,,False,3.14.10,Windows-11,converged 2412401; outside_price_bounds 147580; one_sided 138037; expired 54982; above_volatility_bracket 82
+2026-11-04T01:36:44-05:00,build_greeks,ok,8.5,2.78,2904524.0,2475564.0,spx 2019,,False,3.14.10,Windows-11,converged 2475564; outside_price_bounds 190782; one_sided 181302; expired 56818; above_volatility_bracket 58
+2026-11-04T01:36:53-05:00,build_greeks,ok,10.0,3.09,3473554.0,3061617.0,spx 2020,,False,3.14.10,Windows-11,converged 3061617; outside_price_bounds 175191; one_sided 160859; expired 75620; above_volatility_bracket 261; no_forward 6
+2026-11-04T01:37:03-05:00,build_greeks,ok,12.1,3.65,4181990.0,3676675.0,spx 2021,,False,3.14.10,Windows-11,converged 3676675; one_sided 217807; outside_price_bounds 203468; expired 83638; above_volatility_bracket 336; no_forward 66
+2026-11-04T01:37:15-05:00,build_greeks,ok,11.4,3.75,4039512.0,3667508.0,spx 2022,,False,3.14.10,Windows-11,converged 3667508; one_sided 141371; outside_price_bounds 140189; expired 90170; above_volatility_bracket 262; no_forward 12
+2026-11-04T01:37:26-05:00,build_greeks,ok,11.8,3.75,4018166.0,3602446.0,spx 2023,,False,3.14.10,Windows-11,converged 3602446; outside_price_bounds 167436; one_sided 155884; expired 91806; no_forward 448; above_volatility_bracket 146
+2026-11-04T01:38:47-05:00,build_pairs,ok,14.8,3.32,,1252003.0,spx 2019,,False,3.14.10,Windows-11,E7 1109247; ok 1091262
+2026-11-04T01:43:21-05:00,build_pairs,ok,2.3,0.76,,207384.0,spx 2010,,False,3.14.10,Windows-11,E7 82599; ok 81534
+2026-11-04T01:43:23-05:00,build_pairs,ok,3.5,1.05,,236076.0,spx 2011,,False,3.14.10,Windows-11,E7 92245; ok 91001
+2026-11-04T01:43:27-05:00,build_pairs,ok,4.3,1.24,,287382.0,spx 2012,,False,3.14.10,Windows-11,E7 104326; ok 103379
+2026-11-04T01:43:31-05:00,build_pairs,ok,5.6,1.47,,340191.0,spx 2013,,False,3.14.10,Windows-11,E7 120972; ok 120484
+2026-11-04T01:43:37-05:00,build_pairs,ok,7.7,1.74,,518860.0,spx 2014,,False,3.14.10,Windows-11,E7 160873; ok 159329
+2026-11-04T01:43:45-05:00,build_pairs,ok,10.5,2.43,,861262.0,spx 2015,,False,3.14.10,Windows-11,E7 243791; ok 243637
+2026-11-04T01:43:55-05:00,build_pairs,ok,10.5,2.64,,741959.0,spx 2016,,False,3.14.10,Windows-11,E7 284922; ok 283886
+2026-11-04T01:44:06-05:00,build_pairs,ok,11.9,2.86,,752927.0,spx 2017,,False,3.14.10,Windows-11,E7 341074; ok 339758
+2026-11-04T01:44:17-05:00,build_pairs,ok,14.6,3.48,,1261084.0,spx 2018,,False,3.14.10,Windows-11,E7 590125; ok 589735
+2026-11-04T01:44:32-05:00,build_pairs,ok,16.0,3.81,,1252003.0,spx 2019,,False,3.14.10,Windows-11,E7 581913; ok 573263
+2026-11-04T01:44:48-05:00,build_pairs,ok,19.4,4.54,,1823624.0,spx 2020,,False,3.14.10,Windows-11,E7 1071018; ok 1057455
+2026-11-04T01:45:08-05:00,build_pairs,ok,22.4,4.54,,2132854.0,spx 2021,,False,3.14.10,Windows-11,E7 1289007; ok 1259788
+2026-11-04T01:45:30-05:00,build_pairs,ok,22.9,4.54,,2259455.0,spx 2022,,False,3.14.10,Windows-11,E7 1417453; ok 1387221
+2026-11-04T01:45:53-05:00,build_pairs,ok,18.6,4.54,,2053771.0,spx 2023,,False,3.14.10,Windows-11,E7 1441270; ok 1435152
+2026-11-04T01:58:22-05:00,build_greeks,ok,1.5,0.49,466496.0,361619.0,spx 2010,,False,3.14.10,Windows-11,converged 361619; one_sided 43030; no_forward 30140; outside_price_bounds 29952; expired 1738; above_volatility_bracket 17
+2026-11-04T01:58:24-05:00,build_greeks,ok,1.7,0.64,496764.0,412779.0,spx 2011,,False,3.14.10,Windows-11,converged 412779; one_sided 44198; outside_price_bounds 33861; expired 4490; no_forward 1384; above_volatility_bracket 52
+2026-11-04T01:58:26-05:00,build_greeks,ok,2.7,0.75,643200.0,530351.0,spx 2012,,False,3.14.10,Windows-11,converged 530351; one_sided 65640; outside_price_bounds 41382; expired 5764; above_volatility_bracket 63
+2026-11-04T01:58:28-05:00,build_greeks,ok,3.0,0.94,822544.0,671975.0,spx 2013,,False,3.14.10,Windows-11,converged 671975; one_sided 84404; outside_price_bounds 58500; expired 7602; above_volatility_bracket 57; no_forward 6
+2026-11-04T01:58:32-05:00,build_greeks,ok,4.7,1.28,1253550.0,1057849.0,spx 2014,,False,3.14.10,Windows-11,converged 1057849; one_sided 99817; outside_price_bounds 83687; expired 11630; no_forward 506; above_volatility_bracket 61
+2026-11-04T01:58:36-05:00,build_greeks,ok,7.2,1.85,1969414.0,1672753.0,spx 2015,,False,3.14.10,Windows-11,converged 1672753; one_sided 147751; outside_price_bounds 131557; expired 17282; above_volatility_bracket 71
+2026-11-04T01:58:44-05:00,build_greeks,ok,7.1,1.91,1881192.0,1578909.0,spx 2016,,False,3.14.10,Windows-11,converged 1578909; one_sided 147666; outside_price_bounds 125908; expired 28608; above_volatility_bracket 101
+2026-11-04T01:58:51-05:00,build_greeks,ok,8.0,2.03,2047210.0,1700594.0,spx 2017,,False,3.14.10,Windows-11,converged 1700594; one_sided 152483; outside_price_bounds 150283; expired 42938; no_forward 846; above_volatility_bracket 66
+2026-11-04T01:58:59-05:00,build_greeks,ok,10.2,2.34,2753082.0,2406509.0,spx 2018,,False,3.14.10,Windows-11,converged 2406509; outside_price_bounds 147087; one_sided 137634; expired 54982; no_forward 6788; above_volatility_bracket 82
+2026-11-04T01:59:09-05:00,build_greeks,ok,10.9,2.64,2904524.0,2465688.0,spx 2019,,False,3.14.10,Windows-11,converged 2465688; outside_price_bounds 190157; one_sided 180757; expired 56818; no_forward 11046; above_volatility_bracket 58
+2026-11-04T01:59:20-05:00,build_greeks,ok,13.5,3.08,3473554.0,3061617.0,spx 2020,,False,3.14.10,Windows-11,converged 3061617; outside_price_bounds 175191; one_sided 160859; expired 75620; above_volatility_bracket 261; no_forward 6
+2026-11-04T01:59:33-05:00,build_greeks,ok,16.4,3.38,4181990.0,3676675.0,spx 2021,,False,3.14.10,Windows-11,converged 3676675; one_sided 217807; outside_price_bounds 203468; expired 83638; above_volatility_bracket 336; no_forward 66
+2026-11-04T01:59:50-05:00,build_greeks,ok,15.5,3.66,4039512.0,3667508.0,spx 2022,,False,3.14.10,Windows-11,converged 3667508; one_sided 141371; outside_price_bounds 140189; expired 90170; above_volatility_bracket 262; no_forward 12
+2026-11-04T02:00:05-05:00,build_greeks,ok,14.1,3.66,4018166.0,3602446.0,spx 2023,,False,3.14.10,Windows-11,converged 3602446; outside_price_bounds 167436; one_sided 155884; expired 91806; no_forward 448; above_volatility_bracket 146
+2026-11-04T02:00:21-05:00,build_pairs,ok,2.1,0.76,,207377.0,spx 2010,,False,3.14.10,Windows-11,E7 82598; ok 81533
+2026-11-04T02:00:23-05:00,build_pairs,ok,2.5,1.03,,236076.0,spx 2011,,False,3.14.10,Windows-11,E7 92245; ok 91001
+2026-11-04T02:00:26-05:00,build_pairs,ok,2.9,1.16,,287382.0,spx 2012,,False,3.14.10,Windows-11,E7 104326; ok 103379
+2026-11-04T02:00:29-05:00,build_pairs,ok,3.8,1.5,,340191.0,spx 2013,,False,3.14.10,Windows-11,E7 120972; ok 120484
+2026-11-04T02:00:33-05:00,build_pairs,ok,5.6,2.05,,518860.0,spx 2014,,False,3.14.10,Windows-11,E7 160873; ok 159329
+2026-11-04T02:00:38-05:00,build_pairs,ok,7.7,2.73,,861262.0,spx 2015,,False,3.14.10,Windows-11,E7 243791; ok 243637
+2026-11-04T02:00:46-05:00,build_pairs,ok,7.8,2.89,,741959.0,spx 2016,,False,3.14.10,Windows-11,E7 284922; ok 283886
+2026-11-04T02:00:54-05:00,build_pairs,ok,8.6,3.09,,752927.0,spx 2017,,False,3.14.10,Windows-11,E7 341074; ok 339758
+2026-11-04T02:01:03-05:00,build_pairs,ok,11.1,3.8,,1261084.0,spx 2018,,False,3.14.10,Windows-11,E7 590125; ok 589735
+2026-11-04T02:01:14-05:00,build_pairs,ok,11.8,3.98,,1252003.0,spx 2019,,False,3.14.10,Windows-11,E7 581913; ok 573263
+2026-11-04T02:01:26-05:00,build_pairs,ok,19.1,4.16,,1823624.0,spx 2020,,False,3.14.10,Windows-11,E7 1071018; ok 1057455
+2026-11-04T02:01:45-05:00,build_pairs,ok,22.0,4.8,,2132854.0,spx 2021,,False,3.14.10,Windows-11,E7 1289007; ok 1259788
+2026-11-04T02:02:07-05:00,build_pairs,ok,18.7,4.8,,2259455.0,spx 2022,,False,3.14.10,Windows-11,E7 1417453; ok 1387221
+2026-11-04T02:02:26-05:00,build_pairs,ok,14.5,4.8,,2053771.0,spx 2023,,False,3.14.10,Windows-11,E7 1441270; ok 1435152
+2026-11-04T02:03:15-05:00,audit_light,ok,4.7,0.86,,60.0,spx 2015-2019,,False,3.14.10,Windows-11,
+2026-11-04T02:09:54-05:00,attrition,ok,8.2,3.29,3075627.0,1630718.0,spx 2019-2020,,False,3.14.10,Windows-11,
+2026-11-04T02:08:24-05:00,build_greeks_spy,ok,218.1,1.23,,701740.0,"spy 2019, CRR 150 steps",,False,3.14.10,Windows-11,
+2026-11-04T02:16:52-05:00,build_pairs,ok,6.2,1.68,,518860.0,spx 2014,,False,3.14.10,Windows-11,E7 160873; ok 159329
+2026-11-04T02:16:58-05:00,build_pairs,ok,8.5,2.47,,861262.0,spx 2015,,False,3.14.10,Windows-11,E7 243791; ok 243637
+2026-11-04T02:17:06-05:00,build_pairs,ok,8.4,2.65,,741959.0,spx 2016,,False,3.14.10,Windows-11,E7 284922; ok 283886
+2026-11-04T02:17:15-05:00,build_pairs,ok,9.7,2.95,,752927.0,spx 2017,,False,3.14.10,Windows-11,E7 341074; ok 339758
+2026-11-04T02:17:24-05:00,build_pairs,ok,12.0,3.51,,1261084.0,spx 2018,,False,3.14.10,Windows-11,E7 590125; ok 589735
+2026-11-04T02:17:37-05:00,build_pairs,ok,12.8,4.05,,1252003.0,spx 2019,,False,3.14.10,Windows-11,E7 581913; ok 573263
+2026-11-04T02:17:49-05:00,build_pairs,ok,15.6,4.89,,1823624.0,spx 2020,,False,3.14.10,Windows-11,E7 1071018; ok 1057455
+2026-11-04T02:18:05-05:00,build_pairs,ok,18.5,5.24,,2132854.0,spx 2021,,False,3.14.10,Windows-11,E7 1289007; ok 1259788
+2026-11-04T02:12:02-05:00,build_greeks_spy,ok,394.7,2.07,,1316169.0,"spy 2020, CRR 150 steps",,False,3.14.10,Windows-11,
+2026-11-04T02:23:33-05:00,rehearsal,ok,4.1,2.43,569967.0,,"spx 2019, 6-month windows",22da4ea,False,3.14.10,Windows-11,
+2026-11-04T02:23:37-05:00,rehearsal,ok,5.0,2.43,589735.0,,"spx 2018, 6-month windows",22da4ea,False,3.14.10,Windows-11,
 2026-11-04T02:23:35-05:00,tune_r8,ok,81.8,2.55,,,spx 2019 C,22da4ea,False,3.14.10,Windows-11,"60 trials, TPE seed 2026; best 0.0481751"
-2026-11-04T02:18:37-05:00,build_greeks_spy,ok,487.3,2.07,,1314475,"spy 2021, CRR 150 steps",22da4ea,False,3.14.10,Windows-11,
-2026-11-04T02:27:05-05:00,build_pairs_spy,ok,20.2,1.74,,551100,spy 2019,22da4ea,False,3.14.10,Windows-11,
-2026-11-04T02:27:26-05:00,build_pairs_spy,ok,24.9,2.82,,1033839,spy 2020,22da4ea,False,3.14.10,Windows-11,
-2026-11-04T02:25:21-05:00,test_year_2019,failed,160.8,2.77,569967,569967,spx 2019,22da4ea,False,3.14.10,Windows-11,plan dry-run
-2026-11-04T02:27:51-05:00,build_pairs_spy,ok,18.9,2.82,,983116,spy 2021,22da4ea,False,3.14.10,Windows-11,
-2026-11-04T02:28:13-05:00,audit_light,ok,4.4,0.65,,24,spy 2019-2020,22da4ea,False,3.14.10,Windows-11,
-2026-11-04T02:28:46-05:00,test_year_2019,ok,160.5,2.95,569967,569967,spx 2019,22da4ea,False,3.14.10,Windows-11,plan dry-run
+2026-11-04T02:18:37-05:00,build_greeks_spy,ok,487.3,2.07,,1314475.0,"spy 2021, CRR 150 steps",22da4ea,False,3.14.10,Windows-11,
+2026-11-04T02:27:05-05:00,build_pairs_spy,ok,20.2,1.74,,551100.0,spy 2019,22da4ea,False,3.14.10,Windows-11,
+2026-11-04T02:27:26-05:00,build_pairs_spy,ok,24.9,2.82,,1033839.0,spy 2020,22da4ea,False,3.14.10,Windows-11,
+2026-11-04T02:25:21-05:00,test_year_2019,failed,160.8,2.77,569967.0,569967.0,spx 2019,22da4ea,False,3.14.10,Windows-11,plan dry-run
+2026-11-04T02:27:51-05:00,build_pairs_spy,ok,18.9,2.82,,983116.0,spy 2021,22da4ea,False,3.14.10,Windows-11,
+2026-11-04T02:28:13-05:00,audit_light,ok,4.4,0.65,,24.0,spy 2019-2020,22da4ea,False,3.14.10,Windows-11,
+2026-11-04T02:28:46-05:00,test_year_2019,ok,160.5,2.95,569967.0,569967.0,spx 2019,22da4ea,False,3.14.10,Windows-11,plan dry-run
 2026-11-04T02:25:01-05:00,tune_r8,ok,431.8,2.55,,,spx 2019 P,22da4ea,False,3.14.10,Windows-11,"60 trials, TPE seed 2026; best 0.0598042"
-2026-11-04T02:33:00-05:00,test_year_2019,ok,115.3,3.04,569967,569967,spx 2019,22da4ea,False,3.14.10,Windows-11,plan dry-run
-2026-11-04T02:37:44-05:00,test_year_2020,ok,212.7,3.28,1057455,1057455,spx 2020,b661d6a,False,3.14.10,Windows-11,plan 77b030e (addendum 22da4ea; implementation b661d6a)
-2026-11-04T02:43:31-05:00,spy_2020,ok,12.2,2.28,,1020695,"spy 2019-2020, W12, R0-R5",b661d6a,True,3.14.10,Windows-11,
-2026-11-04T02:46:00-05:00,audit_light,ok,12.3,1.06,,48,spx 2020-2023,b661d6a,True,3.14.10,Windows-11,
-2026-11-04T02:46:26-05:00,audit_light,ok,3.8,0.43,,60,spx 2010-2014,b661d6a,True,3.14.10,Windows-11,
-2026-11-04T02:46:58-05:00,walkforward,ok,384.1,4.50,7725621,22263691,"spx 2010-2023, W12 W36 W60",b661d6a,True,3.14.10,Windows-11,
+2026-11-04T02:33:00-05:00,test_year_2019,ok,115.3,3.04,569967.0,569967.0,spx 2019,22da4ea,False,3.14.10,Windows-11,plan dry-run
+2026-11-04T02:37:44-05:00,test_year_2020,ok,212.7,3.28,1057455.0,1057455.0,spx 2020,b661d6a,False,3.14.10,Windows-11,plan 77b030e (addendum 22da4ea; implementation b661d6a)
+2026-11-04T02:43:31-05:00,spy_2020,ok,12.2,2.28,,1020695.0,"spy 2019-2020, W12, R0-R5",b661d6a,True,3.14.10,Windows-11,
+2026-11-04T02:46:00-05:00,audit_light,ok,12.3,1.06,,48.0,spx 2020-2023,b661d6a,True,3.14.10,Windows-11,
+2026-11-04T02:46:26-05:00,audit_light,ok,3.8,0.43,,60.0,spx 2010-2014,b661d6a,True,3.14.10,Windows-11,
+2026-11-04T02:46:58-05:00,walkforward,ok,384.1,4.5,7725621.0,22263691.0,"spx 2010-2023, W12 W36 W60",b661d6a,True,3.14.10,Windows-11,
 2026-11-04T02:56:19-05:00,tune_r8,ok,141.6,1.68,,,spx 2015_2016 C,b661d6a,True,3.14.10,Windows-11,"60 trials, TPE seed 2026; best 0.104223"
 2026-11-04T02:58:45-05:00,tune_r8,ok,177.9,1.68,,,spx 2015_2016 P,b661d6a,True,3.14.10,Windows-11,"60 trials, TPE seed 2026; best 0.189131"
-2026-11-04T03:01:54-05:00,walkforward_r8,ok,180.7,4.52,,6642372,"spx 2016-2023, R8 tuned on 2015-2016",b661d6a,True,3.14.10,Windows-11,
-2026-11-04T02:24:18-05:00,heston_calibrate,ok,8709.3,0.13,497,1491,"spx 2019-2020, fits L-price, L-iv, B-iv",b661d6a,True,3.14.10,Windows-11,L-price ok 442; L-iv ok 405; B-iv ok 243
-2026-11-04T07:13:57-05:00,heston_calibrate,ok,23627.0,0.12,497,1491,"spx 2019-2020, fits L-price, L-iv, B-iv",29a9fd3,True,3.14.10,Windows-11,L-price ok 496; L-iv ok 496; B-iv ok 448
-2026-11-04T13:48:32-05:00,heston_hedge,ok,63.8,2.94,1057455,969451,"spx 2020, calibration B",29a9fd3,True,3.14.10,Windows-11,
+2026-11-04T03:01:54-05:00,walkforward_r8,ok,180.7,4.52,,6642372.0,"spx 2016-2023, R8 tuned on 2015-2016",b661d6a,True,3.14.10,Windows-11,
+2026-11-04T02:24:18-05:00,heston_calibrate,ok,8709.3,0.13,497.0,1491.0,"spx 2019-2020, fits L-price, L-iv, B-iv",b661d6a,True,3.14.10,Windows-11,L-price ok 442; L-iv ok 405; B-iv ok 243
+2026-11-04T07:13:57-05:00,heston_calibrate,ok,23627.0,0.12,497.0,1491.0,"spx 2019-2020, fits L-price, L-iv, B-iv",29a9fd3,True,3.14.10,Windows-11,L-price ok 496; L-iv ok 496; B-iv ok 448
+2026-11-04T13:48:32-05:00,heston_hedge,ok,63.8,2.94,1057455.0,969451.0,"spx 2020, calibration B",29a9fd3,True,3.14.10,Windows-11,
+2026-11-05T01:35:26-05:00,build_greeks_spy,ok,7.5,0.41,,12758.0,"spy 2010, CRR 150 steps",3431a8d,True,3.14.10,Windows-11,
+2026-11-05T01:35:34-05:00,build_greeks_spy,ok,80.8,0.62,,154995.0,"spy 2011, CRR 150 steps",3431a8d,True,3.14.10,Windows-11,
+2026-11-05T01:35:26-05:00,build_greeks_spy,ok,145.7,0.74,,262278.0,"spy 2015, CRR 150 steps",3431a8d,True,3.14.10,Windows-11,
+2026-11-05T01:36:55-05:00,build_greeks_spy,ok,101.5,0.72,,186215.0,"spy 2012, CRR 150 steps",3431a8d,True,3.14.10,Windows-11,
+2026-11-05T01:38:36-05:00,build_greeks_spy,ok,180.6,0.72,,193462.0,"spy 2013, CRR 150 steps",3431a8d,True,3.14.10,Windows-11,
+2026-11-05T01:37:52-05:00,build_greeks_spy,ok,280.6,0.94,,340393.0,"spy 2016, CRR 150 steps",3431a8d,True,3.14.10,Windows-11,
+2026-11-05T01:35:26-05:00,build_greeks_spy,ok,434.2,1.31,,639288.0,"spy 2022, CRR 150 steps",3431a8d,True,3.14.10,Windows-11,
+2026-11-05T01:35:26-05:00,build_greeks_spy,ok,461.9,0.98,,701740.0,"spy 2019, CRR 150 steps",3431a8d,True,3.14.10,Windows-11,
+2026-11-05T01:41:37-05:00,build_greeks_spy,ok,140.5,0.72,,228788.0,"spy 2014, CRR 150 steps",3431a8d,True,3.14.10,Windows-11,
+2026-11-05T01:44:04-05:00,tune_r8,ok,21.9,0.49,,,spx 2010 C,3431a8d,True,3.14.10,Windows-11,"60 trials, TPE seed 2026; best 0.0172848"
+2026-11-05T01:44:26-05:00,tune_r8,ok,25.7,0.49,,,spx 2010 P,3431a8d,True,3.14.10,Windows-11,"60 trials, TPE seed 2026; best 0.0211346"
+2026-11-05T01:42:33-05:00,build_greeks_spy,ok,208.2,0.94,,344638.0,"spy 2017, CRR 150 steps",3431a8d,True,3.14.10,Windows-11,
+2026-11-05T01:42:41-05:00,build_greeks_spy,ok,282.9,1.5,,492076.0,"spy 2023, CRR 150 steps",3431a8d,True,3.14.10,Windows-11,
+2026-11-05T01:48:41-05:00,build_pairs,ok,2.1,0.71,,5730.0,spx 2010 short-dated,c00d395,True,3.14.10,Windows-11,E7 5404; ok 5077
+2026-11-05T01:48:43-05:00,build_pairs,ok,2.4,0.84,,15837.0,spx 2011 short-dated,c00d395,True,3.14.10,Windows-11,E7 14011; ok 13609
+2026-11-05T01:48:45-05:00,build_pairs,ok,3.1,1.0,,16025.0,spx 2012 short-dated,c00d395,True,3.14.10,Windows-11,E7 14202; ok 13874
+2026-11-05T01:48:48-05:00,build_pairs,ok,4.0,1.26,,18934.0,spx 2013 short-dated,c00d395,True,3.14.10,Windows-11,E7 16812; ok 16501
+2026-11-05T01:48:52-05:00,build_pairs,ok,5.9,1.69,,21821.0,spx 2014 short-dated,c00d395,True,3.14.10,Windows-11,E7 19587; ok 19116
+2026-11-05T01:48:58-05:00,build_pairs,ok,7.7,2.11,,28907.0,spx 2015 short-dated,c00d395,True,3.14.10,Windows-11,E7 26108; ok 25819
+2026-11-05T01:49:06-05:00,build_pairs,ok,7.8,2.14,,53181.0,spx 2016 short-dated,c00d395,True,3.14.10,Windows-11,E7 44741; ok 44408
+2026-11-05T01:49:14-05:00,build_pairs,ok,9.2,2.55,,61653.0,spx 2017 short-dated,c00d395,True,3.14.10,Windows-11,E7 52949; ok 52699
+2026-11-05T01:49:23-05:00,build_pairs,ok,11.2,2.89,,108007.0,spx 2018 short-dated,c00d395,True,3.14.10,Windows-11,E7 88217; ok 87896
+2026-11-05T01:49:34-05:00,build_pairs,ok,11.6,2.92,,94712.0,spx 2019 short-dated,c00d395,True,3.14.10,Windows-11,E7 80212; ok 78571
+2026-11-05T01:49:46-05:00,build_pairs,ok,14.7,3.58,,191101.0,spx 2020 short-dated,c00d395,True,3.14.10,Windows-11,E7 159338; ok 157256
+2026-11-05T01:50:01-05:00,build_pairs,ok,15.6,3.98,,163643.0,spx 2021 short-dated,c00d395,True,3.14.10,Windows-11,E7 141461; ok 137804
+2026-11-05T01:50:16-05:00,build_pairs,ok,15.6,3.98,,277404.0,spx 2022 short-dated,c00d395,True,3.14.10,Windows-11,E7 229085; ok 223788
+2026-11-05T01:46:01-05:00,build_greeks_spy,ok,279.7,1.21,,601770.0,"spy 2018, CRR 150 steps",c00d395,True,3.14.10,Windows-11,
+2026-11-05T01:50:32-05:00,build_pairs,ok,11.8,3.98,,229086.0,spx 2023 short-dated,c00d395,True,3.14.10,Windows-11,E7 203539; ok 202821
+2026-11-05T01:50:45-05:00,short_dated,ok,7.8,1.09,1074162.0,2141526.0,"spx 2010-2023 short-dated pairs, W12",c00d395,True,3.14.10,Windows-11,
+2026-11-05T01:43:08-05:00,build_greeks_spy,ok,625.6,1.45,,1316169.0,"spy 2020, CRR 150 steps",c00d395,True,3.14.10,Windows-11,
+2026-11-05T01:51:18-05:00,learners_variants,ok,596.4,4.19,,200.0,"spx 2020, R7 R8 under Table 8.1",c00d395,True,3.14.10,Windows-11,
+2026-11-05T01:53:34-05:00,build_greeks_spy,ok,605.4,1.97,,1314475.0,"spy 2021, CRR 150 steps",c00d395,True,3.14.10,Windows-11,
+2026-11-05T02:03:42-05:00,build_pairs_spy,ok,1.1,1.41,,10474.0,spy 2010,c00d395,True,3.14.10,Windows-11,
+2026-11-05T02:03:43-05:00,build_pairs_spy,ok,2.1,1.41,,128982.0,spy 2011,c00d395,True,3.14.10,Windows-11,
+2026-11-05T02:03:45-05:00,build_pairs_spy,ok,2.4,1.44,,153038.0,spy 2012,c00d395,True,3.14.10,Windows-11,
+2026-11-05T02:03:48-05:00,build_pairs_spy,ok,2.6,1.47,,157216.0,spy 2013,c00d395,True,3.14.10,Windows-11,
+2026-11-05T02:03:50-05:00,build_pairs_spy,ok,3.2,1.71,,187760.0,spy 2014,c00d395,True,3.14.10,Windows-11,
+2026-11-05T02:03:54-05:00,build_pairs_spy,ok,3.5,1.86,,204806.0,spy 2015,c00d395,True,3.14.10,Windows-11,
+2026-11-05T02:03:57-05:00,build_pairs_spy,ok,4.0,1.95,,273992.0,spy 2016,c00d395,True,3.14.10,Windows-11,
+2026-11-05T02:04:01-05:00,build_pairs_spy,ok,4.6,2.13,,265043.0,spy 2017,c00d395,True,3.14.10,Windows-11,
+2026-11-05T02:04:06-05:00,build_pairs_spy,ok,5.6,2.46,,445322.0,spy 2018,c00d395,True,3.14.10,Windows-11,
+2026-11-05T02:04:11-05:00,build_pairs_spy,ok,6.9,2.8,,551100.0,spy 2019,c00d395,True,3.14.10,Windows-11,
+2026-11-05T02:04:18-05:00,build_pairs_spy,ok,9.0,3.5,,1033839.0,spy 2020,c00d395,True,3.14.10,Windows-11,
+2026-11-05T02:04:28-05:00,build_pairs_spy,ok,8.8,3.69,,983116.0,spy 2021,c00d395,True,3.14.10,Windows-11,
+2026-11-05T02:04:36-05:00,build_pairs_spy,ok,7.2,3.69,,502348.0,spy 2022,c00d395,True,3.14.10,Windows-11,
+2026-11-05T02:04:44-05:00,build_pairs_spy,ok,4.7,3.69,,374463.0,spy 2023,c00d395,True,3.14.10,Windows-11,
+2026-11-05T02:04:49-05:00,audit_light,ok,8.2,0.92,,168.0,spy 2010-2023,c00d395,True,3.14.10,Windows-11,
+2026-11-05T02:06:17-05:00,heston_benchmark,failed,598.2,1.21,21.0,,"21 sessions 2019-2020, old B vs B2, one process",a0d6c73,True,3.14.10,Windows-11,
+2026-11-05T09:42:07-05:00,heston_benchmark,failed,1807.4,1.64,21.0,,"21 sessions 2019-2020, old B vs B2, one process",d23d6b0,True,3.14.10,Windows-11,
+2026-11-05T10:12:49-05:00,build_greeks_spy,ok,141.9,0.46,,171230.0,"spy 2010, CRR 150 steps",d23d6b0,True,3.14.10,Windows-11,
+2026-11-05T10:12:49-05:00,build_greeks_spy,ok,184.6,0.49,,222487.0,"spy 2013, CRR 150 steps",d23d6b0,True,3.14.10,Windows-11,
+2026-11-05T10:12:49-05:00,build_greeks_spy,ok,273.3,0.68,,305011.0,"spy 2015, CRR 150 steps",d23d6b0,True,3.14.10,Windows-11,
+2026-11-05T10:15:12-05:00,build_greeks_spy,ok,184.2,0.6,,208508.0,"spy 2011, CRR 150 steps",d23d6b0,True,3.14.10,Windows-11,
+2026-11-05T10:18:51-05:00,walkforward_r5_r8,ok,14.8,3.04,2822373.0,20.0,"spx 2010-2023, W12 W36 W60, R5-R8",d23d6b0,True,3.14.10,Windows-11,"SMOKE TEST after the code review: 2023-12 only (pairs 2022-2023), output to the scratchpad; not a result"
+2026-11-05T10:15:54-05:00,build_greeks_spy,ok,256.2,0.67,,258970,"spy 2014, CRR 150 steps",9b1f04a,True,3.14.10,Windows-11,
+2026-11-05T10:18:16-05:00,build_greeks_spy,ok,200.0,0.70,,222681,"spy 2012, CRR 150 steps",9b1f04a,True,3.14.10,Windows-11,
+2026-11-05T10:17:23-05:00,build_greeks_spy,ok,314.4,0.80,,346590,"spy 2016, CRR 150 steps",9b1f04a,True,3.14.10,Windows-11,
+2026-11-05T10:12:49-05:00,build_greeks_spy,ok,944.2,1.33,,1328447,"spy 2020, CRR 150 steps",9b1f04a,True,3.14.10,Windows-11,
+2026-11-05T10:28:39-05:00,build_pairs_spy,ok,4.3,1.41,,142550,spy 2010,9b1f04a,True,3.14.10,Windows-11,
+2026-11-05T10:28:44-05:00,build_pairs_spy,ok,5.0,1.41,,173950,spy 2011,9b1f04a,True,3.14.10,Windows-11,
+2026-11-05T10:28:49-05:00,build_pairs_spy,ok,5.1,1.42,,183107,spy 2012,9b1f04a,True,3.14.10,Windows-11,
+2026-11-05T10:28:54-05:00,build_pairs_spy,ok,5.6,1.48,,180826,spy 2013,9b1f04a,True,3.14.10,Windows-11,
+2026-11-05T10:29:00-05:00,build_pairs_spy,ok,6.5,1.62,,212882,spy 2014,9b1f04a,True,3.14.10,Windows-11,
+2026-11-05T10:29:06-05:00,build_pairs_spy,ok,7.1,1.78,,238285,spy 2015,9b1f04a,True,3.14.10,Windows-11,
+2026-11-05T10:29:14-05:00,build_pairs_spy,ok,8.0,1.98,,278982,spy 2016,9b1f04a,True,3.14.10,Windows-11,
+2026-11-05T10:29:22-05:00,build_pairs_spy,ok,9.2,1.98,,265043,spy 2017,9b1f04a,True,3.14.10,Windows-11,
+2026-11-05T10:29:31-05:00,build_pairs_spy,ok,11.1,1.98,,445322,spy 2018,9b1f04a,True,3.14.10,Windows-11,
+2026-11-05T10:29:42-05:00,build_pairs_spy,ok,13.2,2.36,,551100,spy 2019,9b1f04a,True,3.14.10,Windows-11,
+2026-11-05T10:29:55-05:00,build_pairs_spy,ok,18.8,2.75,,1043916,spy 2020,9b1f04a,True,3.14.10,Windows-11,
+2026-11-05T10:30:14-05:00,build_pairs_spy,ok,26.5,2.75,,983116,spy 2021,9b1f04a,True,3.14.10,Windows-11,
+2026-11-05T10:30:41-05:00,build_pairs_spy,ok,19.1,2.75,,502348,spy 2022,9b1f04a,True,3.14.10,Windows-11,
+2026-11-05T10:31:00-05:00,build_pairs_spy,ok,12.5,2.75,,374463,spy 2023,9b1f04a,True,3.14.10,Windows-11,
+2026-11-05T10:31:15-05:00,audit_light,ok,18.6,0.88,,168,spy 2010-2023,9b1f04a,True,3.14.10,Windows-11,
+2026-11-05T10:31:36-05:00,rehearsal,ok,4.1,1.48,538493,,"spy 2019, 6-month windows",9b1f04a,True,3.14.10,Windows-11,
+2026-11-05T10:31:41-05:00,rehearsal,ok,4.2,1.48,444293,,"spy 2018, 6-month windows",9b1f04a,True,3.14.10,Windows-11,
+2026-11-05T10:31:52-05:00,tune_r8,ok,103.8,1.57,,,spy 2019 C,9b1f04a,True,3.14.10,Windows-11,"60 trials, TPE seed 2026; best 0.0696749"
+2026-11-05T10:33:40-05:00,tune_r8,ok,214.6,1.57,,,spy 2019 P,9b1f04a,True,3.14.10,Windows-11,"60 trials, TPE seed 2026; best 0.0595324"
+2026-11-05T10:37:26-05:00,test_year_2019,ok,142.6,2.44,538493,538493,spy 2019,9b1f04a,True,3.14.10,Windows-11,plan 3431a8d
+2026-11-05T10:39:54-05:00,test_year_2020,ok,202.7,2.99,1030757,1030757,spy 2020,9b1f04a,True,3.14.10,Windows-11,plan 3431a8d
+2026-11-05T10:43:27-05:00,learners_variants,ok,716.7,2.95,,190,"spy 2020, R7 R8 under Table 8.1",9b1f04a,True,3.14.10,Windows-11,
+2026-11-05T10:55:31-05:00,tune_r8,ok,38.9,0.49,,,spy 2010 C,9b1f04a,True,3.14.10,Windows-11,"60 trials, TPE seed 2026; best 0.0271228"
+2026-11-05T10:56:11-05:00,tune_r8,ok,42.2,0.49,,,spy 2010 P,9b1f04a,True,3.14.10,Windows-11,"60 trials, TPE seed 2026; best 0.0307162"
+2026-11-05T10:57:02-05:00,tune_r8,ok,161.3,1.17,,,spy 2015_2016 C,9b1f04a,True,3.14.10,Windows-11,"60 trials, TPE seed 2026; best 0.145202"
+2026-11-05T10:59:49-05:00,tune_r8,ok,187.5,1.17,,,spy 2015_2016 P,9b1f04a,True,3.14.10,Windows-11,"60 trials, TPE seed 2026; best 0.153025"
+2026-11-05T11:03:03-05:00,walkforward,ok,338.1,3.85,5529095,15068365,"spy 2010-2023, W12 W36 W60",9b1f04a,True,3.14.10,Windows-11,
+2026-11-05T11:20:19-05:00,short_dated,ok,11.2,1.07,1074162,1070763,"spx 2010-2023 short-dated pairs, W12",9b1f04a,True,3.14.10,Windows-11,
+2026-11-05T11:08:46-05:00,walkforward_r5_r8,ok,1299.8,4.67,5529095,660,"spy 2010-2023, W12 W36 W60, R5-R8",8f75ae9,True,3.14.10,Windows-11,
+2026-11-05T11:30:35-05:00,spy_exdate_by_year,ok,68.5,5.47,,52,"spy 2010-2023, W12",8f75ae9,True,3.14.10,Windows-11,
+2026-11-05T10:12:50-05:00,heston2_calibrate,ok,5967.1,0.12,3479,3479,"spx 2010-2023, calibration B2, 6 processes",8f75ae9,True,3.14.10,Windows-11,"ok 3479 of 3479; session CPU s median 4.70, sum 23766; at bound 1296"
+2026-11-05T11:31:56-05:00,walkforward_r5_r8,ok,1444.1,6.52,7725621,660,"spx 2010-2023, W12 W36 W60, R5-R8",8f75ae9,True,3.14.10,Windows-11,
+2026-11-05T11:52:44-05:00,heston2_hedge,ok,211.3,3.82,,7725621,"spx 2010-2023, calibration B2",8f75ae9,True,3.14.10,Windows-11,
+2026-11-05T11:56:29-05:00,heston_benchmark,ok,2394.8,1.64,21,,"21 sessions 2019-2020, old B vs B2, one process",8f75ae9,True,3.14.10,Windows-11,"B2 (project pricer, 2 cold starts): wall median 5.7 s, total 115 s; old B (library, 3 starts): wall median 17.5 s, total 2280 s"

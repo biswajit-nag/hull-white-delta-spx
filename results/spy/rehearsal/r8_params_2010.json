@@ -1,0 +1,16 @@
+{
+  "C": {
+    "num_leaves": 7,
+    "learning_rate": 0.024760234512412785,
+    "n_estimators": 79,
+    "lambda_l2": 0.041926078508570136,
+    "min_hess_frac": 0.0004627733881078201
+  },
+  "P": {
+    "num_leaves": 4,
+    "learning_rate": 0.013992214706222311,
+    "n_estimators": 69,
+    "lambda_l2": 2.698216491997921,
+    "min_hess_frac": 0.007053545160640925
+  }
+}
