@@ -231,3 +231,7 @@ started_at,step,status,wall_seconds,peak_mem_gb,rows_in,rows_out,inputs,git_hash
 2026-11-05T15:48:12-05:00,level_shape,ok,56.7,7.03,,312,"spx 2010-2023, W12",71ac81b,False,3.14.10,Windows-11,
 2026-11-05T15:49:10-05:00,level_shape,ok,35.9,5.59,,312,"spy 2010-2023, W12",71ac81b,True,3.14.10,Windows-11,
 2026-11-05T15:49:47-05:00,compare_published,ok,144.4,6.56,,108,"spx 2010-2019, W12 W36, three samples",71ac81b,True,3.14.10,Windows-11,
+2026-11-05T16:40:04-05:00,parameter_stability,ok,24.6,6.96,,3960,"spx 2010-2023, W12 W36 W60",d6d42a2,False,3.14.10,Windows-11,
+2026-11-05T16:40:31-05:00,stress_episodes,ok,198.7,7.45,,704,"spx 2010-2023, W12 W36, RV and DD episodes",d6d42a2,True,3.14.10,Windows-11,
+2026-11-05T16:43:51-05:00,parameter_stability,ok,17.5,5.18,,3960,"spy 2010-2023, W12 W36 W60",d6d42a2,True,3.14.10,Windows-11,
+2026-11-05T16:44:10-05:00,stress_episodes,ok,197.8,5.44,,704,"spy 2010-2023, W12 W36, RV and DD episodes",d6d42a2,True,3.14.10,Windows-11,
