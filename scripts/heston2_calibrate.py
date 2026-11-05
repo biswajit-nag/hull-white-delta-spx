@@ -39,14 +39,17 @@ GREEKS = ROOT / "data/processed/greeks/underlying=spx"
 OUT = ROOT / "results/heston2"
 
 
-def sample_b(day: pd.Timestamp) -> pd.DataFrame:
-    """Calibration B's options on one session, with each option's IV, vega and the expiry's D and F."""
-    p = ds.dataset(PANEL / f"year={day.year}").to_table(
-        columns=["quote_date", "expire_date", "strike", "cp", "bid", "ask", "volume", "last", "S_close"],
-        filter=(ds.field("quote_date") == day.date()) & ds.field("is_session")).to_pandas()
-    g = ds.dataset(GREEKS / f"year={day.year}").to_table(
-        columns=["quote_date", "expire_date", "strike", "cp", "tau", "D", "F", "iv", "iv_status"],
-        filter=ds.field("quote_date") == day).to_pandas()
+def sample_b(day: pd.Timestamp | None, year: int | None = None) -> pd.DataFrame:
+    """Calibration B's options on one session (or, with day=None, every session of `year`), with each
+    option's IV, vega and the expiry's D and F."""
+    year = day.year if day is not None else year
+    pf, gf = ds.field("is_session"), ds.field("iv_status") == "converged"
+    if day is not None:
+        pf, gf = pf & (ds.field("quote_date") == day.date()), gf & (ds.field("quote_date") == day)
+    p = ds.dataset(PANEL / f"year={year}").to_table(
+        columns=["quote_date", "expire_date", "strike", "cp", "bid", "ask", "volume", "last", "S_close"], filter=pf).to_pandas()
+    g = ds.dataset(GREEKS / f"year={year}").to_table(
+        columns=["quote_date", "expire_date", "strike", "cp", "tau", "D", "F", "iv", "iv_status"], filter=gf).to_pandas()
     p["cp"], g["cp"] = p.cp.astype(str), g.cp.astype(str)
     p["quote_date"], p["expire_date"] = pd.to_datetime(p.quote_date), pd.to_datetime(p.expire_date)
     g["expire_date"] = pd.to_datetime(g.expire_date)
@@ -84,9 +87,9 @@ def chain_for(B: pd.DataFrame, grid_params, **kw) -> H.Chain:
     return H.Chain(S, B.strike.to_numpy(float), B.tau.to_numpy(float), r, q, B.sgn.to_numpy(float), grid_params, **kw)
 
 
-def calibrate_session(day: pd.Timestamp, prev: np.ndarray | None) -> dict:
+def calibrate_session(day: pd.Timestamp, prev: np.ndarray | None, year_sample: pd.DataFrame | None = None) -> dict:
     w0, c0 = time.perf_counter(), time.process_time()
-    B = sample_b(day)
+    B = sample_b(day) if year_sample is None else year_sample[year_sample.quote_date == day].reset_index(drop=True)
     row = {"session": day, "n": len(B)}
     if len(B) < 10:
         return row | {"ok": False}
@@ -118,8 +121,9 @@ def calibrate_session(day: pd.Timestamp, prev: np.ndarray | None) -> dict:
 def calibrate_year(year: int) -> pd.DataFrame:
     days = pd.DatetimeIndex(pd.to_datetime(pd.read_parquet(GREEKS / f"sessions_{year}.parquet").quote_date)).sort_values()
     rows, prev = [], None
+    Y = sample_b(None, year)  # the year's calibration sample, loaded once
     for d in days:
-        r = calibrate_session(d, prev)
+        r = calibrate_session(d, prev, Y)
         rows.append(r)
         if r.get("ok"):
             prev = np.array([r[k] for k in H.NAMES])
