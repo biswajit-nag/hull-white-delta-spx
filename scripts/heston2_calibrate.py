@@ -94,8 +94,12 @@ def calibrate_session(day: pd.Timestamp, prev: np.ndarray | None, year_sample: p
     if len(B) < 10:
         return row | {"ok": False}
     starts = [prev, data_start(B)] if prev is not None else [data_start(B), H.X0]
-    ch = chain_for(B, starts)
-    fit = H.calibrate(ch, B.mid.to_numpy(), B.weight.to_numpy(), starts)
+    # the search runs on panels three times as wide, then polishes on the specified grid (plan §15, 2026-11-05)
+    f0 = H.calibrate(chain_for(B, starts, rad_per_panel=9.0), B.mid.to_numpy(), B.weight.to_numpy(), starts)
+    ch = chain_for(B, [f0["x"]] + starts)
+    fit = H.calibrate(ch, B.mid.to_numpy(), B.weight.to_numpy(), [f0["x"]])
+    fit["nfev"] += f0["nfev"]
+    fit["njev"] += f0["njev"]
     regrid = not ch.adequate(fit["x"])
     if regrid:  # the solution needs a longer range than the starts did: rebuild the grid there and refit
         ch = chain_for(B, [fit["x"]])

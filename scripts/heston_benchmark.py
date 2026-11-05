@@ -44,6 +44,7 @@ def old_b(day: pd.Timestamp, prm: pd.DataFrame) -> dict:
     liv = prm[(prm.session == day) & (prm.fit == "L-iv")]
     prev = prm[(prm.fit == "B-iv") & prm.ok.fillna(False).astype(bool) & (prm.session.dt.to_period("M") == day.to_period("M") - 1)]
     starts = [old.X0] + ([liv[old.NAMES].iloc[0].to_numpy()] if len(liv) else []) + ([prev[old.NAMES].median().to_numpy()] if len(prev) else [])
+    starts = [x for x in starts if np.isfinite(x).all()]  # a session whose saved warm start is missing
     fits = [old.fit(B, "iv", x) for x in starts]
     best = min(fits, key=lambda r: r["cost"])
     return {"session": day, "method": "old B (library, 3 starts)", "n": best["n"], "starts": len(starts),

@@ -37,20 +37,23 @@ STEPS = 150
 
 
 def yield_curve(year: int) -> pd.DataFrame:
-    """Per session: SPX's implied carry q(τ) = r(τ) − ln(F_e/S_A)/τ_e, linear in τ over 30 days–2 years."""
+    """Per session: SPX's implied carry q(τ) = r(τ) − ln(F_e/S_A)/τ_e, linear in τ over 30 days–2 years.
+    Where S_A is missing, the official SPX close stands in, flagged as q_level = "close" (plan §15, 2026-11-05)."""
     g = pd.read_parquet(SPXG / f"year={year}" / f"greeks_{year}.parquet", columns=["quote_date", "am_settled", "settle_date", "tau", "D", "F"])
     e = g.dropna(subset=["F"]).drop_duplicates(["quote_date", "am_settled", "settle_date"])
-    s = pd.read_parquet(SPXG / f"sessions_{year}.parquet")[["quote_date", "S_A"]]
+    s = pd.read_parquet(SPXG / f"sessions_{year}.parquet")[["quote_date", "S_A", "S_close"]]
+    s["q_level"] = np.where(s.S_A.notna(), "A", "close")
+    s["level"] = s.S_A.fillna(s.S_close)
     e = e.merge(s, on="quote_date")
-    e = e[(e.tau >= 30 / 365) & (e.tau <= 2) & e.S_A.notna()]
-    e["q"] = -np.log(e.D) / e.tau - np.log(e.F / e.S_A) / e.tau
+    e = e[(e.tau >= 30 / 365) & (e.tau <= 2) & e.level.notna()]
+    e["q"] = -np.log(e.D) / e.tau - np.log(e.F / e.level) / e.tau
     rows = {}
     for d, x in e.groupby("quote_date"):
         if len(x) >= 2:
             c1, c0 = np.polyfit(x.tau, x.q, 1)
         else:
             c0, c1 = x.q.mean(), 0.0
-        rows[d] = {"q0": c0, "q1": c1, "q_lo": x.tau.min(), "q_hi": x.tau.max()}
+        rows[d] = {"q0": c0, "q1": c1, "q_lo": x.tau.min(), "q_hi": x.tau.max(), "q_level": x.q_level.iloc[0]}
     return pd.DataFrame(rows).T
 
 
@@ -70,6 +73,7 @@ def build(year: int) -> pd.DataFrame:
     tq = np.clip(t.tau.values, qq.q_lo.values.astype(float), qq.q_hi.values.astype(float))
     t["r"] = r.values
     t["q"] = qq.q0.values.astype(float) + qq.q1.values.astype(float) * tq - EXPENSE
+    t["q_level"] = qq.q_level.values
     t["D"] = np.exp(-t.r * t.tau)
     t["F"] = t.S_close * np.exp((t.r - t.q) * t.tau)
     cand = (t.tau >= 14 / 365) & (t.bid > 0) & (t.ask >= t.bid) & ((t.volume > 0) | (t.volume.isna() & (t["last"] > 0))) \
