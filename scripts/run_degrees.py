@@ -109,7 +109,7 @@ def main() -> None:
                     print(f"W{W} {m} done", flush=True)
             E = pd.concat(E)
             log.setdefault("notes", "")
-            log["notes"] += f"W{W}: max |P2 − R2| error {np.nanmax(np.abs(E.P2 - E.R2)):.2e}; "
+            log["notes"] += f"W{W}: max |P2 - R2| error {np.nanmax(np.abs(E.P2 - E.R2)):.2e}; "
             yr = P.loc[E.index, "quote_date"].dt.year
             rules = [f"P{k}" for k in range(DMAX + 1)] + ["PCV"]
             for year in sorted(yr.unique()):
