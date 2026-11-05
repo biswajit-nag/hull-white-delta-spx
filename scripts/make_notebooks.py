@@ -467,6 +467,8 @@ That is the failure mode the non-smooth-hedge argument predicts: a flexible lear
     md("""
 ## SPY (§16.1)
 
+*Superseded on 2026-11-05 by the full replication of plan §16.3: see notebook 07. The numbers below are the 2026-11-04 exploratory run, kept as the record.*
+
 The same protocol on SPY: American options (Lecture 12's tree for puts), SPY's own close, and distributions added to the hedge leg on ex-dates.
 """),
     code("""
@@ -480,6 +482,8 @@ s[(s.rule == "R2") & s.base.isin(["R1", "R3", "R4"])][["variant", "cp", "base", 
 """),
     md("""
 ## Heston (§16.2), in the style of Lecture 12
+
+*Superseded on 2026-11-05 by the project's own pricer and calibration of plan §16.5, run on 2010–2023: see notebook 09. The numbers below are the 2026-11-04 library-based run, kept as the record.*
 
 Heston's model makes the variance v a second random factor, correlated (ρ) with the index (Lecture 12).
 - **Calibration.** Each session is calibrated with `scipy.optimize.least_squares`, as in the lecture. **L** fits the lecture's own sample (calls 50–100 days, sizes above 10, the size-weighted price), to price errors and to implied-volatility errors. **B** is a broader fit to out-of-the-money calls and puts, 14 days to a year.
@@ -557,6 +561,321 @@ w[w.rule == "R8"][["year", "cp", "gain", "lo", "hi"]].round(3)"""),
 - **The tuning chose a minimal model:** 51 trees, a learning rate of 0.01, 4 leaves.
 - **In most years R8 is within a few percent of R2.**
 - **2020 puts are the exception.** The crash pushed the features far outside their training range, and even this small correction more than doubled R2's squared error (relative Gain −1.98). The same failure appears in the 2020 test (notebook 05).
+"""),
+])
+
+
+NOTEBOOKS["07"] = ("07_spy_replication", [
+    md("""
+# 07 · SPY: a full replication of the SPX protocol (plan §16.3)
+
+**What changes for SPY.**
+- **The options are American** and settle into shares. Puts are priced on Lecture 12's tree (150 steps, control variate), with δ, ν, vanna and theta from finite differences on the same tree. Calls are priced as European, as the lecture does.
+- **SPY pays quarterly dividends.** The distribution enters the hedge leg on ex-dates.
+- **The index level is SPY's close:** Nasdaq's from 2016-11-03, and before that Stooq's, with its dividend adjustment reversed (checked against Nasdaq on 1,821 sessions: median 0.43 bp in level, 0.14 bp in return).
+- **The dividend yield** comes from SPX's implied carry, using the SPX close on the few sessions without SPX's options-implied level (plan §15).
+
+**What is the same:** every SPX procedure that applies.
+- the rehearsal and its specification checks on 2018–2019;
+- R8's tuning on 2019, and the dry run;
+- 2020 with every Table 8.1 variant except A (American parity gives no options-implied level), and the verdict table;
+- the 2011–2023 walk-forward.
+
+**Status.** SPY's 2020 Gains for R0–R5 were first computed on 2026-11-04, so this 2020 verdict is post hoc. The clean evidence is the untouched SPY years: 2011–2014, 2017 and 2021–2023 (`results/spy/year_ledger_spy.csv`).
+"""),
+    code(SETUP),
+    code("""pd.read_csv(R / "spy/year_ledger_spy.csv")"""),
+    md("## The rehearsal's specification checks (2018 and 2019)"),
+    code("""
+pd.concat([pd.read_csv(R / f"spy/rehearsal/spec_checks_{y}.csv").assign(year=y) for y in (2018, 2019)]).round(4)"""),
+    md("""
+**Reading.** 2018 contradicts nothing. In 2019 the cubic beats the quadratic for both types, and τ^−0.75 and τ^−1 beat 1/√τ for calls, all by small margins. Those variants were carried to 2020 as exploratory rules.
+"""),
+    md("## 2020: the verdict and its robustness"),
+    code("""pd.read_csv(R / "spy/2020/verdict.csv").round(3)"""),
+    code("""
+g = pd.read_csv(R / "spy/2020/gains.csv")
+g[(g.variant == "primary")][["cp", "rule", "base", "gain", "lo", "hi", "pairs"]].round(3)"""),
+    code("""
+pd.read_csv(R / "spy/2020/descriptives.csv").query("rule in ['R0','R1','R2','R3','R4']")[["cp", "rule", "rms_dollars_per_contract", "effectiveness_vs_R0", "stress_share_R1"]].round(3)"""),
+    code("""
+pd.concat([g[g.variant.isin(["learners (feature-complete)", "carried variants"])],
+           pd.read_csv(R / "spy/2020/r9_r11.csv").query("variant == 'primary'").assign(variant="R9-R11 (primary)")])[["variant", "cp", "rule", "base", "gain", "lo", "hi"]].round(3)"""),
+    md("""
+**Reading.**
+- **Inconclusive, like SPX.** G is 0.104 [−0.30, 0.40] for calls and 0.238 [−0.25, 0.48] for puts. R2 is not distinguished from R3 or R4, and every robustness variant is Inconclusive too.
+- **R8 and R10 collapse for puts** in the crash (Gains of about −52 against R2).
+- **The δ-only learners R9 and R11 and the carried cubic** beat R2 by a significant but tiny +0.003 to +0.005.
+- **The carried τ-scalings are worse than R2.**
+"""),
+    md("## The 2011–2023 walk-forward"),
+    code("""
+w = pd.read_csv(R / "spy/walkforward/gains_by_year.csv")
+t = w[(w.rule == "R2") & (w.base == "R1")].pivot_table(index=["year", "status"], columns=["window", "cp"], values="gain")
+t.round(3)"""),
+    code("""
+fig, axes = plt.subplots(1, 2, figsize=(11, 4), sharey=True)
+for ax, cp, nm in zip(axes, "CP", ("calls", "puts")):
+    for W in (12, 36, 60):
+        x = w[(w.rule == "R2") & (w.base == "R1") & (w.cp == cp) & (w.window == W)].sort_values("year")
+        ax.plot(x.year, x.gain, marker="o", label=f"W{W}")
+        if W == 12:
+            ax.fill_between(x.year, x.lo, x.hi, alpha=0.15)
+    ax.axhline(0, color="k", lw=0.8); ax.set_title(f"SPY {nm}: Gain of R2 over Black–Scholes"); ax.legend()
+plt.tight_layout()"""),
+    code("""
+med = pd.concat([pd.read_csv(R / f"spy/walkforward/{f}.csv").assign(source=f) for f in
+                 ("median_yearly_gain", "r5_r8_median_yearly_gain", "r9_r11_median_yearly_gain", "degrees_median_yearly_gain")])
+med[med.window == 12].pivot_table(index="rule", columns=["base", "cp"], values="median_yearly_gain").round(3)"""),
+    code("""pd.read_csv(R / "spy/walkforward/exdate_by_year.csv").query("pairs == 'ex-date'").round(3)"""),
+    md("""
+**Reading.**
+- **The same pattern as SPX, clearer for puts.** In the clean years 2011–2014 and 2021, R2's put Gain over Black–Scholes is 0.21–0.28, with intervals above 0. The advantage is gone in 2022–2023, and with the long windows puts go strongly negative in 2022.
+- **For SPY calls the fixed 0.9 scaling is worse than Black–Scholes** in most years; R2 and the fitted scaling stay positive.
+- **The δ-shape rules (R5, R9, R11, P3 and above) add +0.002 to +0.007 a year** over R2.
+- **Ex-date pairs** hold 0.3–9% of a year's squared error, with no systematic loss.
+"""),
+])
+
+NOTEBOOKS["08"] = ("08_more_rules_and_short_dated", [
+    md("""
+# 08 · More rules: the learners decomposed, the polynomial degree, and short-dated options
+
+Three sets of rules were added on 2026-11-05, each specified and committed before its run:
+- **R5–R8 under every protocol** (plan §16.4).
+- **R9–R11** (§16.7). With R8 they form a 2×2 design: a LightGBM correction learned from scratch (R9, R10) or boosted from R2 (R11, R8), on δ alone (R9, R11) or on six features (R10, R8).
+- **P0–P8 and PCV** (§16.8): R2's quadratic replaced by a polynomial of degree 0–8, and a degree chosen by validation inside each training window.
+
+Plus **short-dated options** (§16.6): under 14 days, each pair ending before settlement. All of this is exploratory: it was specified after the 2020 test had been seen.
+"""),
+    code(SETUP),
+    md("## 2020: the learners under the Table 8.1 variants (Gain over R2)"),
+    code("""
+lv = pd.read_csv(R / "2020/learners_variants.csv"); r9 = pd.read_csv(R / "2020/r9_r11.csv")
+both = pd.concat([lv[lv.base == "R2"], r9[(r9.base == "R2") & r9.rule.isin(["R9", "R10", "R11"])]])
+both.pivot_table(index="variant", columns=["rule", "cp"], values="gain").round(3)"""),
+    md("""
+**Reading.** Both learners that use the six features (R8, R10) collapse for puts in most variants: the March 2020 crash pushed volatility and returns far outside their calm training range. Both δ-only learners (R9, R11) stay within ±0.02 of R2 everywhere. The features broke R8, not the boosting.
+"""),
+    md("## The walk-forward, 2011–2023: median yearly Gains over 2015–2023"),
+    code("""
+med = pd.concat([pd.read_csv(R / f"walkforward/{f}.csv") for f in
+                 ("median_yearly_gain", "r5_r8_median_yearly_gain", "r9_r11_median_yearly_gain", "degrees_median_yearly_gain")])
+med = med.drop(columns=[c for c in ("sample",) if c in med]).drop_duplicates(["window", "cp", "rule", "base"])
+med.pivot_table(index="rule", columns=["base", "window", "cp"], values="median_yearly_gain").round(3)"""),
+    code("""
+d = pd.read_csv(R / "walkforward/degrees_by_year.csv"); r9w = pd.read_csv(R / "walkforward/r9_r11_by_year.csv")
+x = pd.concat([d[(d.base == "R2") & d.rule.isin(["P0", "P3", "PCV"])], r9w[(r9w.base == "R2") & r9w.rule.isin(["R9", "R11"])]])
+fig, axes = plt.subplots(1, 2, figsize=(11, 4), sharey=True)
+for ax, cp, nm in zip(axes, "CP", ("calls", "puts")):
+    for rule, z in x[(x.window == 12) & (x.cp == cp)].groupby("rule"):
+        z = z.sort_values("year"); ax.plot(z.year, z.gain, marker="o", label=rule)
+    ax.axhline(0, color="k", lw=0.8); ax.set_title(f"SPX {nm}: Gain over R2 (12-month window)"); ax.legend()
+plt.tight_layout()"""),
+    code("""
+c = pd.read_csv(R / "walkforward/degrees_pcv_choice.csv")
+c.groupby(["window", "cp"]).degree.value_counts().unstack(fill_value=0)"""),
+    md("""
+**Reading.**
+- **Every rule built on Hull–White's form tracks R2 within a few thousandths a year.** On SPX, R5 equals R2; R9 gains about +0.001 to +0.002; P3–P8 add nothing.
+- **The constant P0 is about as good as R2,** and better in 2022–2023 for puts on the long windows.
+- **PCV mostly picks degree 0.** It is never significantly worse than R2.
+- **More flexible learners do worse:** R7 and R10.
+"""),
+    md("""
+## Why R9's tuned correction is nearly constant
+
+Refit on 2019 (the window that feeds January 2020): R2's quadratic, R9's tuned h(δ) and the constant fit, as corrections g(δ) in the hedge δ + ν/(S√τ)·g(δ). The x² weights that the loss uses peak near the money.
+"""),
+    code("""
+from erdos_quant_finance_project import hedging as h, learners as L
+P = h.load_pairs([2018, 2019]); P = P[P.next_session < h.UNBLIND]
+fr = h.ingredients(P); z = L.features(fr, P); ok = L.complete(fr, z)
+p9 = json.loads((R / "rehearsal/r9_params_2019.json").read_text())
+fig, axes = plt.subplots(1, 2, figsize=(11, 4))
+for ax, cp in zip(axes, "CP"):
+    tr = ok & (fr.cp == cp) & (P.quote_date >= "2019-01-01"); dd = fr[tr]
+    beta = h.ols(*h.design("R2", dd)); c0 = float((dd.x * dd.y).sum() / (dd.x ** 2).sum())
+    m9 = L.fit_direct(dd, z[tr][["delta"]], p9[cp])
+    grid = np.linspace(0.05, 0.95, 91) * (1 if cp == "C" else -1)
+    ax.plot(grid, h.poly(grid) @ beta, label="R2 quadratic"); ax.plot(grid, m9.predict(grid[:, None]), label="R9 tuned h(δ)")
+    ax.axhline(c0, ls="--", color="gray", label="constant (P0)")
+    ax2 = ax.twinx(); ax2.hist(dd.delta, bins=45, weights=dd.x ** 2, alpha=0.15, color="k"); ax2.set_yticks([])
+    ax.set_title({"C": "calls", "P": "puts"}[cp] + ": correction g(δ), SPX 2019"); ax.set_xlabel("δ"); ax.legend()
+plt.tight_layout()"""),
+    md("""
+**Reading.** R9 follows R2's shape where the weight lies and flattens toward the constant in the tails. R2's own curve is nearly flat there too. Out of sample on its 2019 tuning folds, the constant matched R2 (+0.014 for calls, +0.000 for puts). Validation therefore shrinks R9 toward a constant: with all options on a session sharing one index move, about 125 independent shocks per fold cannot support much δ-shape. Details: `notes/unified-results.md` §3.2.
+"""),
+    md("## Short-dated options (under 14 days)"),
+    code("""
+s = pd.read_csv(R / "short_dated/gains_by_year.csv")
+s[s.rule.isin(["R2m", "R2s"])].pivot_table(index="year", columns=["rule", "base", "cp"], values="gain").round(3)"""),
+    code("""
+b = pd.read_csv(R / "short_dated/buckets.csv")
+b.groupby(["cp", "days"])[["G_R2m_R1", "G_R2s_R1", "pairs"]].median().round(3)"""),
+    md("""
+**Reading.** Close to expiry, vega is small and the correction has little to work with. R2's coefficients from options of 14 days or more (R2m) gain a median 0.06 for calls and 0.005 for puts over Black–Scholes. That comes mainly from the 7–13-day options. Refitting on short-dated options (R2s) does not help.
+"""),
+])
+
+NOTEBOOKS["09"] = ("09_heston_rewritten", [
+    md("""
+# 09 · Heston, rewritten: pricer, calibration, timing and hedges (plan §16.5)
+
+**The course library's pricer.** Its integration uses 256 nodes whatever the range. At typical parameters it is accurate, but at corners of the lecture's bounds it is off by 6–46 vol points: large ξ, short τ, ρ near −1, slow κ.
+- **The project's `heston.py`** uses the same formula, Lewis's with the Black–Scholes control variate, with node counts tied to the range. It precomputes the strike terms per session and returns C_S and C_v in closed form.
+- **Its accuracy:** within 0.0086 vol points of an adaptive-quadrature reference everywhere tested (`tests/test_heston.py`).
+
+**Calibration B2** keeps calibration B's sample and bounds and changes the solver:
+- vega-weighted price errors in place of IV errors;
+- two starts per session (yesterday's solution and an at-the-money start);
+- a coarse-grid search, then a polish on the accurate grid.
+
+**Hedges, 2010–2023:**
+- H_model = C_S, Heston's own delta;
+- H_mv = C_S + (ρξ/S)·C_v, the model's minimum-variance delta;
+- H_fit = C_S + β̂·C_v/S, with β̂ fitted on the trailing 12 months.
+"""),
+    code(SETUP),
+    md("## The integration defect, live: a 14-day put at K/S = 0.6 with ξ = 5"),
+    code("""
+from erdos_quant_finance_project.lecture import option_pricing
+from erdos_quant_finance_project import heston as H
+op = option_pricing(); S, K, r, q, t = 3000.0, 1800.0, 0.02, 0.018, 14 / 365
+p = np.array([0.03, 10.0, 0.04, 5.0, -0.7])
+fwd = K * np.exp(-r * t) - S * np.exp(-q * t)
+rows = [{"pricer": f"library, {n} nodes", "put": op.heston_call(S, K, *p[[0]], r, t, *p[1:], q, n_phi=n, check_bounds=False) + fwd} for n in (256, 512, 4096)]
+ch = H.Chain(S, [K], [t], [r], [q], [-1.0], [p])
+rows.append({"pricer": "heston.py", "put": ch.prices(p)[0]})
+pd.DataFrame(rows)"""),
+    md("## Timing: the old calibration against B2, the same 21 sessions, run alone"),
+    code("""
+bm = pd.read_csv(R / "heston2/benchmark.csv")
+bm.groupby("method")[["wall_s", "cpu_s", "iv_rmse"]].agg(["median", "sum", "max"]).round(2)"""),
+    code("""
+P2 = pd.concat([pd.read_csv(f, parse_dates=["session"]) for f in sorted((R / "heston2").glob("params_*.csv"))])
+P2.groupby(P2.session.dt.year).agg(sessions=("n", "size"), converged=("ok", "sum"), cpu_median_s=("cpu_s", "median"),
+    iv_rmse_median=("iv_rmse", "median"), at_bound=("at_bound", "sum"), accuracy_check_max_vp=("accuracy_check_vp", "max")).round(4)"""),
+    md("""
+**Reading.**
+- **Every one of the 3,479 sessions of 2010–2023 converged.** The old calibration failed on 49 of 497 sessions, all at scipy's 500-evaluation cap.
+- **Speed:** on the benchmark, B2 is 3× faster at the median and 20× faster in total.
+- **Accuracy:** at most 0.007 vol points.
+- **κ still hits its bound of 10 on 37% of sessions,** which is Heston's misfit to the SPX skew, not a solver failure.
+"""),
+    md("## Hedging, 2010–2023"),
+    code("""
+hg = pd.read_csv(R / "heston2/gains_by_year.csv")
+hg.pivot_table(index="year", columns=["rule", "base", "cp"], values="gain").round(2)"""),
+    code("""
+fig, axes = plt.subplots(1, 2, figsize=(11, 4), sharey=True)
+for ax, cp, nm in zip(axes, "CP", ("calls", "puts")):
+    for rule in ("R2", "H_mv", "H_fit", "H_model"):
+        x = hg[(hg.rule == rule) & (hg.base == "R1") & (hg.cp == cp)].sort_values("year")
+        ax.plot(x.year, x.gain.clip(lower=-1.5), marker="o", label=rule)
+    ax.axhline(0, color="k", lw=0.8); ax.set_title(f"SPX {nm}: Gain over Black–Scholes (H_model clipped at −1.5)"); ax.legend()
+plt.tight_layout()"""),
+    code("""
+bt = pd.read_csv(R / "heston2/beta.csv")
+bt.groupby(["year", "cp"])[["beta", "rho_xi_median_month"]].median().unstack().round(3)"""),
+    md("""
+**Reading.**
+- **Heston's own delta has 1.7–3.2 times Black–Scholes' squared error, every year.**
+- **The minimum-variance correction recovers much of that.** It ends near Black–Scholes and never beats R2.
+- **Fitting the scale β̂ to data instead of the calibrated ρξ** helps against H_mv in most years but still loses to R2. β̂ is typically 40–100% of ρξ.
+- **So the fault is in the shape of Heston's sensitivities across strikes and maturities,** not in their scale. That extends Hull and White's finding for SABR.
+"""),
+])
+
+
+NOTEBOOKS["10"] = ("10_stress_stability_and_interpretation", [
+    md("""
+# 10 · Stress periods, parameter stability, the level of the correction, and the published Gains
+
+The brief's model-validation direction asks to "stress-test assumptions" and "study parameter stability". This notebook collects the analyses of plan §16.9–§16.10, all descriptive and post hoc:
+- **stress episodes 2011–2023,** defined from the S&P 500 close alone;
+- **parameter stability** at every monthly refit, with session-clustered standard errors;
+- **the maturity assumption** (1/√τ), tested by year;
+- **the split of the Gain into the correction's level and its shape;**
+- **our Gains under the published aggregations.**
+"""),
+    code(SETUP),
+    md("## Stress episodes (SPX, out-of-sample, 12-month window)"),
+    code("""
+E = pd.read_csv(R / "walkforward/stress_episodes.csv"); E"""),
+    code("""
+G = pd.read_csv(R / "walkforward/stress_gains.csv")
+x = G[(G.window == 12) & (G.rule == "R2") & (G.base == "R1")]
+x[["definition", "start", "end", "cp", "gain", "lo", "hi", "sessions", "share_of_year_R1_sse", "c_fit_mean", "c_post"]].round(3)"""),
+    code("""
+fig, ax = plt.subplots(figsize=(10, 4))
+for cp, mk in (("C", "o"), ("P", "s")):
+    z = x[x.cp == cp]
+    ax.scatter(z.c_post - z.c_fit_mean, z.gain, marker=mk, label={"C": "calls", "P": "puts"}[cp])
+ax.axhline(0, color="k", lw=0.8); ax.axvline(0, color="k", lw=0.8)
+ax.set_xlabel("best level afterwards − fitted level (positive: the fit over-corrected)"); ax.set_ylabel("Gain of R2 over R1")
+ax.set_title("Stress episodes: the Gain falls when the fitted level overstates the realized one"); ax.legend()"""),
+    code("""
+Y = pd.read_csv(R / "walkforward/stress_by_year.csv")
+Y[(Y.window == 12) & (Y.rule == "R2") & (Y.base == "R1")].pivot_table(index="year", columns=["regime", "cp"], values="gain").round(3)"""),
+    md("""
+**Reading.**
+- **R2 gains in sell-offs:** every peak-to-trough drawdown, significantly in 2011, 2015–2016 and the February 2018 drop.
+- **It loses in rebounds and post-trough volatility,** significantly in September–December 2022. There, implied volatility no longer rose as the index fell, and the fitted level over-corrected.
+- **The stable spot–volatility assumption** therefore fails in one direction of stress, not the other.
+
+SPY's episodes, in `results/spy/walkforward/stress_gains.csv`, show the same pattern.
+"""),
+    md("## Parameter stability"),
+    code("""
+pp = pd.read_csv(R / "walkforward/parameter_paths.csv")
+fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+for ax, cp, nm in zip(axes, "CP", ("calls", "puts")):
+    for rule, coef, lab in (("P0", "c0", "level c (P0)"), ("R2", "b", "R2's b"), ("R2", "c", "R2's c")):
+        z = pp[(pp.window == 12) & (pp.cp == cp) & (pp.rule == rule) & (pp.coef == coef)]
+        t = pd.PeriodIndex(z.month, freq="M").to_timestamp()
+        ax.plot(t, z.value, label=lab); ax.fill_between(t, z.value - 2 * z.se, z.value + 2 * z.se, alpha=0.15)
+    ax.axhline(0, color="k", lw=0.8); ax.set_title(f"SPX {nm}: coefficients at each 12-month refit (±2 clustered SE)"); ax.legend()
+plt.tight_layout()"""),
+    code("""
+S = pd.read_csv(R / "walkforward/parameter_stability_summary.csv")
+S[S.window == 12][["cp", "rule", "coef", "min", "median", "max", "median_se", "median_abs_change_over_se", "share_abs_z12_gt_2", "median_corr_bc"]].round(3)"""),
+    code("""
+pd.read_csv(R / "heston2/parameter_stability.csv").pivot_table(index="year", columns="parameter", values=["median", "share_at_bound"]).round(3)"""),
+    md("""
+**Reading.**
+- **R2's three coefficients are poorly identified one by one:** b and c are nearly collinear (|correlation| about 0.9). The level they imply is well identified.
+- **That level drifts beyond sampling error** between non-overlapping years (|z| > 2 in 10–19% of comparisons), from about −0.34 to near zero.
+- **Longer windows are smoother but staler.**
+- **In Heston,** ρ is stable while κ often sits on its bound: a sign of model misfit, not of a solver problem.
+"""),
+    md("## The maturity assumption (1/√τ), by year"),
+    code("""
+M = pd.read_csv(R / "walkforward/maturity_by_year.csv")
+M[M.regime == "all"].pivot_table(index="year", columns=["rule", "cp"], values="gain").round(3)"""),
+    md("**Reading.** No alternative exponent beats 1/√τ consistently, in any year or regime; α = 0 and α = 1 are worse in most years."),
+    md("## The level and the shape of the correction"),
+    code("""
+L = pd.read_csv(R / "walkforward/level_shape_by_year.csv")
+L[["year", "cp", "c_fit", "c_post", "G_level_P0_R1", "G_shape_R2_P0", "G_R2_R1", "G_ceiling_P0post_R1", "vol_points_per_1pct_fall"]].round(3)"""),
+    md("""
+**Reading.**
+- **The level of R2's correction equals P0's constant exactly:** the first normal equation of R2's least-squares fit.
+- **The level supplies the Gain;** the shape adds at most about ±0.015 a year on SPX.
+- **For a constant correction c, the Gain over R1 is G* · [1 − ((c − c*)/c*)²],** with c* the best constant afterwards and G* the ceiling it would give. An error in the level therefore costs quadratically, and overshooting by more than a factor of two loses to Black–Scholes. That is what happened in 2022.
+
+Derivation: `notes/level-and-shape-of-the-correction.md`.
+"""),
+    md("## Our Gains under the published aggregations"),
+    code("""
+P = pd.read_csv(R / "walkforward/published_comparison.csv")
+P[P.rule == "R2"].pivot_table(index=["window", "period", "sample"], columns="cp", values=["pooled", "mean_of_monthly"]).round(3)"""),
+    md("""
+**Reading.**
+- **On the same years and a comparable window, our pooled Gains match Hull and White's:** 0.22 / 0.25 on their 2013–2015 overlap with 36 months, against their 0.26 / 0.23 for 2007–2015.
+- **Against Ruf and Wang** (their period, out of the money), our puts match theirs and our calls fall short.
+- **Our headline numbers are lower** because of the later years, the 12-month primary window, and in-the-money calls.
+- **Hull and White's monthly averaging** makes our Gains look lower still.
 """),
 ])
 
