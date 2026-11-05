@@ -488,6 +488,7 @@ They may run once the confirmatory core is complete, before or after submission,
 | 2026-11-05 | §16.5 | Calibration B2 searches on Gauss–Legendre panels three times as wide (9 radians), then polishes from that solution on the specified 3-radian grid. The accuracy check and the bound and regrid rules are unchanged. | On 2019-10-24 this gives the identical solution (cost 0.084286) in 3.2 s instead of 11.2 s | Calibration timing and fit on benchmark sessions only; no B2 hedging outcome |
 | 2026-11-05 | §16.1, §16.3 | SPY's dividend yield q: on sessions where SPX's options-implied level S_A is missing, SPX's carry is measured against the official SPX close, flagged per session (`q_level`). | S_A is missing on 223 of 242 SPX sessions in 2010 (few short-dated SPX expiries), which left SPY with Greeks on 19 of 250 sessions in 2010 and lost 64 of 245 in 2011. The author's choice of 2026-11-05 | Data quality only; no SPY outcome before 2019 computed |
 | 2026-11-05 | §6, §16.7 | Rules R9–R11 specified (§16.7): LightGBM corrections fitted from scratch on δ (R9) or on R8's features (R10), and boosted from R2 on δ alone (R11). | The author's request of 2026-11-05 | Yes: every result of §16.3–§16.6, R8's included |
+| 2026-11-05 | §16.8 | The degree of R2's polynomial, 0 to 8 (P0–P8), and a degree chosen by validation inside each training window (PCV), in the walk-forward for SPX and SPY (§16.8). | The author's request of 2026-11-05 | Yes: every result of §16.3–§16.7, and the 2019 analysis of R9 |
 
 ## 16. Extension specifications (appended under §14's rule)
 
@@ -654,4 +655,23 @@ At the author's request, after the results of §16.3–§16.6 (R8's among them) 
   - **The walk-forward:** 2011–2023 on W12, W36 and W60.
   - **The sample:** the feature-complete pairs, with R2's all-pairs fit re-reported there.
 - **Reported:** the Gains over R1, R2 and R8, with session-block intervals. In the walk-forward, per year and window, the median yearly Gains over 2015–2023, and R8's §16.4 results on the same pairs.
+- **Status:** exploratory, with no verdict.
+
+### 16.8 The degree of R2's polynomial, 0 to 8, and a validated choice. Specified 2026-11-05
+
+At the author's request, after the results of §16.3–§16.7 were seen; the R9 analysis found that a constant matched R2's quadratic out of sample in 2019.
+- **Rules P0–P8:** Hull–White's form with a polynomial of degree k in δ: δ + ν/(S√τ)·p_k(|δ|). Each is fitted by least squares without intercept on §7's normalized scale, per option type, with the rehearsal's Legendre basis in |δ| (the band [0.05, 0.95] mapped to [−1, 1]).
+  - P2 spans the same functions as R2 and must reproduce it, a check on the code.
+  - P0 is the one-parameter rule δ + c·ν/(S√τ).
+- **Rule PCV, the degree chosen by validation inside each training window.**
+  - **The folds:** at each monthly refit, every degree 0–8 is fitted on the window's months before each of its last three months, and scored on that month. Only pairs whose day two falls before the validation month's first session enter the fit.
+  - **The choice:** the degree with the lowest validation SSE, pooled over the three months, is refitted on the whole window and applied to the test month.
+  - **What it uses:** pairs ending before the test month's first session only.
+- **Protocol:** the walk-forward of §14 item 2, 2011–2023, on W12, W36 and W60, for SPX and SPY (§16.3), with the §7 boundary rule and the 150-session minimum.
+- **Reported:**
+  - per year and window, every rule's Gain over R1 and over R2, with session-block intervals;
+  - the median yearly Gains over 2015–2023;
+  - PCV's chosen degrees.
+
+  Since nine fixed degrees are compared, the best of them is not a validated result; PCV is.
 - **Status:** exploratory, with no verdict.
