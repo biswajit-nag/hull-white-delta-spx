@@ -490,6 +490,7 @@ They may run once the confirmatory core is complete, before or after submission,
 | 2026-11-05 | §6, §16.7 | Rules R9–R11 specified (§16.7): LightGBM corrections fitted from scratch on δ (R9) or on R8's features (R10), and boosted from R2 on δ alone (R11). | The author's request of 2026-11-05 | Yes: every result of §16.3–§16.6, R8's included |
 | 2026-11-05 | §16.8 | The degree of R2's polynomial, 0 to 8 (P0–P8), and a degree chosen by validation inside each training window (PCV), in the walk-forward for SPX and SPY (§16.8). | The author's request of 2026-11-05 | Yes: every result of §16.3–§16.7, and the 2019 analysis of R9 |
 | 2026-11-05 | §16.9 | Two descriptive diagnostics: SPX Gains under the published aggregations and samples (mean monthly Gain, delta buckets, no volume rule, out of the money), and the level and shape of the correction by refit and year (§16.9). | The author's questions of 2026-11-05 | Yes: every result above |
+| 2026-11-05 | §16.10 | Stress episodes over 2010–2023 (two definitions from the index alone), parameter stability (coefficient paths with clustered standard errors, non-overlapping comparisons, Heston's daily parameters) and the maturity-scaling check by year (§16.10). | The author's request of 2026-11-05, following the brief's model-validation direction | Yes: every result above |
 
 ## 16. Extension specifications (appended under §14's rule)
 
@@ -702,3 +703,28 @@ At the author's request, after every result above had been seen. Both are descri
      - the Gain of R2 over P0 (the shape added to it);
      - the Gain of P0 with the after-the-fact constant over R1, a ceiling for the level;
      - and, for SPX, the spot–volatility slope of `scripts/spot_vol_slope.py` beside them.
+
+### 16.10 Stress periods, parameter stability and the maturity assumption, 2010–2023. Specified 2026-11-05
+
+At the author's request, after every result above had been seen. All descriptive, for SPX and SPY. The brief's model-validation direction names "stress-test assumptions" and "study parameter stability".
+
+1. **Stress episodes, defined from the S&P 500 close alone.** Both definitions are fixed here, before any episode's Gains are computed.
+   - **RV:** sessions whose trailing 20-session realized volatility (√252 × standard deviation of daily log returns) exceeds 25%. Runs separated by 10 sessions or fewer are merged into one episode.
+   - **DD:** drawdowns of 10% or more from the running peak, from the peak to the trough.
+   - **Reported for each episode, and for each year's RV-stress and calm sessions:**
+     - the out-of-sample Gains (W12 and W36) of R2, R3, R4, R5, R6 and P0 over R1 and over R2, pooled within the episode, with a session-block bootstrap inside it (block length the smaller of 10 and a fifth of its sessions);
+     - the episode's share of the year's Black–Scholes squared error;
+     - the constant correction that fits the episode best after the fact, against the one fitted beforehand.
+   - The 2020 stress window of §8 (2020-02-24 to 04-30) is reported beside them for reference.
+2. **Parameter stability**, at every monthly refit of W12, W36 and W60, 2011–2023.
+   - **What is estimated:**
+     - R2's (a, b, c);
+     - R4's â;
+     - P0's constant c, which equals R2's loss-weighted average correction (`level-and-shape-of-the-correction.md` §3).
+   - Each has session-clustered standard errors and, for R2, the correlations between its coefficient estimates.
+   - **Summaries per window and coefficient:**
+     - the range;
+     - the median month-to-month change relative to its standard error;
+     - for W12, the z-statistic between fits 12 months apart, whose windows do not overlap, and the share of |z| > 2 (a Chow-type comparison).
+   - **Heston:** the daily calibration-B2 parameters' yearly median, interquartile range, median day-to-day change and share at a bound.
+3. **The maturity assumption, by year.** The specification check of §10 (τ^(−α) in place of 1/√τ, α ∈ {0, 0.25, 0.5, 0.75, 1}), run on the 12-month walk-forward for every test year 2011–2023 and for the RV-stress and calm sessions. Reported: each α's Gain over α = 0.5, with intervals. Unadjusted, so descriptive.
