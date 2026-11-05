@@ -489,6 +489,7 @@ They may run once the confirmatory core is complete, before or after submission,
 | 2026-11-05 | §16.1, §16.3 | SPY's dividend yield q: on sessions where SPX's options-implied level S_A is missing, SPX's carry is measured against the official SPX close, flagged per session (`q_level`). | S_A is missing on 223 of 242 SPX sessions in 2010 (few short-dated SPX expiries), which left SPY with Greeks on 19 of 250 sessions in 2010 and lost 64 of 245 in 2011. The author's choice of 2026-11-05 | Data quality only; no SPY outcome before 2019 computed |
 | 2026-11-05 | §6, §16.7 | Rules R9–R11 specified (§16.7): LightGBM corrections fitted from scratch on δ (R9) or on R8's features (R10), and boosted from R2 on δ alone (R11). | The author's request of 2026-11-05 | Yes: every result of §16.3–§16.6, R8's included |
 | 2026-11-05 | §16.8 | The degree of R2's polynomial, 0 to 8 (P0–P8), and a degree chosen by validation inside each training window (PCV), in the walk-forward for SPX and SPY (§16.8). | The author's request of 2026-11-05 | Yes: every result of §16.3–§16.7, and the 2019 analysis of R9 |
+| 2026-11-05 | §16.9 | Two descriptive diagnostics: SPX Gains under the published aggregations and samples (mean monthly Gain, delta buckets, no volume rule, out of the money), and the level and shape of the correction by refit and year (§16.9). | The author's questions of 2026-11-05 | Yes: every result above |
 
 ## 16. Extension specifications (appended under §14's rule)
 
@@ -675,3 +676,29 @@ At the author's request, after the results of §16.3–§16.7 were seen; the R9 
 
   Since nine fixed degrees are compared, the best of them is not a validated result; PCV is.
 - **Status:** exploratory, with no verdict.
+
+### 16.9 Two descriptive diagnostics. Specified 2026-11-05
+
+At the author's request, after every result above had been seen. Both are descriptive; neither adds a rule or a test.
+
+1. **Comparison with the published aggregations, SPX.** For the walk-forwards on W12 (test months 2011–2019) and W36 (2013–2019), with R1–R4 under §7's protocol:
+   - **Three aggregations of the Gain over R1:**
+     - pooled per year, as reported throughout this plan;
+     - the mean of monthly Gains, Hull and White's aggregation;
+     - the mean over months of the Gain within each of their nine delta buckets (|δ| rounded to the nearest tenth), their Table 1.
+   - **Three samples:**
+     - the analysis sample;
+     - the same pairs without E7, the day-one volume rule (Hull and White apply no volume rule);
+     - the out-of-the-money subsample (Ruf and Wang's population: calls with K ≥ F, puts with K ≤ F).
+   - **Reported** over Hull and White's overlapping years (2011–2015 on W12, 2013–2015 on W36) and Ruf and Wang's (2012-07 to 2019-06).
+   - **The pairs without E7** are evaluated here only; that changes no other result.
+2. **The level and the shape of the correction, SPX and SPY, 2011–2023 on W12.**
+   - **Per monthly refit:**
+     - the constant c of P0 (§16.8), fitted on the training window;
+     - the constant that fits the test month best, after the fact;
+     - R2's average correction, the x²-weighted mean of a + bδ + cδ² over the training pairs.
+   - **Per year:**
+     - the Gain of P0 over R1 (the level);
+     - the Gain of R2 over P0 (the shape added to it);
+     - the Gain of P0 with the after-the-fact constant over R1, a ceiling for the level;
+     - and, for SPX, the spot–volatility slope of `scripts/spot_vol_slope.py` beside them.
