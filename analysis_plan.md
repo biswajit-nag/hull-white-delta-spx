@@ -487,6 +487,7 @@ They may run once the confirmatory core is complete, before or after submission,
 | 2026-11-05 | §14 item 3, §16.6 | Short-dated SPX options (under 14 days) specified (§16.6). | The author's request of 2026-11-05 | No |
 | 2026-11-05 | §16.5 | Calibration B2 searches on Gauss–Legendre panels three times as wide (9 radians), then polishes from that solution on the specified 3-radian grid. The accuracy check and the bound and regrid rules are unchanged. | On 2019-10-24 this gives the identical solution (cost 0.084286) in 3.2 s instead of 11.2 s | Calibration timing and fit on benchmark sessions only; no B2 hedging outcome |
 | 2026-11-05 | §16.1, §16.3 | SPY's dividend yield q: on sessions where SPX's options-implied level S_A is missing, SPX's carry is measured against the official SPX close, flagged per session (`q_level`). | S_A is missing on 223 of 242 SPX sessions in 2010 (few short-dated SPX expiries), which left SPY with Greeks on 19 of 250 sessions in 2010 and lost 64 of 245 in 2011. The author's choice of 2026-11-05 | Data quality only; no SPY outcome before 2019 computed |
+| 2026-11-05 | §6, §16.7 | Rules R9–R11 specified (§16.7): LightGBM corrections fitted from scratch on δ (R9) or on R8's features (R10), and boosted from R2 on δ alone (R11). | The author's request of 2026-11-05 | Yes: every result of §16.3–§16.6, R8's included |
 
 ## 16. Extension specifications (appended under §14's rule)
 
@@ -629,3 +630,28 @@ This replaces §16.2's code; its sample and bounds are kept.
   - **R2m,** R2 with the main study's 12-month coefficients, fitted on options of at least 14 days, applied to the short-dated pairs.
 - **The tests:** 2020, and the 12-month walk-forward over 2011–2023. Reported: the Gains of R2s and R2m over R1, and of R2s over R2m, per year, with the session bootstrap, plus day-one maturity buckets of 1–2, 3–6 and 7–13 days.
 - **Status:** exploratory.
+
+### 16.7 R9–R11: the boosted learner, decomposed. Specified 2026-11-05
+
+At the author's request, after the results of §16.3–§16.6 (R8's among them) were seen. With R8, these rules form a 2×2 design: the learner is either fitted from scratch or boosted from R2's polynomial, and its input is either δ alone or R8's six features z.
+
+| Rule | Hedge ratio | From scratch or boosted | Input |
+|---|---|---|---|
+| R9 | δ + ν/(S√τ)·h(δ) | from scratch | δ |
+| R10 | δ + ν/(S√τ)·h(z) | from scratch | z |
+| R11 | δ + ν/(S√τ)·[a + b·δ + c·δ² + h(δ)] | boosted from R2 | δ |
+| R8 (§6) | δ + ν/(S√τ)·[a + b·δ + c·δ² + h(z)] | boosted from R2 | z |
+
+- **The learner:** LightGBM on the weighted regression of y/x, with weights x² rescaled to mean 1 (§7). Pairs with x = 0 are left out of the fit and kept in evaluation.
+  - **R9 and R10** start from LightGBM's weighted mean of the target (`boost_from_average`), so a fully regularized h is a constant correction.
+  - **R11** starts from R2's fitted polynomial on the same window, as R8 does, so a fully regularized h gives R2 back.
+  - Everything else is as for R8: CPU, feature_fraction 1, no bagging, min_data_in_leaf 20, deterministic, seed 2026, 8 threads, no early stopping.
+- **Tuning:** R8's search space and design, separately for each rule and option type: Optuna TPE (seed 2026), 60 trials, the rehearsal folds.
+  - for 2020: SPX 2019, and SPY 2019 for SPY;
+  - for the walk-forward: 2010 for test months up to 2016-12, and 2015–2016 from 2017-01, as in §16.4. Frozen after tuning.
+- **Protocols:** R8's, on SPX and SPY.
+  - **2020:** the primary, and the Table 8.1 variants. Variants that refit do so with the frozen hyperparameters; subsample variants use the primary fits. There are no endpoint scenarios, as §16.4.
+  - **The walk-forward:** 2011–2023 on W12, W36 and W60.
+  - **The sample:** the feature-complete pairs, with R2's all-pairs fit re-reported there.
+- **Reported:** the Gains over R1, R2 and R8, with session-block intervals. In the walk-forward, per year and window, the median yearly Gains over 2015–2023, and R8's §16.4 results on the same pairs.
+- **Status:** exploratory, with no verdict.

@@ -46,18 +46,20 @@ def tree_error(m, d, z) -> np.ndarray:
     return (d.y - d.x * m.predict(z.to_numpy())).to_numpy()
 
 
+def _lgb_params(params: dict, n: int, from_average: bool) -> dict:
+    return {"objective": "regression", "learning_rate": params["learning_rate"], "num_leaves": params["num_leaves"],
+            "lambda_l2": params["lambda_l2"], "min_sum_hessian_in_leaf": params["min_hess_frac"] * n,
+            "min_data_in_leaf": 20, "boost_from_average": from_average, "feature_fraction": 1.0, "bagging_fraction": 1.0,
+            "bagging_freq": 0, "deterministic": True, "seed": SEED, "num_threads": 8, "verbose": -1, "force_col_wise": True}
+
+
 def fit_boost(d: pd.DataFrame, z: pd.DataFrame, params: dict) -> tuple[lgb.Booster, np.ndarray]:
-    """LightGBM on the residual of R2: initial score = R2's fitted polynomial on the same window."""
+    """LightGBM on the residual of R2: initial score = R2's fitted polynomial on the same window (R8; R11 with z = δ)."""
     beta = ols(d.x.to_numpy()[:, None] * poly(d.delta.to_numpy()), d.y.to_numpy())
     keep, t, w = _target(d)
     base = (poly(d.delta.to_numpy()) @ beta)[keep]
-    n = int(keep.sum())
-    prm = {"objective": "regression", "learning_rate": params["learning_rate"], "num_leaves": params["num_leaves"],
-           "lambda_l2": params["lambda_l2"], "min_sum_hessian_in_leaf": params["min_hess_frac"] * n,
-           "min_data_in_leaf": 20, "boost_from_average": False, "feature_fraction": 1.0, "bagging_fraction": 1.0, "bagging_freq": 0,
-           "deterministic": True, "seed": SEED, "num_threads": 8, "verbose": -1, "force_col_wise": True}
     ds = lgb.Dataset(z.to_numpy()[keep], label=t, weight=w, init_score=base, free_raw_data=False)
-    return lgb.train(prm, ds, num_boost_round=params["n_estimators"]), beta
+    return lgb.train(_lgb_params(params, int(keep.sum()), False), ds, num_boost_round=params["n_estimators"]), beta
 
 
 def boost_error(model_beta, d, z) -> np.ndarray:
@@ -65,6 +67,32 @@ def boost_error(model_beta, d, z) -> np.ndarray:
     # the prediction is R2's polynomial plus the trees' correction, added explicitly
     g = poly(d.delta.to_numpy()) @ beta + model.predict(z.to_numpy(), raw_score=True)
     return (d.y - d.x * g).to_numpy()
+
+
+def fit_direct(d: pd.DataFrame, z: pd.DataFrame, params: dict) -> lgb.Booster:
+    """LightGBM for the whole correction h, from the target's weighted mean (R9 with z = δ, R10 with R8's z; plan §16.7)."""
+    keep, t, w = _target(d)
+    ds = lgb.Dataset(z.to_numpy()[keep], label=t, weight=w, free_raw_data=False)
+    return lgb.train(_lgb_params(params, int(keep.sum()), True), ds, num_boost_round=params["n_estimators"])
+
+
+def direct_error(model, d, z) -> np.ndarray:
+    return (d.y - d.x * model.predict(z.to_numpy())).to_numpy()
+
+
+# plan §16.7: each LightGBM rule's inputs, fit and error
+LGB_RULES = {
+    "R8": (FEATURES, fit_boost, boost_error),
+    "R9": (["delta"], fit_direct, direct_error),
+    "R10": (FEATURES, fit_direct, direct_error),
+    "R11": (["delta"], fit_boost, boost_error),
+}
+
+
+def lgb_error(rule: str, d, z, dt, zt, params) -> np.ndarray:
+    """Fit `rule` on (d, z) and return its errors on (dt, zt)."""
+    cols, fit, err = LGB_RULES[rule]
+    return err(fit(d, z[cols], params), dt, zt[cols])
 
 
 def suggest(trial) -> dict:

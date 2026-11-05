@@ -6,7 +6,8 @@ is the pooled normalized hedging SSE over the rehearsal folds: trailing 6-month 
 and learners_2019.csv (R7, R8 and R2 on the feature-complete test pairs).
 
 Usage: uv run python -I scripts/tune_r8.py [--spy] [YEAR ...]   (2019 for the plan; 2015 2016 and 2010 for the
-walk-forward, §16.4; --spy for SPY, §16.3, writing to results/spy/rehearsal/)
+walk-forward, §16.4; --spy for SPY, §16.3, writing to results/spy/rehearsal/). --rule R9|R10|R11 tunes those rules
+(plan §16.7) with the same design, writing r9_params_*.json etc.; R8 is the default.
 """
 
 from __future__ import annotations
@@ -27,6 +28,8 @@ from erdos_quant_finance_project import learners as L  # noqa: E402
 from erdos_quant_finance_project.runlog import timed  # noqa: E402
 
 U = "spy" if "--spy" in sys.argv else "spx"
+RULE = sys.argv[sys.argv.index("--rule") + 1] if "--rule" in sys.argv else "R8"
+TAG = RULE.lower()
 OUT = ROOT / ("results/spy/rehearsal" if U == "spy" else "results/rehearsal")
 
 
@@ -60,15 +63,17 @@ def main(years: list[int]) -> None:
 
         def objective(trial):
             prm = L.suggest(trial)
-            return float(sum((L.boost_error(L.fit_boost(tr, ztr, prm), te, zte) ** 2).sum() for tr, ztr, te, zte in F))
+            return float(sum((L.lgb_error(RULE, tr, ztr, te, zte, prm) ** 2).sum() for tr, ztr, te, zte in F))
 
-        with timed("tune_r8", inputs=f"{U} {tag} {cp}", notes="60 trials, TPE seed 2026") as run:
+        with timed(f"tune_{TAG}", inputs=f"{U} {tag} {cp}", notes="60 trials, TPE seed 2026") as run:
             study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler(seed=L.SEED))
             optuna.logging.set_verbosity(optuna.logging.WARNING)
             study.optimize(objective, n_trials=60, n_jobs=1)
             run["notes"] = f"60 trials, TPE seed 2026; best {study.best_value:.6g}"
         best[cp] = study.best_params
-        study.trials_dataframe().to_csv(OUT / f"r8_trials_{tag}_{cp}.csv", index=False)
+        study.trials_dataframe().to_csv(OUT / f"{TAG}_trials_{tag}_{cp}.csv", index=False)
+        if RULE != "R8":
+            continue
         # R7 and the tuned R8 against R2 on the same folds (2019 is the tuning year: in-sample for R8)
         for tr, ztr, te, zte in F:
             beta = h.ols(*h.design("R2", tr))
@@ -77,10 +82,12 @@ def main(years: list[int]) -> None:
             e8 = L.boost_error(L.fit_boost(tr, ztr, study.best_params), te, zte)
             rows.append({"cp": cp, "month": str(te.session.min())[:7], "pairs": len(te),
                          "sse_R1": (te.y**2).sum(), "sse_R2": (e2**2).sum(), "sse_R7": (e7**2).sum(), "sse_R8": (e8**2).sum()})
-    (OUT / f"r8_params_{tag}.json").write_text(json.dumps(best, indent=2))
-    pd.DataFrame(rows).to_csv(OUT / f"learners_{tag}.csv", index=False)
+    (OUT / f"{TAG}_params_{tag}.json").write_text(json.dumps(best, indent=2))
+    if RULE == "R8":
+        pd.DataFrame(rows).to_csv(OUT / f"learners_{tag}.csv", index=False)
     print(json.dumps(best, indent=2))
 
 
 if __name__ == "__main__":
-    main([int(a) for a in sys.argv[1:] if a != "--spy"] or [2019])
+    args = [a for a in sys.argv[1:] if a not in ("--spy", "--rule", RULE)]
+    main([int(a) for a in args] or [2019])
