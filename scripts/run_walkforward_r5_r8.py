@@ -2,7 +2,7 @@
 
 For W12, W36 and W60 over each window's test span (from 2011-01, 2013-01 and 2015-01), monthly refits
 with the §7 boundary rule: R5 and R6 by least squares on every analysis pair, R7 (the depth-3 tree) and
-R8 (LightGBM boosted from R2) on the feature-complete pairs. R8's hyperparameters: the 2010 tuning for
+R8 (LightGBM boosted from R2) on the feature-complete pairs, against R2's all-pairs fit there. R8's hyperparameters: the 2010 tuning for
 test months up to 2016-12, the 2015–2016 tuning from 2017-01. R2 is refitted alongside and re-reported
 on each sample. Gains per year and window with session-block intervals, and median yearly Gains over
 2015–2023. Writes results/walkforward/r5_r8_by_year.csv (results/spy/walkforward/ with --spy).
@@ -66,15 +66,15 @@ def main() -> None:
                     e = {"R1": dt.y.to_numpy(), "month": str(m)}
                     for r, beta in b.items():
                         X, t = h.design(r, dt)
-                        e[r] = (t - X @ beta).to_numpy() if beta is not None else np.full(len(dt), np.nan)
+                        e[r] = np.asarray(t - X @ beta) if beta is not None else np.full(len(dt), np.nan)
                     E_ls.append(pd.DataFrame(e, index=dt.index))
                     trc, tec = tr & ok, te & ok
                     dc, dtc = fr[trc], fr[tec]
                     if dtc.empty:
                         continue
-                    beta = h.ols(*h.design("R2", dc))
+                    # R2 from the all-pairs fit, as in the 2020 learner comparison (run_test_year.learners)
                     E_ml.append(pd.DataFrame({
-                        "R1": dtc.y.to_numpy(), "R2": (dtc.y - h.design("R2", dtc)[0] @ beta).to_numpy(),
+                        "R1": dtc.y.to_numpy(), "R2": (dtc.y - h.design("R2", dtc)[0] @ b["R2"]).to_numpy(),
                         "R7": L.tree_error(L.fit_tree(dc, z[trc]), dtc, z[tec]),
                         "R8": L.boost_error(L.fit_boost(dc, z[trc], params[cp]), dtc, z[tec]), "month": str(m)}, index=dtc.index))
                 print(f"W{W} {m} done", flush=True) if m.month == 12 else None
@@ -92,7 +92,7 @@ def main() -> None:
                         rows.append(g[keep].assign(window=W, year=year, sample=label, months=ee.month.nunique()))
         G = pd.concat(rows, ignore_index=True)
         G.to_csv(OUT / "r5_r8_by_year.csv", index=False)
-        med = G[G.year >= 2015].groupby(["window", "cp", "rule", "base"]).gain.median().rename("median_yearly_gain").reset_index()
+        med = G[G.year >= 2015].groupby(["window", "sample", "cp", "rule", "base"]).gain.median().rename("median_yearly_gain").reset_index()
         med.to_csv(OUT / "r5_r8_median_yearly_gain.csv", index=False)
         log["rows_out"] = len(G)
         print(med.round(3).to_string(index=False))

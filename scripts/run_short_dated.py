@@ -56,7 +56,7 @@ def main() -> None:
                              h.bootstrap_counts(index, B=10_000, block=10, seed=2026))
             rows.append(g.assign(year=year, months=E.month.nunique(), sessions=len(index)))
             e = E.join(fr[["cp"]])
-            e["bucket"] = pd.cut(fr.loc[E.index, "tau"] * 365, BUCKETS)
+            e["bucket"] = pd.cut(np.round(fr.loc[E.index, "tau"] * 365, 6), BUCKETS)  # rounding keeps whole days in their bucket
             for (cp, b), x in e.groupby(["cp", "bucket"], observed=True):
                 s = (x[["R1", "R2s", "R2m"]] ** 2).sum()
                 brows.append({"year": year, "cp": cp, "days": f"{int(b.left)}-{int(b.right) - 1}", "pairs": len(x),
@@ -66,7 +66,7 @@ def main() -> None:
         G.to_csv(OUT / "gains_by_year.csv", index=False)
         pd.DataFrame(brows).to_csv(OUT / "buckets.csv", index=False)
         pd.concat(coefs).to_csv(OUT / "coefficients_R2s.csv", index=False)
-        log["rows_in"], log["rows_out"] = n_in, int(G[G.rule == "R2s"].pairs.sum())
+        log["rows_in"], log["rows_out"] = n_in, int(G[(G.rule == "R2s") & (G.base == "R1")].pairs.sum())
         print(G.pivot_table(index="year", columns=["rule", "base", "cp"], values="gain").round(3).to_string())
 
 
