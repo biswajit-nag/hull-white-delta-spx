@@ -5,7 +5,8 @@ is the pooled normalized hedging SSE over the rehearsal folds: trailing 6-month 
 2019-07 to 12, pairs with x = 0 included. Writes results/rehearsal/r8_params.json, r8_trials_{C,P}.csv,
 and learners_2019.csv (R7, R8 and R2 on the feature-complete test pairs).
 
-Usage: uv run python -I scripts/tune_r8.py [YEAR]   (YEAR = 2019 for the plan; 2015 + 2016 for the walk-forward)
+Usage: uv run python -I scripts/tune_r8.py [--spy] [YEAR ...]   (2019 for the plan; 2015 2016 and 2010 for the
+walk-forward, §16.4; --spy for SPY, §16.3, writing to results/spy/rehearsal/)
 """
 
 from __future__ import annotations
@@ -25,7 +26,8 @@ from erdos_quant_finance_project import hedging as h  # noqa: E402
 from erdos_quant_finance_project import learners as L  # noqa: E402
 from erdos_quant_finance_project.runlog import timed  # noqa: E402
 
-OUT = ROOT / "results/rehearsal"
+U = "spy" if "--spy" in sys.argv else "spx"
+OUT = ROOT / ("results/spy/rehearsal" if U == "spy" else "results/rehearsal")
 
 
 def folds(fr, P, z, ok, months, cp):
@@ -43,7 +45,8 @@ def folds(fr, P, z, ok, months, cp):
 
 def main(years: list[int]) -> None:
     OUT.mkdir(parents=True, exist_ok=True)
-    P = h.load_pairs(sorted({y - 1 for y in years} | set(years)))
+    have = [y for y in sorted({y - 1 for y in years} | set(years)) if (h.PAIRS_ROOT / f"underlying={U}" / f"year={y}").exists()]
+    P = h.load_pairs(have, underlying=U)
     # validation pairs end before the first session after the tuning years (2020-01-02 for 2019: no 2020 outcome)
     P = P[P.next_session.dt.year <= max(years)]
     fr = h.ingredients(P)
@@ -59,7 +62,7 @@ def main(years: list[int]) -> None:
             prm = L.suggest(trial)
             return float(sum((L.boost_error(L.fit_boost(tr, ztr, prm), te, zte) ** 2).sum() for tr, ztr, te, zte in F))
 
-        with timed("tune_r8", inputs=f"spx {tag} {cp}", notes="60 trials, TPE seed 2026") as run:
+        with timed("tune_r8", inputs=f"{U} {tag} {cp}", notes="60 trials, TPE seed 2026") as run:
             study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler(seed=L.SEED))
             optuna.logging.set_verbosity(optuna.logging.WARNING)
             study.optimize(objective, n_trials=60, n_jobs=1)
@@ -80,4 +83,4 @@ def main(years: list[int]) -> None:
 
 
 if __name__ == "__main__":
-    main([int(a) for a in sys.argv[1:]] or [2019])
+    main([int(a) for a in sys.argv[1:] if a != "--spy"] or [2019])

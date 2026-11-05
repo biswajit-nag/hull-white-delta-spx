@@ -1,7 +1,8 @@
 """Endpoint scenarios for pairs whose day-two bid vanished (analysis_plan.md §5).
 
 Each vanished pair gets a day-two band from parity with the other leg at the same strike, else from
-the no-arbitrage floor and the ask; two imputations are labelled. The scenarios then set the day-two
+the no-arbitrage floor and the ask; two imputations are labelled. SPY's American options get the band
+[intrinsic value, ask] instead (analysis_plan.md §16.3). The scenarios then set the day-two
 value at the band's low end, its high end, or, per comparison, the end that is worst for R2.
 """
 
@@ -15,12 +16,16 @@ import pyarrow.dataset as ds
 
 from . import hedging as h
 
-PANEL = Path(__file__).resolve().parents[2] / "data/processed/optionsdx_long/underlying=spx"
+PANELS = Path(__file__).resolve().parents[2] / "data/processed/optionsdx_long"
 
 
-def vanished(year: int) -> pd.DataFrame:
-    p = h.load_pairs([year], analysis_only=False)
+def vanished(year: int, underlying: str = "spx") -> pd.DataFrame:
+    p = h.load_pairs([year], analysis_only=False, underlying=underlying)
     v = p[p.E7 & (p.next_status == "one_sided_next")].copy()
+    if underlying == "spy":
+        v.index = pd.RangeIndex(10**9, 10**9 + len(v))
+        return band_american(v)
+    PANEL = PANELS / f"underlying={underlying}"
     sess = sorted(set(v.next_session.dt.date))
     other = []
     for y in sorted({d.year for d in sess}):
@@ -63,6 +68,16 @@ def band(v: pd.DataFrame) -> pd.DataFrame:
     lo, hi = np.where(below, ask, lo), np.where(below, ask, hi)
     kind = np.where(below, "imputed: ask below floor", kind)
     return v.assign(band_lo=lo, band_hi=hi, band_kind=kind)
+
+
+def band_american(v: pd.DataFrame) -> pd.DataFrame:
+    """[L, ask] with L the day-two intrinsic value; an ask below L sets both ends to the ask."""
+    sgn = np.where(v.cp == "C", 1.0, -1.0)
+    L = np.maximum(0.0, sgn * (v.S_close_next.to_numpy(float) - v.strike.to_numpy(float)))
+    ask = v.ask_next.to_numpy(float)
+    below = ask < L
+    kind = np.where(below, "imputed: ask below intrinsic", "intrinsic-ask").astype(object)
+    return v.assign(band_lo=np.where(below, ask, L), band_hi=ask, band_kind=kind)
 
 
 def errors_at(v: pd.DataFrame, value: np.ndarray, coefs: pd.DataFrame) -> pd.DataFrame:

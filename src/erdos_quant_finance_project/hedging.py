@@ -23,10 +23,10 @@ UNBLIND = pd.Timestamp("2020-01-02")
 FIXED = {"C": 0.9, "P": 1.1}  # Ruf and Wang's fixed scaling, R3
 
 
-def load_pairs(years, columns=None, analysis_only=True, underlying="spx") -> pd.DataFrame:
+def load_pairs(years, columns=None, analysis_only=True, underlying="spx", root=PAIRS_ROOT) -> pd.DataFrame:
     frames = []
     for y in years:
-        p = pd.read_parquet(PAIRS_ROOT / f"underlying={underlying}" / f"year={y}" / f"pairs_{y}.parquet", columns=columns)
+        p = pd.read_parquet(root / f"underlying={underlying}" / f"year={y}" / f"pairs_{y}.parquet", columns=columns)
         if analysis_only:
             p = p[p.E7 & (p.next_status == "ok")]
         frames.append(p)

@@ -5,7 +5,9 @@ gains_YYYY.csv (rules and specification-check variants, with session-block inter
 spec_checks_YYYY.csv (the §10 criteria), buckets_YYYY.csv, se_ratio_YYYY.csv, attribution_YYYY.csv,
 coefficients_YYYY.csv.
 
-Usage: uv run python -I scripts/run_rehearsal.py
+With --spy, SPY's rehearsal (plan §16.3): results/spy/rehearsal/, the attribution for calls only.
+
+Usage: uv run python -I scripts/run_rehearsal.py [--spy]
 """
 
 from __future__ import annotations
@@ -23,7 +25,8 @@ from erdos_quant_finance_project import diagnostics as dg  # noqa: E402
 from erdos_quant_finance_project import hedging as h  # noqa: E402
 from erdos_quant_finance_project.runlog import timed  # noqa: E402
 
-OUT = ROOT / "results/rehearsal"
+U = "spy" if "--spy" in sys.argv else "spx"
+OUT = ROOT / ("results/spy/rehearsal" if U == "spy" else "results/rehearsal")
 DEGREES = [f"deg:{k}" for k in range(4)]
 ALPHAS = [f"alpha:{a}" for a in (0, 0.25, 0.5, 0.75, 1)]
 RULES = h.FITTED + DEGREES + ALPHAS
@@ -62,6 +65,8 @@ def rehearse(year: int, P: pd.DataFrame, fr: pd.DataFrame) -> None:
     dg.bucket_kappa(fr.loc[err.index], P).to_csv(OUT / f"buckets_{year}.csv", index=False)
     yr = fr[P.quote_date.dt.year == year]
     dg.clustered_vs_naive(yr).to_csv(OUT / f"se_ratio_{year}.csv", index=False)
+    if U == "spy":  # the forward-form expansion is not defined for the tree's American puts
+        yr = yr[yr.cp == "C"]
     t = dg.attribution(yr, P)
     pd.concat([dg.attribution_summary(t, yr, ["cp"]).assign(group="all"),
                dg.attribution_summary(t, yr, ["cp", "delta_b"]).assign(group="delta"),
@@ -72,11 +77,11 @@ def rehearse(year: int, P: pd.DataFrame, fr: pd.DataFrame) -> None:
 
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
-    P = h.load_pairs([2018, 2019])
+    P = h.load_pairs([2018, 2019], underlying=U)
     P = P[P.next_session < h.UNBLIND]  # no 2020 outcome before unblinding (the 2019-12-31 pairs)
     fr = h.ingredients(P)
     for year in (2019, 2018):
-        with timed("rehearsal", inputs=f"spx {year}, 6-month windows", rows_in=int((P.quote_date.dt.year == year).sum())):
+        with timed("rehearsal", inputs=f"{U} {year}, 6-month windows", rows_in=int((P.quote_date.dt.year == year).sum())):
             rehearse(year, P, fr)
 
 

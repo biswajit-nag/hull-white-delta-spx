@@ -86,12 +86,33 @@ def settlement(pairs: pd.DataFrame, underlying: str, sessions: pd.Series) -> pd.
     return out
 
 
+def stooq_unadjusted(external: Path) -> pd.Series:
+    """Stooq's dividend-adjusted SPY closes with the adjustment reversed (analysis_plan.md §16.3).
+
+    Going back from the last session with f = 1, at each SSGA ex-date e the factor for earlier sessions
+    becomes f / (1 + f·Div_e / C̃_{e−1}), with C̃ Stooq's adjusted close; the close is C̃ / f.
+    """
+    adj = pd.read_csv(external / "stooq_spy_us_d.csv", parse_dates=["Date"]).set_index("Date").Close.sort_index()
+    div = pd.read_csv(external / "ssga_SPY_distributions.csv", parse_dates=["ex_date"]).set_index("ex_date").dividend
+    div = div[(div.index > adj.index[0]) & (div.index <= adj.index[-1])].sort_index(ascending=False)
+    factor = pd.Series(1.0, index=adj.index)
+    f = 1.0
+    for e, d in div.items():
+        f = f / (1 + f * d / adj[adj.index < e].iloc[-1])
+        factor[factor.index < e] = f
+    return adj / factor
+
+
 def official_closes(external: Path, underlying: str = "spx") -> pd.DataFrame:
     """Official closes. SPX: FRED where available (2016-10 on), else Cboe's SPX history.
-    SPY: the exchange close from Nasdaq's historical quotes (2016-11 on; earlier dates have none)."""
+    SPY: the exchange close from Nasdaq's historical quotes (2016-11-03 on); before that, Stooq's close
+    with its dividend adjustment reversed (stooq_unadjusted)."""
     if underlying == "spy":
-        spy = pd.read_csv(external / "nasdaq_SPY_history.csv", parse_dates=["date"]).set_index("date").close
-        return pd.DataFrame({"S_close": spy, "S_close_source": "nasdaq"})
+        nasdaq = pd.read_csv(external / "nasdaq_SPY_history.csv", parse_dates=["date"]).set_index("date").close
+        stooq = stooq_unadjusted(external)
+        stooq = stooq[stooq.index < nasdaq.index.min()]
+        return pd.DataFrame({"S_close": pd.concat([stooq, nasdaq]).sort_index(),
+                             "S_close_source": ["stooq_unadjusted"] * len(stooq) + ["nasdaq"] * len(nasdaq)}).sort_index()
     fred = pd.read_csv(external / "fred_SP500.csv", na_values=".").dropna()
     fred = pd.Series(fred.SP500.values, index=pd.to_datetime(fred.observation_date), name="fred")
     cboe = pd.read_csv(external / "cboe_SPX_History.csv")

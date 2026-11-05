@@ -11,8 +11,9 @@ This file says where the data come from and exactly how the code turns them into
 | S&P 500 closes, 1975 on | Cboe: https://cdn.cboe.com/api/global/us_indices/daily_prices/SPX_History.csv | Index level before FRED's coverage starts |
 | NYSE trading calendar | `pandas-market-calendars`, calendar `XNYS` | Sessions, early closes, next session |
 | SPY daily closes, 2016-11 on | Nasdaq historical quotes: https://api.nasdaq.com/api/quote/SPY/historical?assetclass=etf | SPY's index level (`S_close` for SPY) |
+| SPY daily closes, dividend-adjusted, 2010 on | Stooq: https://stooq.com/q/d/l/?s=spy.us&i=d (supplied by the author, 2026-11-05) | SPY's index level before 2016-11-03, with the dividend adjustment reversed (below) |
 | SPY distributions, 1993 on | State Street (the sponsor), SPDR distributions workbook: https://www.ssga.com/library-content/products/fund-data/etfs/us/spdr-etf-historical-distributions.xlsx (SPY rows) | SPY ex-dates and cash amounts |
-| Boot-camp option-pricing library | `option_pricing.py`, version 2026.11.02.1, in Lecture 12 of github.com/TheErdosInstitute/quant-finance (commit b2709e9). Imported from a local clone; set `ERDOS_LECTURE12` to its folder | Implied-volatility solver; Black–Scholes, American and Heston pricers |
+| Boot-camp option-pricing library | `option_pricing.py`, version 2026.11.02.1, in Lecture 12 of github.com/TheErdosInstitute/quant-finance (commit b2709e9). Imported from a local clone; set `ERDOS_LECTURE12` to its folder | Implied-volatility solver; Black–Scholes and American pricers; the Heston pricer of §16.2 (the project's own replaces it in §16.5, `heston.py`) |
 
 `data/external/SOURCES.csv` records the download time of each external file. FRED serves only the most recent ten years of `SP500`. Where both closes exist (2016-10 to 2023), Cboe's file matches FRED to the cent on 99.5% of 1,804 dates. One Cboe value is stale (2019-02-28 repeats 2019-02-27), which is why FRED takes precedence.
 
@@ -140,4 +141,8 @@ Per session and expiry, `data/processed/greeks/underlying=spx/year=YYYY/` holds 
 
 ## Applying the rules to SPY
 
-`scripts/build_processed.py --underlying spy` runs the same code, with `S_close` from SPY's Nasdaq close instead of the index's. For SPY, `am_settled` is always false, and no stamp window is defined. SPY's step 4 is `scripts/build_greeks_spy.py` (American put IVs from the Lecture 12 tree; `analysis_plan.md` §16.1), and its pairs, `scripts/build_pairs_spy.py`, add each pair's day-two distribution. SPY's files have not yet been audited for windows of their own. What American exercise and dividends require is handled in the analysis, not in this panel.
+`scripts/build_processed.py --underlying spy` runs the same code, with `S_close` from SPY's close instead of the index's.
+- **From 2016-11-03:** Nasdaq's close.
+- **Before 2016-11-03:** Stooq's close, which is dividend-adjusted, with the adjustment reversed (`processed.stooq_unadjusted`). Going back from the last session with a factor f = 1, at each SSGA ex-date e the factor for earlier sessions becomes f/(1 + f·Div_e/C̃_{e−1}), where C̃ is Stooq's adjusted close. The close is C̃/f.
+- **The check against Nasdaq,** 2016-11-03 to 2024-01-31 (1,821 sessions): the level differs by a median 0.43 bp (maximum 2.3 bp; bias −0.4 bp, growing further back), and one-session returns by a median 0.14 bp (99th percentile 1.7 bp). The vendor's snapshot differs from Nasdaq by 1.05 bp in level and 1.46 bp in return (99th percentile 11.8 bp, maximum 68 bp). Only 28% of sessions match to the cent, so Stooq's closes are not exact.
+- `S_close_source` records which series each session uses (`analysis_plan.md` §16.3). For SPY, `am_settled` is always false, and no stamp window is defined. SPY's step 4 is `scripts/build_greeks_spy.py` (American put IVs from the Lecture 12 tree; `analysis_plan.md` §16.1), and its pairs, `scripts/build_pairs_spy.py`, add each pair's day-two distribution. SPY's light audit (`results/audit_light_spy.csv`, 2010–2023) runs before any SPY outcome. What American exercise and dividends require is handled in the analysis, not in this panel.

@@ -4,7 +4,10 @@ Writes data/processed/pairs/underlying=spx/year=YYYY/pairs_YYYY.parquet: pairs w
 that pass E1–E6 and E8, with E7, its strict reading and next_status as columns. No hedging error
 is computed.
 
-Usage: uv run python -I scripts/build_pairs.py 2010 2023
+With --short, the short-dated pairs of plan §16.6 (under 14 days, ending before settlement) go to
+data/processed/pairs_short/underlying=spx/.
+
+Usage: uv run python -I scripts/build_pairs.py 2010 2023 [--short]
 """
 
 from __future__ import annotations
@@ -26,7 +29,8 @@ GREEKS = ROOT / "data/processed/greeks/underlying=spx"
 OUT = ROOT / "data/processed/pairs/underlying=spx"
 
 
-def main(first: int, last: int) -> None:
+def main(first: int, last: int, short: bool = False) -> None:
+    out_root = ROOT / "data/processed/pairs_short/underlying=spx" if short else OUT
     sessions = pd.concat([pd.read_parquet(p) for p in sorted(GREEKS.glob("sessions_*.parquet"))])
     sessions["quote_date"] = pd.to_datetime(sessions.quote_date)
     sessions = sessions.sort_values("quote_date")
@@ -34,15 +38,16 @@ def main(first: int, last: int) -> None:
     nyse = nyse_sessions("2009-11-01", "2024-02-28").index
     closes = official_closes(ROOT / "data/external", "spx").S_close.reindex(nyse).dropna()
     for year in range(first, last + 1):
-        with timed("build_pairs", inputs=f"spx {year}") as run:
-            p = build_year(year, PANEL, GREEKS, sessions, closes)
+        with timed("build_pairs", inputs=f"spx {year}" + (" short-dated" if short else "")) as run:
+            p = build_year(year, PANEL, GREEKS, sessions, closes, maturity="short" if short else "main")
             run["rows_out"] = len(p)
-            (OUT / f"year={year}").mkdir(parents=True, exist_ok=True)
-            p.to_parquet(OUT / f"year={year}" / f"pairs_{year}.parquet", index=False)
+            (out_root / f"year={year}").mkdir(parents=True, exist_ok=True)
+            p.to_parquet(out_root / f"year={year}" / f"pairs_{year}.parquet", index=False)
             a = p[p.E7]
             run["notes"] = f"E7 {len(a)}; ok {int((a.next_status == 'ok').sum())}"
             print(year, len(p), "E7:", len(a), "ok:", int((a.next_status == "ok").sum()), dict(a.next_status.value_counts()), flush=True)
 
 
 if __name__ == "__main__":
-    main(int(sys.argv[1]), int(sys.argv[2]) if len(sys.argv) > 2 else int(sys.argv[1]))
+    args = [a for a in sys.argv[1:] if a != "--short"]
+    main(int(args[0]), int(args[1]) if len(args) > 1 else int(args[0]), short="--short" in sys.argv)

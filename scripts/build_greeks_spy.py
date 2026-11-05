@@ -97,11 +97,19 @@ def build(year: int) -> pd.DataFrame:
     ok = m & (t.iv_status == "converged")
     x = t[ok]
     S, K, sg, T, R, Q = (x[c].values for c in ("S_close", "strike", "iv", "tau", "r", "q"))
-    px = lambda s, v: op.bs_american_put(s, K, v, T, R, Q, n_steps=STEPS, control_variate=True)
+    px = lambda s, v, tt=T: op.bs_american_put(s, K, v, tt, R, Q, n_steps=STEPS, control_variate=True)
     h = 0.005 * S
-    delta = (px(S + h, sg) - px(S - h, sg)) / (2 * h)
-    vega = (px(S, sg + 0.01) - px(S, np.maximum(sg - 0.01, 1e-4))) / (sg + 0.01 - np.maximum(sg - 0.01, 1e-4))
+    up, dn, mid = px(S + h, sg), px(S - h, sg), px(S, sg)
+    delta = (up - dn) / (2 * h)
+    s_hi, s_lo = sg + 0.01, np.maximum(sg - 0.01, 1e-4)
+    vega = (px(S, s_hi) - px(S, s_lo)) / (s_hi - s_lo)
+    # plan §16.3: vanna (for R6) as ∂δ/∂σ and theta (for sensitivity T) from the same tree
+    d_hi = (px(S + h, s_hi) - px(S - h, s_hi)) / (2 * h)
+    d_lo = (px(S + h, s_lo) - px(S - h, s_lo)) / (2 * h)
     t.loc[ok, "delta"], t.loc[ok, "vega"] = delta, vega
+    t.loc[ok, "gamma"] = (up - 2 * mid + dn) / h**2
+    t.loc[ok, "vanna"] = (d_hi - d_lo) / (s_hi - s_lo)
+    t.loc[ok, "theta"] = (px(S, sg, T - 1 / 365) - mid) * 365  # per year, as the lectures' theta
     t.loc[ok, "dV_dF"] = delta * S / x.F.values
     return t.drop(columns=["bid", "ask", "mid", "volume", "last", "quote_unixtime", "settle_ts", "is_session", "f_non_session"])
 

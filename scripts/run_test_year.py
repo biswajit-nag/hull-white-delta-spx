@@ -4,7 +4,11 @@ variant, the verdict and its robustness, the descriptives, the attribution, and 
 The confirmatory run is 2020. The same script runs first on 2019 (a dry run on training data, with the
 2019-12-31 pairs excluded) so that no code is debugged with 2020 results in view.
 
-Usage: uv run python -I scripts/run_test_year.py YEAR PLAN_COMMIT [OUTDIR]
+With --spy, the SPY replication of plan §16.3: no sensitivity A (American parity gives only bounds),
+the American endpoint band, SPY's own R8 tuning and carried variants, the attribution for calls only;
+outputs under results/spy/.
+
+Usage: uv run python -I scripts/run_test_year.py YEAR PLAN_COMMIT [OUTDIR] [--spy]
 """
 
 from __future__ import annotations
@@ -27,6 +31,8 @@ from erdos_quant_finance_project import learners as L  # noqa: E402
 from erdos_quant_finance_project.runlog import timed  # noqa: E402
 from erdos_quant_finance_project.verdict import secondary_tests, verdict  # noqa: E402
 
+U = "spy" if "--spy" in sys.argv else "spx"
+BASE = ROOT / "results" / ("spy" if U == "spy" else "")
 RULES = ["R0", "R1", "R2", "R3", "R4", "R5", "R6"]
 REQUIRED = ["R0", "R1", "R2", "R3", "R4"]
 COMPS = [("R2", "R1"), ("R2", "R3"), ("R2", "R4"), ("R1", "R0"), ("R2", "R0"), ("R3", "R1"), ("R4", "R1"), ("R5", "R1"), ("R6", "R1")]
@@ -36,13 +42,13 @@ class Run:
     def __init__(self, year: int, out: Path):
         self.year, self.out = year, out
         self.months = pd.period_range(f"{year}-01", f"{year}-12", freq="M")
-        P = h.load_pairs(range(year - 5, year + 1))
+        P = h.load_pairs(range(year - 5, year + 1), underlying=U)
         if year < 2020:
             P = P[P.next_session < h.UNBLIND]  # a dry run must not touch 2020 outcomes
         self.P = P
         self.T = P.quote_date.dt.year == year
         self.fr = h.ingredients(P)
-        self.vanished = ep.vanished(year)
+        self.vanished = ep.vanished(year, U)
         if year < 2020:
             self.vanished = self.vanished[self.vanished.next_session < h.UNBLIND]
         self.index = pd.DatetimeIndex(np.sort(pd.unique(np.concatenate([P.quote_date[self.T].unique(), self.vanished.quote_date.unique()]))))
@@ -80,7 +86,7 @@ class Run:
 
 def main(year: int, plan_commit: str, out: Path) -> None:
     out.mkdir(parents=True, exist_ok=True)
-    with timed(f"test_year_{year}", inputs=f"spx {year}", notes=f"plan {plan_commit}") as log:
+    with timed(f"test_year_{year}", inputs=f"{U} {year}", notes=f"plan {plan_commit}") as log:
         R = Run(year, out)
         P, fr, T = R.P, R.fr, R.T
         log["rows_in"] = int(T.sum())
@@ -95,6 +101,8 @@ def main(year: int, plan_commit: str, out: Path) -> None:
         # --- Table 8.1: refitted measurement variants, each with the primary on its intersection
         for label, kw in [("A", {"level": "A"}), ("B", {"level": "B"}), ("P-bid", {"mark": "bid"}), ("P-ask", {"mark": "ask"}),
                           ("P-WM", {"mark": "wm"}), ("P-SW", {"mark": "sw"}), ("T", {"theta": True})]:
+            if U == "spy" and label == "A":  # no options-implied level for SPY (plan §16.3)
+                continue
             f2 = h.ingredients(P, **kw)
             f2["avail"] &= fr.avail
             e2 = R.fit(f2, label=label)
@@ -147,7 +155,8 @@ def main(year: int, plan_commit: str, out: Path) -> None:
             R.add(f"primary, block {b}", err, fr, counts=h.bootstrap_counts(R.index, B=10_000, block=b, seed=2026))
 
         # --- R7 and R8 on the feature-complete subsample, against the primary R2 there
-        params = json.loads((ROOT / "results/rehearsal/r8_params_2019.json").read_text()) if (ROOT / "results/rehearsal/r8_params_2019.json").exists() else None
+        pf = BASE / "rehearsal/r8_params_2019.json"
+        params = json.loads(pf.read_text()) if pf.exists() else None
         learners(R, err, params)
 
         # --- specification variants that contradicted R2's form in the rehearsal, carried as exploratory rules
@@ -224,7 +233,7 @@ def smoothness(H: pd.DataFrame, P: pd.DataFrame, cols: list[str], out: Path) -> 
 def carried_variants() -> list[str]:
     out = []
     for y in (2018, 2019):
-        f = ROOT / f"results/rehearsal/spec_checks_{y}.csv"
+        f = BASE / f"rehearsal/spec_checks_{y}.csv"
         if f.exists():
             s = pd.read_csv(f)
             for r in s[s.contradicts].itertuples():
@@ -303,6 +312,8 @@ def ceiling_and_monitoring(R: Run, err):
 def attribution(R: Run, err):
     P, fr = R.P, R.fr
     sub = fr.loc[err.index]
+    if U == "spy":  # the forward-form expansion is not defined for the tree's American puts (plan §16.3)
+        sub = sub[sub.cp == "C"]
     t = dg.attribution(sub, P)
     stress = P.loc[t.index].quote_date.between(*h.STRESS)
     parts = [dg.attribution_summary(t, sub, ["cp"]).assign(group="all"),
@@ -316,5 +327,6 @@ def attribution(R: Run, err):
 
 
 if __name__ == "__main__":
-    y = int(sys.argv[1])
-    main(y, sys.argv[2], Path(sys.argv[3]) if len(sys.argv) > 3 else ROOT / "results" / str(y))
+    args = [a for a in sys.argv[1:] if a != "--spy"]
+    y = int(args[0])
+    main(y, args[1], Path(args[2]) if len(args) > 2 else BASE / str(y))

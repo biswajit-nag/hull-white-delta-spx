@@ -6,7 +6,9 @@ bootstrap), and the median yearly Gain. Reported beside the year ledger: 2019 an
 2015–2018 were fit-only or evaluated, so only 2021–2023 (and 2011–2013 for the supplements) are clean.
 Writes results/walkforward/.
 
-Usage: uv run python -I scripts/run_walkforward.py
+With --spy, SPY's walk-forward (plan §16.3), with SPY's year ledger; results/spy/walkforward/.
+
+Usage: uv run python -I scripts/run_walkforward.py [--spy]
 """
 
 from __future__ import annotations
@@ -23,19 +25,24 @@ sys.path.insert(0, str(ROOT / "src"))
 from erdos_quant_finance_project import hedging as h  # noqa: E402
 from erdos_quant_finance_project.runlog import timed  # noqa: E402
 
-OUT = ROOT / "results/walkforward"
+U = "spy" if "--spy" in sys.argv else "spx"
+OUT = ROOT / ("results/spy/walkforward" if U == "spy" else "results/walkforward")
 RULES = ["R0", "R1", "R2", "R3", "R4"]
 COMPS = [("R2", "R1"), ("R2", "R3"), ("R2", "R4"), ("R4", "R1"), ("R3", "R1"), ("R1", "R0")]
 START = {12: "2011-01", 36: "2013-01", 60: "2015-01"}
 STATUS = {2011: "untouched", 2012: "untouched", 2013: "untouched", 2014: "fit-only (2019 dry run)", 2015: "fit-only", 2016: "fit-only",
           2017: "fit-only", 2018: "evaluated (rehearsal)", 2019: "evaluated (rehearsal, dry run)", 2020: "evaluated (unblinding)",
           2021: "untouched", 2022: "untouched", 2023: "untouched"}
+if U == "spy":  # SPY's ledger (plan §16.3)
+    STATUS = {y: "untouched" for y in range(2011, 2024)} | {
+        2015: "R8 tuning (walk-forward)", 2016: "R8 tuning (walk-forward)", 2018: "evaluated (rehearsal)",
+        2019: "evaluated (rehearsal, dry run); R8 tuning", 2020: "evaluated (2026-11-04, §16.1)"}
 
 
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
-    with timed("walkforward", inputs="spx 2010-2023, W12 W36 W60") as log:
-        P = h.load_pairs(range(2010, 2024))
+    with timed("walkforward", inputs=f"{U} 2010-2023, W12 W36 W60") as log:
+        P = h.load_pairs(range(2010, 2024), underlying=U)
         fr = h.ingredients(P)
         log["rows_in"] = len(P)
         rows, errs = [], {}

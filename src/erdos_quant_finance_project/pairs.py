@@ -57,8 +57,11 @@ def index_features(closes: pd.Series) -> pd.DataFrame:
     return pd.DataFrame({"rv20": lr.rolling(20).std() * np.sqrt(252), "ret5": np.log(s / s.shift(5))})
 
 
-def build_year(year: int, panel: Path, greeks: Path, sessions: pd.DataFrame, closes: pd.Series) -> pd.DataFrame:
-    """Pairs with day one in `year` passing E1–E6 and E8 (E7 and next_status kept as columns)."""
+def build_year(year: int, panel: Path, greeks: Path, sessions: pd.DataFrame, closes: pd.Series, maturity: str = "main") -> pd.DataFrame:
+    """Pairs with day one in `year` passing E1–E6 and E8 (E7 and next_status kept as columns).
+
+    maturity="short" replaces E5 by τ < 14 days on day one and keeps only pairs that end before
+    settlement, τ > 0 at day two's snapshot (analysis_plan.md §16.6)."""
     day1 = _read(panel / f"year={year}", PANEL_COLS, ds.field("is_session") & ~ds.field("f_non_session"))
     g1 = _read(greeks / f"year={year}", ROW + ["am_settled", "settle_date"] + GREEK_COLS)
     p = day1.merge(g1.drop(columns=["am_settled", "settle_date"]), on=ROW, how="inner")
@@ -71,7 +74,7 @@ def build_year(year: int, panel: Path, greeks: Path, sessions: pd.DataFrame, clo
     p["E2"] = ~p.f_stamp_window
     p["E3"] = ~flags
     p["E4"] = (p.bid > 0) & (p.ask >= p.bid)
-    p["E5"] = p.tau >= 14 / 365
+    p["E5"] = p.tau >= 14 / 365 if maturity == "main" else p.tau < 14 / 365
     p["E6"] = p.delta.abs().between(0.05, 0.95)
     # the vendor codes "no last price" as 0; empty volume with a positive last is a day of 1,000+ contracts
     p["E7"] = (p.volume > 0) | (p.volume.isna() & (p["last"] > 0))
@@ -92,6 +95,8 @@ def build_year(year: int, panel: Path, greeks: Path, sessions: pd.DataFrame, clo
                                          "F": "F_next", "D": "D_next", "tau": "tau_next",
                                          "bid_size": "bid_size_next", "ask_size": "ask_size_next"})
     p = p.merge(two.drop_duplicates(["next_session"] + CONTRACT_KEY), on=["next_session"] + CONTRACT_KEY, how="left")
+    if maturity == "short":
+        p = p[~(p.tau_next <= 0)]  # rows without a day-two quote stay, as attrition
 
     lvl = sessions.set_index("quote_date")
     p["S_A"] = p.quote_date.map(lvl.S_A)
