@@ -1078,6 +1078,13 @@ for u in U:
     v = pd.read_csv(R / "stocks" / u / "test2020_verdict.csv").assign(underlying=u.upper())
     rows.append(v)
 pd.concat(rows)[["underlying", "variant", "verdict", "G_C", "G_C_lo", "G_C_hi", "G_P", "G_P_lo", "G_P_hi", "C_vs_R3", "C_vs_R4", "P_vs_R3", "P_vs_R4"]].round(3)"""),
+    md("""
+**Reading.** None of the five passes H1 in 2020.
+- **AAPL, TSLA and QQQ are Inconclusive.**
+- **NVDA is Reject (b):** both upper bounds are below the 0.05 the plan calls material.
+- **SLV is Reject (a):** its put interval lies below zero, so R2 is significantly worse than Black–Scholes.
+- **Outside the stress period, AAPL's, NVDA's and QQQ's calls lose significantly.** It is SPX's April 2020 lesson again: the crash entered the training window and the fits over-corrected.
+"""),
     md("## The walk-forward: Gain over Black–Scholes by year"),
     code("""
 for u in U:
@@ -1091,6 +1098,13 @@ for u in U:
     m = pd.read_csv(R / "stocks" / u / "walkforward_median_yearly_gain.csv").assign(underlying=u.upper())
     med.append(m[(m.base == "R1") & m.rule.isin(["R2", "R3", "R4", "R9", "P0"])])
 pd.concat(med).pivot_table(index=["underlying", "window"], columns=["rule", "cp"], values="median_yearly_gain").round(3)"""),
+    md("""
+**Reading.**
+- **The single stocks gain little or lose.** AAPL's median yearly Gain of R2 is 0.04–0.06 for calls and at most 0.02 for puts. NVDA and TSLA are near zero or negative.
+- **QQQ, an index ETF, behaves like SPX:** 0.06–0.08 on the 12- and 36-month windows.
+- **SLV gains nothing.**
+- **Ruf and Wang's fixed 0.9/1.1 scaling (R3), calibrated to S&P 500 options, is harmful off the index:** −0.05 to −0.37 for calls on the stocks.
+"""),
     md("## Beside Hull and White's Table 3 (mean of monthly Gains, 36-month window)"),
     code("""
 hw = {"C": {"Stocks": 0.103, "Commodity ETFs": 0.077}, "P": {"Stocks": 0.025, "Commodity ETFs": 0.025}}
@@ -1100,6 +1114,12 @@ for u in U:
     a = t[t.bucket.astype(str) == "all"].set_index("cp").gain
     rows.append({"underlying": u.upper(), "calls (ours)": a.get("C"), "puts (ours)": a.get("P")})
 display(pd.DataFrame(rows).round(3)); hw"""),
+    md("""
+**Reading.**
+- **Our aggregation of Hull and White's kind gives the stocks far less** than their Dow-stock average of 0.103 (calls) and 0.025 (puts). The direction matches theirs: much less than for indices, and almost nothing for puts.
+- **Their explanation fits.** Noise inserts a wedge between the parameters estimated in one period and those that would hedge best in the next.
+- **A caution on reading QQQ's row.** The monthly average can be negative even when the pooled yearly Gains are positive, because single months with large losses weigh as much as calm months.
+"""),
     md("## Stress episodes, parameter stability, level and shape, maturity"),
     code("""
 for u in U:
@@ -1119,6 +1139,13 @@ for u in U:
     M = pd.read_csv(R / "stocks" / u / "maturity_by_year.csv")
     print(u.upper(), "tau^(-alpha) against alpha = 0.5 (R2)")
     display(M.pivot_table(index=["sessions_kind", "year"], columns=["rule", "cp"], values="gain").round(3))"""),
+    md("""
+**Reading.**
+- **The spot–volatility relation exists within each period but does not carry forward.**
+  - The level that fits each month best, after the fact, would have removed 11–22% of the three stocks' error: the ceiling column.
+  - The level fitted on the previous 12 months gains nothing or loses: the level column is negative for NVDA and TSLA.
+  - A stock's relation is too unstable to be estimated from its own history. For comparison, SPX's trailing level reached at least half of its ceiling in 15 of 26 type-years (2011–2023); it fell short in 2017–2019, 2022–2023 and for 2012's calls.
+"""),
     md("## Books, data starvation and held positions on the five (§16.11, §16.13, §16.14)"),
     code("""
 for u in U:
@@ -1136,6 +1163,16 @@ for u in U:
         print(u.upper(), "held positions, R2 over R1, pooled periods")
         display(G[(G.subset == "all") & (G.base == "R1") & (G.rule == "R2") & ~G.period.str.fullmatch(r"\\d{4}")]
                 .pivot_table(index=["H", "period"], columns=["measure", "cp"], values="gain").round(3))"""),
+    md("""
+**Reading.**
+- **Books amplify whatever the sign:** gains for QQQ (calls 0.162 on the book, against 0.083 per option) and AAPL, losses for NVDA and TSLA.
+- **The risk-reversal book gains 0.22–0.24 for AAPL, TSLA and SLV.** That is unlike the indices, where it is the control. One possible reason, not investigated: out-of-the-money calls and puts on these underlyings may not share one volatility move.
+- **Held positions:**
+  - QQQ's Gain grows with the holding period in 2017–2019 (10 sessions: 0.333 / 0.275, against 0.122 / 0.102 one session), as SPX's does.
+  - The stocks are mixed.
+  - Most of the five lose on paths in 2020 and 2021–2023.
+- **Checks:** on every underlying, the path code's first-day errors equal the walk-forward's exactly, and 79–94% of eligible paths complete.
+"""),
 ])
 
 

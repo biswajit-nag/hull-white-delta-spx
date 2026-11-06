@@ -49,8 +49,9 @@ The run that unblinds 2020 records two commits in the `notes` column of the runt
 | R2's degree, P0–P8 and PCV (§16.8) | 2026-11-05 | 2026-11-05 | `run_degrees.py` | `results/walkforward/` | 08 |
 | Published aggregations; level and shape (§16.9) | 2026-11-05 | 2026-11-05 | `compare_published.py`, `level_shape.py` | `results/walkforward/` | 10 |
 | Stress, parameter stability, maturity (§16.10) | 2026-11-05 | 2026-11-05 | `stress_episodes.py`, `parameter_stability.py` | `results/walkforward/` | 10 |
-| Held positions, simulation, data starvation, books (§16.11–§16.14) | 2026-11-05; revised 11-06 | pending | | | 11 (planned) |
-| Single stocks and ETFs (§16.15) | 2026-11-05; revised 11-06 | pending | | | 12 (planned) |
+| Held positions, data starvation, books (§16.11, §16.13, §16.14) | 2026-11-05; revised 11-06 | 2026-11-06 | `run_extensions.py`, `build_pairs_any.py`, `ruleset.py` | `results/extensions/<u>/` (SPX, SPY and the five) | 11, 12 |
+| The coverage simulation (§16.12) | 2026-11-05; revised 11-06 | 2026-11-06 | `run_coverage_sim.py` | `results/simulation/` | 11 |
+| Single stocks and ETFs (§16.15) | 2026-11-05; revised 11-06 | 2026-11-06 | `build_greeks_stocks.py`, `build_pairs_stocks.py`, `audit_stocks.py`, `run_protocol_stocks.py`, `run_extensions.py` | `results/stocks/<u>/`, `results/extensions/<u>/` | 12 |
 
 **The extensions of §14:**
 1. Pending items of §§1–13: none known.
@@ -60,7 +61,7 @@ The run that unblinds 2020 records two commits in the `notes` column of the runt
 5. Smile-based and regime-dependent deltas: not run.
 6. Further machine-learning challengers: LightGBM decomposed (§16.7). GAM, EBM and HedgeNet: not run.
 7. Stochastic-volatility deltas: Heston run (§16.2, §16.5); SABR not run.
-8. Simulations with a known truth: §16.12 (pending).
+8. Simulations with a known truth: §16.12 (run 2026-11-06).
 9. SPY: run (§16.1, §16.3).
 10. The jump term: not run.
 

@@ -12,3 +12,7 @@ years,planned_exposure,actual_exposure,date,run
 2011-2023,R5-R8 in the walk-forward (§16.4),"evaluated: R5-R8, W12 W36 W60",2026-11-05,scripts/run_walkforward_r5_r8.py
 2010-2023,Heston deltas (§16.5),"evaluated: H_model, H_mv (2010-2023), H_fit (2011-2023) under calibration B2",2026-11-05,scripts/heston2_hedge.py
 2020,R7/R8 under the Table 8.1 variants (§16.4),evaluated,2026-11-05,scripts/run_learners_variants.py 2020
+2011-2023,"SPX and SPY: books, data starvation and held positions (§16.11, §16.13, §16.14)","evaluated: R0-R4, R6, R9, P0 (and Heston on SPX) on W12, windows of 1-6 months, thinned W12 fits, 5- and 10-session paths",2026-11-06,scripts/run_extensions.py
+2016,"AAPL, NVDA, TSLA, QQQ, SLV (§16.15): untouched until these runs","fit-only: the first W12 windows",2026-11-06,scripts/run_protocol_stocks.py; scripts/run_extensions.py
+2017-2023,"AAPL, NVDA, TSLA, QQQ, SLV (§16.15): untouched until these runs","evaluated: 2020 as the test year (2019 training), the walk-forward (W12 from 2017, W36 from 2019, W60 from 2021), stress, stability, level/shape, maturity, books, starvation, held positions",2026-11-06,scripts/run_protocol_stocks.py; scripts/run_extensions.py
+none,"§16.12 simulation","no real-data outcome: calibrated to 2010-2019 returns and 2019's pairs; the 2020-path scenario uses 2020's filtered volatility path",2026-11-06,scripts/run_coverage_sim.py

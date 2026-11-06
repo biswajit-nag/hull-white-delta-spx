@@ -235,3 +235,241 @@ started_at,step,status,wall_seconds,peak_mem_gb,rows_in,rows_out,inputs,git_hash
 2026-11-05T16:40:31-05:00,stress_episodes,ok,198.7,7.45,,704,"spx 2010-2023, W12 W36, RV and DD episodes",d6d42a2,True,3.14.10,Windows-11,
 2026-11-05T16:43:51-05:00,parameter_stability,ok,17.5,5.18,,3960,"spy 2010-2023, W12 W36 W60",d6d42a2,True,3.14.10,Windows-11,
 2026-11-05T16:44:10-05:00,stress_episodes,ok,197.8,5.44,,704,"spy 2010-2023, W12 W36, RV and DD episodes",d6d42a2,True,3.14.10,Windows-11,
+2026-11-06T01:00:38-05:00,coverage_sim,ok,9.9,1.63,,200,"spx 2019 cross-section, GARCH 2010-2019, 20 reps x 5 kappas, B=2000",3ffa621,True,3.14.10,Windows-11,
+2026-11-06T01:00:59-05:00,coverage_sim,ok,59.6,1.61,,10000,"spx 2019 cross-section, GARCH 2010-2019, 1000 reps x 5 kappas, B=2000",3ffa621,True,3.14.10,Windows-11,
+2026-11-06T01:07:12-05:00,coverage_sim_v2,ok,13.5,1.64,,600,"spx 2019 cross-section, GARCH 2010-2019, 20 reps x 5 kappas x 3 scenarios, B=2000",d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:07:30-05:00,build_processed,ok,2.0,0.40,,310878,aapl 2016,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:07:30-05:00,build_processed,ok,2.6,0.46,,375572,tsla 2016,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:07:32-05:00,build_processed,ok,3.0,0.49,,374050,aapl 2017,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:07:33-05:00,build_processed,ok,3.8,0.59,,485934,tsla 2017,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:07:35-05:00,build_processed,ok,2.9,0.53,,385880,aapl 2018,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:07:38-05:00,build_processed,ok,3.6,0.56,,374400,aapl 2019,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:07:37-05:00,build_processed,ok,5.4,0.74,,632318,tsla 2018,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:07:42-05:00,build_processed,ok,5.1,0.73,,585496,aapl 2020,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:07:42-05:00,build_processed,ok,7.0,0.83,,678990,tsla 2019,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:07:47-05:00,build_processed,ok,5.7,0.73,,479644,aapl 2021,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:07:53-05:00,build_processed,ok,5.6,0.73,,472008,aapl 2022,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:07:58-05:00,build_processed,ok,5.5,0.73,,513084,aapl 2023,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:07:49-05:00,build_processed,ok,20.9,1.66,,1845688,tsla 2020,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:08:08-05:00,build_processed,ok,2.7,0.34,,236224,nvda 2016,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:08:11-05:00,build_processed,ok,3.5,0.44,,298522,nvda 2017,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:08:14-05:00,build_processed,ok,3.6,0.49,,336196,nvda 2018,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:08:18-05:00,build_processed,ok,4.5,0.50,,323370,nvda 2019,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:08:10-05:00,build_processed,ok,18.5,1.66,,1540312,tsla 2021,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:08:23-05:00,build_processed,ok,6.8,0.73,,604228,nvda 2020,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:08:30-05:00,build_processed,ok,8.2,0.88,,793002,nvda 2021,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:08:29-05:00,build_processed,ok,13.6,1.66,,1253528,tsla 2022,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:08:38-05:00,build_processed,ok,7.4,0.88,,700292,nvda 2022,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:08:43-05:00,build_processed,ok,10.1,1.66,,1001212,tsla 2023,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:08:45-05:00,build_processed,ok,9.9,1.07,,1041130,nvda 2023,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:08:59-05:00,build_processed,ok,3.0,0.38,,297452,slv 2016,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:08:57-05:00,build_processed,ok,5.2,0.54,,502512,qqq 2016,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:09:02-05:00,build_processed,ok,2.9,0.40,,254804,slv 2017,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:09:05-05:00,build_processed,ok,2.2,0.40,,203656,slv 2018,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:09:02-05:00,build_processed,ok,7.0,0.71,,649188,qqq 2017,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:09:08-05:00,build_processed,ok,2.7,0.40,,225652,slv 2019,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:09:10-05:00,build_processed,ok,3.7,0.50,,346222,slv 2020,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:09:10-05:00,build_processed,ok,9.5,0.83,,779182,qqq 2018,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:09:14-05:00,build_processed,ok,5.3,0.54,,371914,slv 2021,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:09:19-05:00,build_processed,ok,5.3,0.54,,333884,slv 2022,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:09:25-05:00,build_processed,ok,4.8,0.54,,315114,slv 2023,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:09:19-05:00,build_processed,ok,13.1,0.88,,807378,qqq 2019,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:09:33-05:00,build_processed,ok,22.7,1.26,,1477248,qqq 2020,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:09:56-05:00,build_processed,ok,27.2,1.53,,1823106,qqq 2021,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:10:32-05:00,build_pairs_any,ok,6.8,0.78,,361418,spx 2010,d6be15a,True,3.14.10,Windows-11,ok 351825; in band 207377
+2026-11-06T01:10:39-05:00,build_pairs_any,ok,7.8,1.04,,410087,spx 2011,d6be15a,True,3.14.10,Windows-11,ok 398730; in band 236076
+2026-11-06T01:10:23-05:00,build_processed,ok,28.8,1.53,,1728392,qqq 2022,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:10:47-05:00,build_pairs_any,ok,9.4,1.06,,527480,spx 2012,d6be15a,True,3.14.10,Windows-11,ok 513237; in band 287382
+2026-11-06T01:10:57-05:00,build_pairs_any,ok,11.2,1.52,,668506,spx 2013,d6be15a,True,3.14.10,Windows-11,ok 655157; in band 340191
+2026-11-06T01:10:52-05:00,build_processed,ok,28.9,1.53,,1709530,qqq 2023,d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:11:08-05:00,build_pairs_any,ok,14.7,2.24,,1052949,spx 2014,d6be15a,True,3.14.10,Windows-11,ok 1025560; in band 518860
+2026-11-06T01:11:23-05:00,build_pairs_any,ok,19.4,3.14,,1666246,spx 2015,d6be15a,True,3.14.10,Windows-11,ok 1639561; in band 861262
+2026-11-06T01:07:32-05:00,coverage_sim_v2,ok,267.8,1.62,,30000,"spx 2019 cross-section, GARCH 2010-2019, 1000 reps x 5 kappas x 3 scenarios, B=2000",d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:11:42-05:00,build_pairs_any,ok,18.6,3.33,,1566979,spx 2016,d6be15a,True,3.14.10,Windows-11,ok 1538238; in band 741959
+2026-11-06T01:12:01-05:00,build_pairs_any,ok,14.7,3.61,,1682854,spx 2017,d6be15a,True,3.14.10,Windows-11,ok 1652445; in band 752927
+2026-11-06T01:10:46-05:00,build_greeks_stocks,ok,100.4,0.33,297452,187828,"slv 2016, CRR 150 steps",d6be15a,True,3.14.10,Windows-11,converged 187828; one_sided 69819; outside_price_bounds 31212; no_rate 4486; not_identifiable 3880; above_volatility_bracket 139; expired 88
+2026-11-06T01:12:16-05:00,build_pairs_any,ok,18.8,4.54,,2382343,spx 2018,d6be15a,True,3.14.10,Windows-11,ok 2352435; in band 1261084
+2026-11-06T01:12:35-05:00,build_pairs_any,ok,19.7,4.99,,2346651,spx 2019,d6be15a,True,3.14.10,Windows-11,ok 2282221; in band 1252003
+2026-11-06T01:12:54-05:00,build_pairs_any,ok,45.4,4.99,,3026133,spx 2020,d6be15a,True,3.14.10,Windows-11,ok 2958336; in band 1823624
+2026-11-06T01:13:40-05:00,build_pairs_any,ok,44.1,4.99,,3638016,spx 2021,d6be15a,True,3.14.10,Windows-11,ok 3508613; in band 2132854
+2026-11-06T01:10:34-05:00,ext_books,ok,233.8,3.38,7644088,1872,"spx W12, §16.14",d6be15a,True,3.14.10,Windows-11,
+2026-11-06T01:14:24-05:00,build_pairs_any,ok,44.9,5.41,,3612221,spx 2022,d6be15a,True,3.14.10,Windows-11,ok 3514439; in band 2259455
+2026-11-06T01:12:58-05:00,build_greeks_stocks,ok,152.0,0.33,236224,169831,"nvda 2016, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 169831; one_sided 33067; outside_price_bounds 26966; expired 6106; not_identifiable 151; below_volatility_bracket 81; above_volatility_bracket 22
+2026-11-06T01:15:09-05:00,build_pairs_any,ok,50.1,5.41,,3546427,spx 2023,c6d0eb0,True,3.14.10,Windows-11,ok 3508453; in band 2053771
+2026-11-06T01:15:31-05:00,build_greeks_stocks,ok,218.6,0.34,298522,237836,"nvda 2017, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 237836; one_sided 30232; outside_price_bounds 23126; expired 7074; not_identifiable 183; above_volatility_bracket 71
+2026-11-06T01:17:48-05:00,build_greeks_stocks,ok,285.8,0.40,375572,274990,"tsla 2016, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 274990; one_sided 50337; outside_price_bounds 39364; expired 8338; above_volatility_bracket 2469; not_identifiable 74
+2026-11-06T01:19:09-05:00,build_greeks_stocks,ok,241.8,0.36,334594,286542,"nvda 2018, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 286542; outside_price_bounds 21336; one_sided 19741; expired 6402; not_identifiable 514; above_volatility_bracket 59
+2026-11-06T01:17:48-05:00,build_greeks_stocks,ok,377.7,0.52,502512,432659,"qqq 2016, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 432659; one_sided 46215; outside_price_bounds 14094; expired 7324; below_volatility_bracket 1460; not_identifiable 760
+2026-11-06T01:23:11-05:00,build_greeks_stocks,ok,209.8,0.38,323370,268225,"nvda 2019, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 268225; one_sided 21738; outside_price_bounds 21101; no_rate 6342; expired 5532; not_identifiable 400; above_volatility_bracket 32
+2026-11-06T01:22:34-05:00,build_greeks_stocks,ok,325.9,0.49,485934,374463,"tsla 2017, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 374463; outside_price_bounds 59650; one_sided 41822; expired 8718; above_volatility_bracket 927; not_identifiable 354
+2026-11-06T01:24:06-05:00,build_greeks_stocks,ok,431.7,0.60,649188,537919,"qqq 2017, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 537919; one_sided 69913; outside_price_bounds 32232; expired 8092; not_identifiable 1032
+2026-11-06T01:26:41-05:00,build_greeks_stocks,failed,439.3,0.55,,,"nvda 2020, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T01:28:00-05:00,build_greeks_stocks,ok,461.8,0.68,629424,541872,"tsla 2018, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 541872; outside_price_bounds 49845; one_sided 26906; expired 10248; not_identifiable 309; above_volatility_bracket 244
+2026-11-06T01:34:07-05:00,build_greeks_stocks,ok,165.1,0.38,310878,250427,"aapl 2016, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 250427; one_sided 36128; outside_price_bounds 10388; expired 6928; below_volatility_bracket 6296; not_identifiable 655; above_volatility_bracket 56
+2026-11-06T01:31:18-05:00,build_greeks_stocks,ok,487.4,0.78,776108,651828,"qqq 2018, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 651828; outside_price_bounds 62696; one_sided 49003; expired 11232; not_identifiable 1347; above_volatility_bracket 2
+2026-11-06T01:17:48-05:00,build_greeks_stocks,ok,1298.4,1.37,1823106,1601848,"qqq 2021, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 1601848; one_sided 79889; outside_price_bounds 64905; no_rate 43194; expired 31944; not_identifiable 1020; below_volatility_bracket 273; above_volatility_bracket 33
+2026-11-06T01:36:52-05:00,build_greeks_stocks,ok,193.5,0.50,374050,288620,"aapl 2017, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 288620; one_sided 61172; outside_price_bounds 17000; expired 6146; not_identifiable 543; below_volatility_bracket 320; above_volatility_bracket 249
+2026-11-06T01:35:42-05:00,build_greeks_stocks,ok,413.3,0.74,678990,558346,"tsla 2019, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 558346; outside_price_bounds 65641; one_sided 31866; no_rate 12924; expired 8694; above_volatility_bracket 828; not_identifiable 691
+2026-11-06T01:40:05-05:00,build_greeks_stocks,ok,188.4,0.55,384254,297668,"aapl 2018, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 297668; one_sided 53879; outside_price_bounds 26193; expired 5302; above_volatility_bracket 610; not_identifiable 602
+2026-11-06T01:43:14-05:00,build_greeks_stocks,ok,209.7,0.57,374400,314494,"aapl 2019, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 314494; one_sided 30091; outside_price_bounds 18331; no_rate 5836; expired 5012; not_identifiable 551; above_volatility_bracket 85
+2026-11-06T01:39:25-05:00,build_greeks_stocks,ok,456.6,0.85,807378,674989,"qqq 2019, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 674989; one_sided 53528; outside_price_bounds 52385; no_rate 14548; expired 10738; not_identifiable 1190
+2026-11-06T01:46:44-05:00,build_greeks_stocks,failed,353.6,0.72,,,"aapl 2020, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T01:39:27-05:00,build_greeks_stocks,ok,946.9,1.53,1669156,1416112,"qqq 2022, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 1416112; outside_price_bounds 125750; one_sided 80052; expired 44586; not_identifiable 2551; above_volatility_bracket 56; below_volatility_bracket 49
+2026-11-06T01:47:02-05:00,build_greeks_stocks,failed,875.8,1.29,,,"qqq 2020, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T01:42:35-05:00,build_greeks_stocks,failed,1189.3,1.50,,,"tsla 2020, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:01:41-05:00,build_greeks_stocks,ok,89.1,0.36,297452,187828,"slv 2016, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 187828; one_sided 69819; outside_price_bounds 31212; expired 4574; not_identifiable 3880; above_volatility_bracket 139
+2026-11-06T02:03:10-05:00,build_greeks_stocks,ok,65.1,0.44,254804,147812,"slv 2017, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 147812; one_sided 67454; outside_price_bounds 30068; not_identifiable 5698; expired 3664; above_volatility_bracket 108
+2026-11-06T02:04:15-05:00,build_greeks_stocks,ok,46.7,0.44,202842,114070,"slv 2018, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 114070; one_sided 54141; outside_price_bounds 26030; not_identifiable 5425; expired 3054; above_volatility_bracket 122
+2026-11-06T02:05:02-05:00,build_greeks_stocks,ok,52.7,0.45,225652,135802,"slv 2019, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 135802; one_sided 55688; outside_price_bounds 23266; not_identifiable 6214; expired 2694; no_rate 1914; above_volatility_bracket 74
+2026-11-06T02:05:55-05:00,build_greeks_stocks,failed,138.9,0.57,,,"slv 2020, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T01:55:14-05:00,build_greeks_stocks,ok,817.3,1.58,1709530,1365457,"qqq 2023, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 1365457; outside_price_bounds 168787; one_sided 106533; expired 61318; no_rate 5210; not_identifiable 2224; above_volatility_bracket 1
+2026-11-06T01:15:00-05:00,ext_starve,ok,3457.7,4.23,,18720,spx §16.13,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:13:07-05:00,build_pairs_any,ok,3.2,1.41,,171230,spy 2010,c6d0eb0,True,3.14.10,Windows-11,ok 167825; in band 142550
+2026-11-06T02:13:11-05:00,build_pairs_any,ok,3.2,1.41,,208508,spy 2011,c6d0eb0,True,3.14.10,Windows-11,ok 203977; in band 173950
+2026-11-06T02:13:14-05:00,build_pairs_any,ok,3.6,1.41,,222681,spy 2012,c6d0eb0,True,3.14.10,Windows-11,ok 218913; in band 183107
+2026-11-06T02:13:18-05:00,build_pairs_any,ok,4.8,1.41,,218157,spy 2013,c6d0eb0,True,3.14.10,Windows-11,ok 215314; in band 180826
+2026-11-06T02:13:22-05:00,build_pairs_any,ok,5.4,1.41,,251121,spy 2014,c6d0eb0,True,3.14.10,Windows-11,ok 248276; in band 212882
+2026-11-06T02:13:28-05:00,build_pairs_any,ok,6.1,1.54,,284572,spy 2015,c6d0eb0,True,3.14.10,Windows-11,ok 282646; in band 238285
+2026-11-06T02:13:34-05:00,build_pairs_any,ok,6.9,1.68,,346590,spy 2016,c6d0eb0,True,3.14.10,Windows-11,ok 341847; in band 278982
+2026-11-06T02:13:41-05:00,build_pairs_any,ok,7.5,1.84,,344638,spy 2017,c6d0eb0,True,3.14.10,Windows-11,ok 339805; in band 265043
+2026-11-06T02:13:49-05:00,build_pairs_any,ok,9.2,2.12,,600772,spy 2018,c6d0eb0,True,3.14.10,Windows-11,ok 594794; in band 445322
+2026-11-06T02:13:58-05:00,build_pairs_any,ok,10.9,2.60,,701740,spy 2019,c6d0eb0,True,3.14.10,Windows-11,ok 684938; in band 551100
+2026-11-06T02:14:09-05:00,build_pairs_any,ok,14.5,3.21,,1328447,spy 2020,c6d0eb0,True,3.14.10,Windows-11,ok 1303974; in band 1043916
+2026-11-06T02:14:23-05:00,build_pairs_any,ok,15.5,3.59,,1314475,spy 2021,c6d0eb0,True,3.14.10,Windows-11,ok 1310149; in band 983116
+2026-11-06T02:14:39-05:00,build_pairs_any,ok,11.7,3.59,,639288,spy 2022,c6d0eb0,True,3.14.10,Windows-11,ok 628179; in band 502348
+2026-11-06T02:14:51-05:00,build_pairs_any,ok,7.8,3.59,,492076,spy 2023,c6d0eb0,True,3.14.10,Windows-11,ok 488052; in band 374463
+2026-11-06T02:13:07-05:00,ext_paths,failed,121.7,4.56,,,"spx H 5 10, §16.11",c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:15:56-05:00,ext_paths,failed,451.1,7.56,,,"spx H 5 10, §16.11",c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:18:21-05:00,build_greeks_stocks,ok,317.5,0.59,585496,528622,"aapl 2020, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 528622; one_sided 27529; outside_price_bounds 19397; expired 8596; below_volatility_bracket 1058; not_identifiable 247; above_volatility_bracket 47
+2026-11-06T02:18:21-05:00,build_greeks_stocks,ok,330.5,0.59,604228,525610,"nvda 2020, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 525610; outside_price_bounds 34499; one_sided 33931; expired 9972; not_identifiable 149; above_volatility_bracket 59; below_volatility_bracket 8
+2026-11-06T02:24:07-05:00,ext_books,ok,180.5,3.66,5387998,1248,"spy W12, §16.14",c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:23:38-05:00,build_greeks_stocks,ok,291.9,0.59,479644,422650,"aapl 2021, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 422650; one_sided 23967; outside_price_bounds 14682; no_rate 10534; expired 7236; not_identifiable 371; below_volatility_bracket 116; above_volatility_bracket 88
+2026-11-06T02:18:19-05:00,build_greeks_stocks,ok,722.3,1.04,1209468,1055395,"tsla 2022, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 1055395; outside_price_bounds 89293; one_sided 45486; expired 16674; above_volatility_bracket 1836; not_identifiable 783; infinite_volatility_bound 1
+2026-11-06T02:23:51-05:00,build_greeks_stocks,ok,477.6,0.76,793002,677988,"nvda 2021, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 677988; one_sided 44655; outside_price_bounds 39929; no_rate 17370; expired 12568; above_volatility_bracket 279; not_identifiable 209; below_volatility_bracket 4
+2026-11-06T02:28:30-05:00,build_greeks_stocks,ok,239.0,0.59,456040,380456,"aapl 2022, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 380456; outside_price_bounds 40823; one_sided 27425; expired 6524; not_identifiable 726; above_volatility_bracket 82; below_volatility_bracket 4
+2026-11-06T02:27:12-05:00,ext_paths,ok,319.6,4.91,,1440,"spy H 5 10, §16.11",c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:32:29-05:00,build_greeks_stocks,ok,272.1,0.60,513084,398296,"aapl 2023, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 398296; outside_price_bounds 60662; one_sided 44046; expired 6762; no_rate 2154; not_identifiable 1092; above_volatility_bracket 72
+2026-11-06T02:31:49-05:00,build_greeks_stocks,ok,400.2,0.82,676272,574530,"nvda 2022, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 574530; outside_price_bounds 57092; one_sided 33917; expired 9272; not_identifiable 883; above_volatility_bracket 578
+2026-11-06T02:18:19-05:00,build_greeks_stocks,ok,1252.1,1.37,1845688,1690956,"tsla 2020, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 1690956; outside_price_bounds 85297; one_sided 45910; expired 20990; above_volatility_bracket 2394; below_volatility_bracket 77; not_identifiable 64
+2026-11-06T02:30:21-05:00,build_greeks_stocks,ok,553.1,1.04,1001212,824162,"tsla 2023, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 824162; outside_price_bounds 102704; one_sided 55180; expired 12962; no_rate 3956; not_identifiable 1409; above_volatility_bracket 839
+2026-11-06T02:39:37-05:00,build_greeks_stocks,ok,179.7,0.40,346222,277763,"slv 2020, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 277763; one_sided 41783; outside_price_bounds 19425; expired 4784; not_identifiable 2280; above_volatility_bracket 187
+2026-11-06T02:42:37-05:00,build_greeks_stocks,ok,201.7,0.51,371914,304993,"slv 2021, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 304993; one_sided 31661; outside_price_bounds 19420; no_rate 8820; expired 4586; not_identifiable 2342; above_volatility_bracket 92
+2026-11-06T02:45:58-05:00,build_greeks_stocks,ok,156.1,0.51,322782,247612,"slv 2022, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 247612; outside_price_bounds 37794; one_sided 28267; not_identifiable 5091; expired 3910; above_volatility_bracket 108
+2026-11-06T02:38:29-05:00,build_greeks_stocks,ok,620.5,1.01,1041130,874064,"nvda 2023, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 874064; outside_price_bounds 89942; one_sided 61226; expired 12458; no_rate 2278; not_identifiable 766; above_volatility_bracket 396
+2026-11-06T02:48:35-05:00,build_greeks_stocks,ok,110.0,0.51,315114,202708,"slv 2023, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 202708; outside_price_bounds 52989; one_sided 47964; not_identifiable 5379; expired 4746; no_rate 1256; above_volatility_bracket 72
+2026-11-06T02:37:05-05:00,build_greeks_stocks,ok,961.9,1.16,1477248,1362154,"qqq 2020, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 1362154; one_sided 51266; outside_price_bounds 46079; expired 15210; below_volatility_bracket 1897; not_identifiable 632; above_volatility_bracket 10
+2026-11-06T02:53:12-05:00,build_greeks_stocks,ok,92.7,0.33,236224,169831,"nvda 2016, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 169831; one_sided 33067; outside_price_bounds 26966; expired 6106; not_identifiable 151; below_volatility_bracket 81; above_volatility_bracket 22
+2026-11-06T02:39:11-05:00,build_greeks_stocks,ok,951.5,1.44,1540312,1331634,"tsla 2021, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 1331634; outside_price_bounds 86774; one_sided 66896; no_rate 32884; expired 19842; above_volatility_bracket 1855; not_identifiable 411; below_volatility_bracket 14; infinite_volatility_bound 2
+2026-11-06T02:55:45-05:00,build_pairs_stocks,ok,3.8,0.68,,150732,aapl 2016,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:55:46-05:00,build_pairs_stocks,ok,5.3,1.08,,292288,qqq 2016,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:55:49-05:00,build_pairs_stocks,ok,4.3,0.86,,150454,aapl 2017,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:55:51-05:00,build_pairs_stocks,ok,5.8,1.40,,313942,qqq 2017,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:55:53-05:00,build_pairs_stocks,ok,4.2,0.91,,161814,aapl 2018,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:55:57-05:00,build_pairs_stocks,ok,4.4,1.06,,185364,aapl 2019,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:55:57-05:00,build_pairs_stocks,ok,6.5,1.61,,434677,qqq 2018,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:56:02-05:00,build_pairs_stocks,ok,5.1,1.24,,325728,aapl 2020,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:56:03-05:00,build_pairs_stocks,ok,7.4,1.98,,459897,qqq 2019,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:56:07-05:00,build_pairs_stocks,ok,4.7,1.29,,243260,aapl 2021,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:56:12-05:00,build_pairs_stocks,ok,4.6,1.29,,211653,aapl 2022,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:56:16-05:00,build_pairs_stocks,ok,4.4,1.29,,211294,aapl 2023,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:56:11-05:00,build_pairs_stocks,ok,11.6,2.69,,946187,qqq 2020,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:56:24-05:00,build_pairs_stocks,ok,3.4,0.95,,179134,tsla 2016,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:56:28-05:00,build_pairs_stocks,ok,4.6,1.17,,233216,tsla 2017,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:56:23-05:00,build_pairs_stocks,ok,13.7,3.20,,1007682,qqq 2021,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:56:33-05:00,build_pairs_stocks,ok,5.3,1.39,,347563,tsla 2018,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:56:38-05:00,build_pairs_stocks,ok,6.1,1.91,,339762,tsla 2019,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:56:36-05:00,build_pairs_stocks,ok,11.4,3.20,,821195,qqq 2022,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:56:44-05:00,build_pairs_stocks,ok,12.1,2.79,,1074049,tsla 2020,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:56:48-05:00,build_pairs_stocks,ok,10.7,3.20,,748975,qqq 2023,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:54:45-05:00,build_greeks_stocks,ok,135.2,0.46,298522,237836,"nvda 2017, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 237836; one_sided 30232; outside_price_bounds 23126; expired 7074; not_identifiable 183; above_volatility_bracket 71
+2026-11-06T02:57:01-05:00,build_pairs_stocks,ok,3.5,0.59,,113394,slv 2016,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:56:56-05:00,build_pairs_stocks,ok,10.2,2.88,,704979,tsla 2021,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:57:05-05:00,build_pairs_stocks,ok,3.3,0.62,,82031,slv 2017,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:57:08-05:00,build_pairs_stocks,ok,3.1,0.62,,63689,slv 2018,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:57:11-05:00,build_pairs_stocks,ok,3.2,0.73,,75399,slv 2019,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:57:06-05:00,build_pairs_stocks,ok,8.9,2.88,,627658,tsla 2022,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:57:15-05:00,build_pairs_stocks,ok,4.3,0.84,,180251,slv 2020,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:57:15-05:00,build_pairs_stocks,ok,6.6,2.88,,482338,tsla 2023,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:57:19-05:00,build_pairs_stocks,ok,4.0,0.96,,206944,slv 2021,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:57:23-05:00,build_pairs_stocks,ok,3.6,0.97,,162368,slv 2022,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:57:27-05:00,build_pairs_stocks,ok,3.0,0.97,,119741,slv 2023,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T02:57:00-05:00,build_greeks_stocks,ok,157.4,0.54,334594,286542,"nvda 2018, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 286542; outside_price_bounds 21336; one_sided 19741; expired 6402; not_identifiable 514; above_volatility_bracket 59
+2026-11-06T02:59:37-05:00,build_greeks_stocks,ok,143.2,0.56,323370,268225,"nvda 2019, CRR 150 steps",c6d0eb0,True,3.14.10,Windows-11,converged 268225; one_sided 21738; outside_price_bounds 21101; no_rate 6342; expired 5532; not_identifiable 400; above_volatility_bracket 32
+2026-11-06T03:02:15-05:00,build_pairs_stocks,ok,2.3,0.62,,115964,nvda 2016,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T03:02:18-05:00,build_pairs_stocks,ok,2.3,0.78,,146133,nvda 2017,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T03:02:20-05:00,build_pairs_stocks,ok,2.1,0.86,,179996,nvda 2018,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T03:02:22-05:00,build_pairs_stocks,ok,2.3,0.97,,167473,nvda 2019,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T03:02:25-05:00,build_pairs_stocks,ok,3.7,1.34,,334664,nvda 2020,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T03:02:28-05:00,build_pairs_stocks,ok,5.0,1.52,,399751,nvda 2021,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T03:02:33-05:00,build_pairs_stocks,ok,5.3,1.65,,352241,nvda 2022,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T03:02:39-05:00,build_pairs_stocks,ok,5.6,1.66,,534107,nvda 2023,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T03:02:59-05:00,audit_stocks,ok,1.9,0.35,,,aapl,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T03:02:59-05:00,audit_stocks,ok,3.2,0.69,,,tsla,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T03:02:59-05:00,audit_stocks,ok,3.6,0.71,,,qqq,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T03:03:01-05:00,audit_stocks,ok,2.0,0.46,,,nvda,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T03:03:02-05:00,audit_stocks,ok,1.3,0.69,,,slv,c6d0eb0,True,3.14.10,Windows-11,
+2026-11-06T03:05:03-05:00,protocol_stocks,failed,110.1,1.33,1224786,,"aapl 2016-2023, §16.15 items 2-5, 7",89c1d20,True,3.14.10,Windows-11,
+2026-11-06T03:06:55-05:00,build_pairs_any,ok,3.2,0.64,,247811,aapl 2016,89c1d20,True,3.14.10,Windows-11,ok 242491; in band 150732
+2026-11-06T03:06:59-05:00,build_pairs_any,ok,2.7,0.87,,286523,aapl 2017,89c1d20,True,3.14.10,Windows-11,ok 280724; in band 150454
+2026-11-06T03:07:01-05:00,build_pairs_any,ok,2.6,0.92,,295582,aapl 2018,89c1d20,True,3.14.10,Windows-11,ok 290982; in band 161814
+2026-11-06T03:07:04-05:00,build_pairs_any,ok,2.8,1.04,,312592,aapl 2019,89c1d20,True,3.14.10,Windows-11,ok 307189; in band 185364
+2026-11-06T03:07:07-05:00,build_pairs_any,ok,4.7,1.22,,524798,aapl 2020,89c1d20,True,3.14.10,Windows-11,ok 507796; in band 325728
+2026-11-06T03:07:12-05:00,build_pairs_any,ok,4.4,1.22,,419671,aapl 2021,89c1d20,True,3.14.10,Windows-11,ok 414987; in band 243260
+2026-11-06T03:07:16-05:00,build_pairs_any,ok,4.4,1.22,,377280,aapl 2022,89c1d20,True,3.14.10,Windows-11,ok 368132; in band 211653
+2026-11-06T03:07:21-05:00,build_pairs_any,ok,4.3,1.22,,395920,aapl 2023,89c1d20,True,3.14.10,Windows-11,ok 390344; in band 211294
+2026-11-06T03:07:28-05:00,ext_books,ok,38.9,1.27,1118638,672,"aapl W12, §16.14",89c1d20,True,3.14.10,Windows-11,
+2026-11-06T03:08:10-05:00,ext_paths,ok,60.4,2.16,,864,"aapl H 5 10, §16.11",89c1d20,True,3.14.10,Windows-11,
+2026-11-06T03:09:14-05:00,protocol_stocks,failed,110.2,1.57,1349864,,"nvda 2016-2023, §16.15 items 2-5, 7",89c1d20,True,3.14.10,Windows-11,
+2026-11-06T03:11:07-05:00,build_pairs_any,ok,2.6,0.51,,167924,nvda 2016,89c1d20,True,3.14.10,Windows-11,ok 163662; in band 115964
+2026-11-06T03:11:09-05:00,build_pairs_any,ok,2.9,0.75,,234698,nvda 2017,89c1d20,True,3.14.10,Windows-11,ok 229378; in band 146133
+2026-11-06T03:11:12-05:00,build_pairs_any,ok,3.1,0.86,,283392,nvda 2018,89c1d20,True,3.14.10,Windows-11,ok 279377; in band 179996
+2026-11-06T03:11:15-05:00,build_pairs_any,ok,3.5,0.99,,265828,nvda 2019,89c1d20,True,3.14.10,Windows-11,ok 262181; in band 167473
+2026-11-06T03:11:19-05:00,build_pairs_any,ok,5.0,1.27,,520801,nvda 2020,89c1d20,True,3.14.10,Windows-11,ok 505776; in band 334664
+2026-11-06T03:11:24-05:00,build_pairs_any,ok,5.5,1.58,,671795,nvda 2021,89c1d20,True,3.14.10,Windows-11,ok 659440; in band 399751
+2026-11-06T03:11:30-05:00,build_pairs_any,ok,5.6,1.66,,570090,nvda 2022,89c1d20,True,3.14.10,Windows-11,ok 553727; in band 352241
+2026-11-06T03:11:35-05:00,build_pairs_any,ok,6.0,1.81,,869420,nvda 2023,89c1d20,True,3.14.10,Windows-11,ok 858751; in band 534107
+2026-11-06T03:11:44-05:00,ext_books,ok,38.5,1.51,1302075,672,"nvda W12, §16.14",89c1d20,True,3.14.10,Windows-11,
+2026-11-06T03:12:26-05:00,ext_paths,ok,66.4,2.77,,864,"nvda H 5 10, §16.11",89c1d20,True,3.14.10,Windows-11,
+2026-11-06T02:32:37-05:00,ext_starve,ok,2527.3,3.97,,13260,spy §16.13,89c1d20,True,3.14.10,Windows-11,
+2026-11-06T03:13:36-05:00,protocol_stocks,ok,341.0,3.15,2635748,360,"tsla 2016-2023, §16.15 items 2-5, 7",f9f9fe3,True,3.14.10,Windows-11,
+2026-11-06T03:19:20-05:00,build_pairs_any,ok,4.2,0.74,,271682,tsla 2016,f9f9fe3,True,3.14.10,Windows-11,ok 265365; in band 179134
+2026-11-06T03:19:25-05:00,build_pairs_any,ok,5.2,1.02,,370698,tsla 2017,f9f9fe3,True,3.14.10,Windows-11,ok 363231; in band 233216
+2026-11-06T03:19:30-05:00,build_pairs_any,ok,5.7,1.30,,536393,tsla 2018,f9f9fe3,True,3.14.10,Windows-11,ok 529769; in band 347563
+2026-11-06T03:19:36-05:00,build_pairs_any,ok,6.4,1.74,,554237,tsla 2019,f9f9fe3,True,3.14.10,Windows-11,ok 546754; in band 339762
+2026-11-06T03:19:42-05:00,build_pairs_any,ok,14.1,2.96,,1679695,tsla 2020,f9f9fe3,True,3.14.10,Windows-11,ok 1639316; in band 1074049
+2026-11-06T03:16:46-05:00,protocol_stocks,ok,191.7,1.70,1224786,360,"aapl 2016-2023, §16.15 items 2-5, 7",f9f9fe3,True,3.14.10,Windows-11,
+2026-11-06T03:19:56-05:00,build_pairs_any,ok,11.6,2.99,,1320624,tsla 2021,f9f9fe3,True,3.14.10,Windows-11,ok 1306252; in band 704979
+2026-11-06T03:20:08-05:00,build_pairs_any,ok,10.4,2.99,,1046323,tsla 2022,f9f9fe3,True,3.14.10,Windows-11,ok 1018837; in band 627658
+2026-11-06T03:20:18-05:00,build_pairs_any,ok,6.9,2.99,,819253,tsla 2023,f9f9fe3,True,3.14.10,Windows-11,ok 810146; in band 482338
+2026-11-06T03:20:30-05:00,ext_books,ok,74.1,2.50,2547238,672,"tsla W12, §16.14",f9f9fe3,True,3.14.10,Windows-11,
+2026-11-06T03:20:02-05:00,protocol_stocks,ok,207.4,1.87,1349864,360,"nvda 2016-2023, §16.15 items 2-5, 7",f9f9fe3,True,3.14.10,Windows-11,
+2026-11-06T03:21:50-05:00,ext_paths,ok,148.0,5.25,,864,"tsla H 5 10, §16.11",f9f9fe3,True,3.14.10,Windows-11,
+2026-11-06T03:15:10-05:00,ext_starve,ok,720.4,1.29,,7140,aapl §16.13,f9f9fe3,True,3.14.10,Windows-11,
+2026-11-06T03:23:35-05:00,protocol_stocks,ok,378.7,3.15,2635748,360,"tsla 2016-2023, §16.15 items 2-5, 7",f9f9fe3,True,3.14.10,Windows-11,
+2026-11-06T03:24:23-05:00,protocol_stocks,ok,368.6,3.07,2646547,360,"qqq 2016-2023, §16.15 items 2-5, 7",f9f9fe3,True,3.14.10,Windows-11,
+2026-11-06T03:30:36-05:00,build_pairs_any,ok,4.5,0.91,,429963,qqq 2016,f9f9fe3,True,3.14.10,Windows-11,ok 422184; in band 292288
+2026-11-06T03:30:40-05:00,build_pairs_any,ok,4.5,1.32,,534911,qqq 2017,f9f9fe3,True,3.14.10,Windows-11,ok 524803; in band 313942
+2026-11-06T03:30:45-05:00,build_pairs_any,ok,6.7,1.53,,646879,qqq 2018,f9f9fe3,True,3.14.10,Windows-11,ok 637103; in band 434677
+2026-11-06T03:30:51-05:00,build_pairs_any,ok,7.6,1.82,,670863,qqq 2019,f9f9fe3,True,3.14.10,Windows-11,ok 660522; in band 459897
+2026-11-06T03:30:59-05:00,build_pairs_any,ok,10.4,2.67,,1355784,qqq 2020,f9f9fe3,True,3.14.10,Windows-11,ok 1327249; in band 946187
+2026-11-06T03:31:10-05:00,build_pairs_any,ok,12.7,3.30,,1587710,qqq 2021,f9f9fe3,True,3.14.10,Windows-11,ok 1572581; in band 1007682
+2026-11-06T03:31:22-05:00,build_pairs_any,ok,13.5,3.30,,1393006,qqq 2022,f9f9fe3,True,3.14.10,Windows-11,ok 1357586; in band 821195
+2026-11-06T03:31:36-05:00,build_pairs_any,ok,10.1,3.30,,1337800,qqq 2023,f9f9fe3,True,3.14.10,Windows-11,ok 1305587; in band 748975
+2026-11-06T03:31:50-05:00,ext_books,ok,60.1,2.15,2530161,672,"qqq W12, §16.14",f9f9fe3,True,3.14.10,Windows-11,
+2026-11-06T03:32:55-05:00,ext_paths,ok,128.4,5.07,,864,"qqq H 5 10, §16.11",f9f9fe3,True,3.14.10,Windows-11,
+2026-11-06T03:35:07-05:00,protocol_stocks,ok,104.6,1.18,592299,360,"slv 2016-2023, §16.15 items 2-5, 7",f9f9fe3,True,3.14.10,Windows-11,
+2026-11-06T03:36:55-05:00,build_pairs_any,ok,3.6,0.56,,186672,slv 2016,f9f9fe3,True,3.14.10,Windows-11,ok 182496; in band 113394
+2026-11-06T03:36:58-05:00,build_pairs_any,ok,3.3,0.62,,146965,slv 2017,f9f9fe3,True,3.14.10,Windows-11,ok 143306; in band 82031
+2026-11-06T03:37:02-05:00,build_pairs_any,ok,2.3,0.62,,113392,slv 2018,f9f9fe3,True,3.14.10,Windows-11,ok 110019; in band 63689
+2026-11-06T03:37:04-05:00,build_pairs_any,ok,2.0,0.70,,135189,slv 2019,f9f9fe3,True,3.14.10,Windows-11,ok 130007; in band 75399
+2026-11-06T03:37:06-05:00,build_pairs_any,ok,3.8,0.90,,276372,slv 2020,f9f9fe3,True,3.14.10,Windows-11,ok 267443; in band 180251
+2026-11-06T03:37:10-05:00,build_pairs_any,ok,4.1,0.99,,303641,slv 2021,f9f9fe3,True,3.14.10,Windows-11,ok 298597; in band 206944
+2026-11-06T03:37:14-05:00,build_pairs_any,ok,3.9,0.99,,246202,slv 2022,f9f9fe3,True,3.14.10,Windows-11,ok 240393; in band 162368
+2026-11-06T03:37:18-05:00,build_pairs_any,ok,2.9,0.99,,201428,slv 2023,f9f9fe3,True,3.14.10,Windows-11,ok 197767; in band 119741
+2026-11-06T03:27:16-05:00,ext_starve,ok,608.0,1.50,,7140,nvda §16.13,f9f9fe3,True,3.14.10,Windows-11,
+2026-11-06T03:37:23-05:00,ext_books,ok,28.5,0.68,542876,672,"slv W12, §16.14",f9f9fe3,True,3.14.10,Windows-11,
+2026-11-06T03:37:55-05:00,ext_paths,ok,36.5,1.32,,864,"slv H 5 10, §16.11",f9f9fe3,True,3.14.10,Windows-11,
+2026-11-06T03:40:27-05:00,ext_paths,ok,471.0,7.30,,4320,"spx H 5 10, §16.11",2527127,True,3.14.10,Windows-11,
+2026-11-06T03:37:28-05:00,ext_starve,ok,828.8,2.55,,7140,tsla §16.13,2527127,True,3.14.10,Windows-11,
+2026-11-06T03:51:25-05:00,ext_starve,ok,724.6,2.18,,7140,qqq §16.13,2527127,True,3.14.10,Windows-11,
+2026-11-06T04:03:32-05:00,ext_starve,ok,277.8,0.73,,7140,slv §16.13,2527127,True,3.14.10,Windows-11,
