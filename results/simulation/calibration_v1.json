@@ -1,0 +1,55 @@
+{
+ "garch": {
+  "omega": 2.379458653390013e-06,
+  "alpha": 0.1593811798469798,
+  "beta": 0.8267219340979819,
+  "nu": 5.066067478840562,
+  "loglik_decimal_units": 8639.693599950759,
+  "n_returns": 2516,
+  "converged": true
+ },
+ "s_eta": 0.17193816525839942,
+ "s_eps": {
+  "C": 0.69249913155806,
+  "P": 0.48076539398014995
+ },
+ "q": {
+  "C": [
+   -0.14503304681200857,
+   0.12807740108485985,
+   -0.1617052885858365
+  ],
+  "P": [
+   -0.16701258261531535,
+   -0.06610775644363812,
+   0.043640628772309835
+  ]
+ },
+ "n_sessions_2019": 232,
+ "n_pairs_2019": {
+  "C": 248692,
+  "P": 321275
+ },
+ "n_pairs_2019_total": 569967,
+ "garch_sigma_2019_mean_daily": 0.00833566592040438,
+ "r2_sd_2019_returns_mean_daily": 0.008048151138528378,
+ "truth_moments_years": 200,
+ "truth_at_beta_zero_note": "G(0)=0 by construction",
+ "seed": 20261106,
+ "choices": [
+  "Optimisation in percent units, results converted to decimal daily units; omega scaled by 1e-4.",
+  "GARCH fitted on log returns dated 2010-01-04..2019-12-31 (first return uses the last 2009 close); variance recursion started at the sample variance; Nelder-Mead from 3 starts, best kept; alpha+beta<0.9999 enforced.",
+  "Closes: Cboe before 2016-10-28, FRED from then on (FRED NaN holidays dropped).",
+  "Simulated GARCH starts at the unconditional variance, then 500 burn-in sessions.",
+  "2019 pairs ending after 2019-12-31 (the 2019-12-31 starts, which end 2020-01-02) are dropped from the q fit, calibration and cross-section (unblinding rule).",
+  "sigma_t for a pair = GARCH conditional sd of the return realised on its next_session date; r = pair's dSn (simple return).",
+  "eta_hat_t = unweighted mean of e'/v over all options (both types) in the session; s_eta = sd (ddof=1) of eta_hat/sigma over sessions; no correction for sampling noise in eta_hat.",
+  "s_eps per type = sd (ddof=1) of (e'/v - eta_hat)/(sqrt(tau)*sigma) over that type's pairs, pooled across sessions.",
+  "Random draws (returns, eta, session draws, subsamples, eps) are common across the five kappas within a replication; bootstrap seed 10000+rep, shared by C and P.",
+  "Bootstrap index is the 252 test sessions; every test session has options of both types.",
+  "The truth uses the pair-weighted (per option) moments, pooled over all simulated sessions; the 200 years are 4 independent chunks of 50 years, each a fresh GARCH path with its own burn-in.",
+  "Training-year and test-year sessions are consecutive draws of one GARCH path (training immediately precedes test).",
+  "Pilot/full replication r uses SeedSequence([20261106, 1, r]); long simulation uses SeedSequence([20261106, 777]).",
+  "2020-like flag: test-year top-10 session share of R1 squared error, calls and puts summed, >= 0.5; the same flag is applied to both types of a replication."
+ ]
+}
