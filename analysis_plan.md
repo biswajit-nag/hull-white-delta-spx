@@ -33,6 +33,37 @@
 
 The run that unblinds 2020 records two commits in the `notes` column of the runtime log: the plan's (v1.0) and the implementation's.
 
+## Status (updated 2026-11-06)
+
+*Added 2026-11-06 at the author's request. It maps what has run, and where its results are. It changes no specification. Which years each run saw is in `results/year_ledger.csv`; every run's commit and wall time is in `results/runtime_log.csv`.*
+
+| Item | Specified | Ran | Main scripts | Results | Notebook |
+|---|---|---|---|---|---|
+| The confirmatory core: rehearsal, dry run, the 2020 verdict (§§5–13) | v1.0, 2026-11-04 | 2026-11-04 (plan 77b030e) | `run_rehearsal.py`, `run_test_year.py` | `results/rehearsal/`, `results/2020/` | 01–05 |
+| Walk-forward 2010–2023 (§14 item 2) | v1.0 | 2026-11-04 | `run_walkforward.py` | `results/walkforward/` | 06 |
+| SPY (§16.1; a full replication from §16.3) | 2026-11-04; 11-05 | 2026-11-04; 11-05 | `build_greeks_spy.py`, `build_pairs_spy.py`, `run_spy.py`, `run_walkforward.py --spy` | `results/spy/` | 07 |
+| Heston (§16.2; rewritten in §16.5) | 2026-11-04; 11-05 | 2026-11-04; 11-05 | `heston2_calibrate.py`, `heston2_hedge.py` | `results/heston/`, `results/heston2/` | 05, 09 |
+| R5–R8 under every protocol (§16.4) | 2026-11-05 | 2026-11-05 | `run_learners_variants.py`, `run_walkforward_r5_r8.py` | `results/2020/`, `results/walkforward/` | 08 |
+| Short-dated options (§16.6) | 2026-11-05 | 2026-11-05 | `run_short_dated.py` | `results/short_dated/` | 08 |
+| R9–R11 (§16.7) | 2026-11-05 | 2026-11-05 | `run_r9_r11.py` | `results/2020/`, `results/walkforward/` | 08 |
+| R2's degree, P0–P8 and PCV (§16.8) | 2026-11-05 | 2026-11-05 | `run_degrees.py` | `results/walkforward/` | 08 |
+| Published aggregations; level and shape (§16.9) | 2026-11-05 | 2026-11-05 | `compare_published.py`, `level_shape.py` | `results/walkforward/` | 10 |
+| Stress, parameter stability, maturity (§16.10) | 2026-11-05 | 2026-11-05 | `stress_episodes.py`, `parameter_stability.py` | `results/walkforward/` | 10 |
+| Held positions, simulation, data starvation, books (§16.11–§16.14) | 2026-11-05; revised 11-06 | pending | | | 11 (planned) |
+| Single stocks and ETFs (§16.15) | 2026-11-05; revised 11-06 | pending | | | 12 (planned) |
+
+**The extensions of §14:**
+1. Pending items of §§1–13: none known.
+2. The walk-forward: run.
+3. Short-dated options: run (§16.6).
+4. A spline or varying-coefficient adjustment: not run. The polynomial degrees P0–P8 (§16.8) address the same question.
+5. Smile-based and regime-dependent deltas: not run.
+6. Further machine-learning challengers: LightGBM decomposed (§16.7). GAM, EBM and HedgeNet: not run.
+7. Stochastic-volatility deltas: Heston run (§16.2, §16.5); SABR not run.
+8. Simulations with a known truth: §16.12 (pending).
+9. SPY: run (§16.1, §16.3).
+10. The jump term: not run.
+
 ## 1. Question and scope
 
 **Question.** On OptionsDX SPX end-of-day quotes in 2020, does Hull and White's minimum-variance (MV) delta reduce next-session squared hedging error:
@@ -491,6 +522,13 @@ They may run once the confirmatory core is complete, before or after submission,
 | 2026-11-05 | §16.8 | The degree of R2's polynomial, 0 to 8 (P0–P8), and a degree chosen by validation inside each training window (PCV), in the walk-forward for SPX and SPY (§16.8). | The author's request of 2026-11-05 | Yes: every result of §16.3–§16.7, and the 2019 analysis of R9 |
 | 2026-11-05 | §16.9 | Two descriptive diagnostics: SPX Gains under the published aggregations and samples (mean monthly Gain, delta buckets, no volume rule, out of the money), and the level and shape of the correction by refit and year (§16.9). | The author's questions of 2026-11-05 | Yes: every result above |
 | 2026-11-05 | §16.10 | Stress episodes over 2010–2023 (two definitions from the index alone), parameter stability (coefficient paths with clustered standard errors, non-overlapping comparisons, Heston's daily parameters) and the maturity-scaling check by year (§16.10). | The author's request of 2026-11-05, following the brief's model-validation direction | Yes: every result above |
+| 2026-11-05 | §16.11 | Holding-period hedging error: 5- and 10-session paths of one contract, rebalanced daily with the W12 fits, scored by Gain on the path error, with mean path errors and attrition (§16.11). | The author's request of 2026-11-05, after a review of past Erdős projects (one found that a one-session Gain did not carry over to a contract's life, on simulated data) | Yes: every result above |
+| 2026-11-05 | §16.12 | Interval coverage and power under a known truth: a regression-level simulation calibrated to 2010–2019 returns and 2019's cross-section and residuals (§16.12; §14 item 8). | The author's request of 2026-11-05: the verdict rests on the session-block intervals in a year whose error is concentrated in ten sessions | Yes: every result above |
+| 2026-11-05 | §7, §16.13 | Training-data starvation: windows of 1, 2, 3 and 6 months, with the minimum training coverage relaxed to ⌈0.7·21·W⌉ sessions for these windows only; and W12 fits on a random fraction or a fixed number of each training session's pairs (§16.13). | The author's request of 2026-11-05, after the review of past projects (the Summer 2026 winner tested its models on less data) | Yes: every result above |
+| 2026-11-05 | §16.14 | Hedging error at the level of a book: four books formed from day-one information, each session's error the mean over the book (§16.14). | The author's request of 2026-11-05 | Yes: every result above |
+| 2026-11-05 | §16.15 | Single stocks and ETFs after Hull and White's §VIII (AAPL, NVDA, TSLA, SLV, QQQ, as the data allow): out of the money only, the vendor's IV and Greeks, W12 and W36 (§16.15). Runs only if the data are obtained. | The author's request of 2026-11-05 | No single-stock or non-SPX ETF data had been obtained |
+| 2026-11-06 | §16.11–§16.15, preamble | Revised after the author's review, before any of them ran. One rule set for every experiment from §16.11 on (R1–R4, R6, R9, P0; Heston on SPX). §16.11: a path is H one-session hedges in a row; after the start no band, maturity floor or volume rule applies (requiring them selects on the outcome), and the contract must outlive the path, replacing the 14 + 2H days rule. §16.13: the spread over seeds; all underlyings. §16.14: every year, 2020 and 2022 highlighted; all underlyings. §16.15: its own IV and Greeks as for SPY, over the full band (the out-of-the-money restriction and the vendor's Greeks dropped), the SPY protocol on all five underlyings, the vendor's snapshot as the level. Raw files copied to `data/raw/optionsdx_stocks/` with checksums. | The author's review of 2026-11-06 | No: none of §16.11–§16.15 had run, and no outcome on the five underlyings had been computed |
+| 2026-11-06 | Status | A status section after the version note: what has run, its scripts, results and notebooks, and the status of §14's items. No specification changes. | The author's request of 2026-11-06 | — |
 
 ## 16. Extension specifications (appended under §14's rule)
 
@@ -728,3 +766,190 @@ At the author's request, after every result above had been seen. All descriptive
      - for W12, the z-statistic between fits 12 months apart, whose windows do not overlap, and the share of |z| > 2 (a Chow-type comparison).
    - **Heston:** the daily calibration-B2 parameters' yearly median, interquartile range, median day-to-day change and share at a bound.
 3. **The maturity assumption, by year.** The specification check of §10 (τ^(−α) in place of 1/√τ, α ∈ {0, 0.25, 0.5, 0.75, 1}), run on the 12-month walk-forward for every test year 2011–2023 and for the RV-stress and calm sessions. Reported: each α's Gain over α = 0.5, with intervals. Unadjusted, so descriptive.
+
+### The rules scored from §16.11 on. Fixed 2026-11-06
+
+The author's choice, before any experiment from §16.11 on had run. Every experiment specified from here on scores the same rules, unless its section says otherwise:
+- R1, R2, R3, R4, R6, R9 and P0;
+- on SPX, also Heston's H_model, H_mv and H_fit (§16.5);
+- R0 wherever an effectiveness figure is needed.
+
+Fitting and tuning:
+- **R9** keeps the hyperparameters frozen for its walk-forward (§16.7). No rule is retuned.
+- **Not carried forward:** R5, R11, P1–P8 and PCV, which are equal to R2 within ±0.02 a year; and R7, R8 and R10, which are worse (§16.4, §16.7, §16.8).
+
+### 16.11 Holding-period hedging error. Specified 2026-11-05; revised 2026-11-06, before any run
+
+At the author's request, after every result above had been seen. Descriptive.
+
+**The question.** The verdict scores one-session hedges. A desk holds a position and re-hedges it every day: does the one-session Gain carry over to the error of a position held for several sessions? A Summer 2026 project on simulated data found a 46% one-session Gain and no gain at all over a contract's life.
+
+**Paths**
+- **A path is H one-session hedges in a row,** not one hedge held for H sessions. The position in one contract (keyed as in §2) is re-hedged at every close, with that day's hedge ratio from the rule, as a desk would do. H ∈ {5, 10} sessions.
+- **Starts:** every H-th session of the test period, numbered from its first session. So the paths of one length never overlap in time, and all paths that start on one session share one index path.
+- **At the start,** the path's first pair is in the analysis sample (§5), so the start uses day-one information only. The contract also expires after the path's last session (by the NYSE calendar), so it is alive throughout.
+- **Every later day needs only a usable hedge:** a two-sided quote on both ends and an implied volatility and Greeks on that day, from the Greeks panel, which covers every quoted contract-day.
+  - No delta band, maturity floor or volume rule applies after the start.
+  - Requiring them would select on the path's outcome: an option leaves the band exactly when the index moves a lot, so the paths that leave are the large-error ones. The same reasoning is why §5 conditions on day one only, never on day two.
+  - A path with a missing day is dropped and counted.
+
+**Hedge ratios**
+- Each day's ratio comes from the fit for that day's month on W12 (in 2020, the test-year fits).
+- The rules are those of the preamble above. On days outside the band, a fitted correction is evaluated at that day's δ, an extrapolation that is reported as such.
+- **Heston's** Greeks exist only for analysis-sample pairs. So the Heston rules are reported on the paths whose every day is in the analysis sample, with every other rule re-reported on that subset.
+
+**The path error,** in units of the index level on the start day:
+  E = Σₖ Sₖ·eₖ / S₀,
+where eₖ is the one-session normalized error of §6 and Sₖ the level. The option-price changes telescope, so quote noise in the mids enters only at the path's two ends.
+
+**Reported for each year and H**
+- Gain_H = 1 − ΣE²(rule)/ΣE²(R1), over R1 and over R2.
+- Beside it, the one-session Gain on exactly the same pairs (the H = 1 reference).
+- Each rule's mean path error, and its difference from R1's. This is the expected-P&L cost of the correction, which the Sharpe argument assumes is negligible.
+- Attrition: the share of eligible starts that complete their path, by year and by whether the path left the band.
+
+**Intervals:** a circular block bootstrap over start sessions, with blocks of max(1, round(10/H)) starts and B = 10,000.
+- With H = 10, a year has about 25 starts, so the yearly intervals are rough.
+- For SPX and SPY, 2011–2019, 2020 and 2021–2023 are also reported pooled.
+
+**Underlyings:** SPX and SPY, 2011–2023 (no Heston for SPY), and the five of §16.15.
+
+### 16.12 Interval coverage and power under a known truth (simulation). Specified 2026-11-05
+
+At the author's request, after every result above had been seen. This is §14 item 8 in a form that runs overnight. The rule set of the preamble does not apply: the simulation's truth lies in R2's family, and it scores R2 against R1, the comparison behind H1.
+
+**The question.** The verdict rests on §9's session-block intervals, in a year when ten sessions hold 65–73% of the error. Do the intervals cover the truth at the nominal rate under that concentration? And how large a true Gain would §8's H1 criterion confirm in such a year?
+
+**A regression-level market, not an option-pricing one.** It keeps what matters for inference: every option on a session shares that session's index move, the error comes in volatility bursts, and coefficients are fitted on one year and applied to the next.
+- **Index returns:** r_t = σ_t·z_t, a GARCH(1,1) with standardized Student-t innovations, fitted by maximum likelihood to the S&P 500's daily log returns over 2010–2019 (the closes of §2).
+- **The cross-section:** each simulated session copies the options of a randomly drawn real 2019 session: type, δ, v = ν/(S√τ), τ, and the gamma coefficient g = ½Γ·S. It is subsampled to at most 300 options per type.
+- **The Black–Scholes error:**
+  y_it = κ·q(δ_i)·v_i·r_t + v_i·η_t + g_i·(r_t² − σ_t²) + v_i·√τ_i·σ_t·s_ε·ε_it,
+  where:
+  - q(δ) is 2019's fitted R2 quadratic for that type, and κ ∈ {0, 0.5, 1, 1.5, 2} sets the true effect;
+  - η_t = s_η·σ_t·w_t is the part of the session's volatility move that the index doesn't explain, with w_t a standardized Student-t independent of z_t;
+  - the third term is gamma's P&L net of theta, at the session's true variance;
+  - ε_it is i.i.d. standard normal.
+- **Calibration:** s_η and s_ε by moments, from 2019's real R2 errors scaled by each session's GARCH-filtered σ_t. s_η comes from the session means of e/v, and s_ε from the deviations within a session.
+
+**One replication**
+- Simulate 252 training and 252 test sessions from the stationary GARCH, after 500 burn-in sessions. Calls and puts share the returns, η_t and the session draws.
+- Fit R2 on the training year (§7; one fit stands in for the monthly refits).
+- Compute the test year's R1 and R2 errors, and §9's interval for R2 over R1, with blocks of 10 and B = 2,000 (not 10,000, for time).
+- 1,000 replications for each κ.
+
+**The truth:** G(β̂) = 1 − E[(y − β̂ᵀX)²]/E[y²] under the stationary law. It is computed in closed form in β̂, from the moments of one long simulation (200 years) per type and κ.
+
+**Reported**
+- Coverage of the 95% interval, over all replications and over the "2020-like" ones: those whose test year puts at least 50% of R1's squared error in its ten largest sessions (2020 had 65–73%).
+- The median interval width.
+- The H1 pass rate (both types' lower bounds above 0), against the mean true Gain, for all years and for 2020-like years.
+
+**Limits, stated in advance.** The spot–volatility relation here is stationary and linear in r_t, with no drift in the level. Coverage here is therefore a best case: real years add the drift of §16.10.
+
+### 16.13 Training-data starvation. Specified 2026-11-05; revised 2026-11-06, before any run
+
+At the author's request, after every result above had been seen. Descriptive.
+
+**The question.** How much training data do the fitted rules need, and in which unit?
+
+**The expectation, stated now.** Every option on a session shares that session's index move, so the information is in the number of sessions, not the number of options. Thinning the options within each session should cost little until very few remain; shortening the window should matter.
+
+**Rules:** the preamble's.
+- H_model and H_mv are fitted to no hedging data, so they are reported once, as references.
+- H_fit's β̂ is trained on the shortened or thinned data, like the other fitted rules.
+
+1. **Fewer sessions.**
+   - **Windows:** W ∈ {1, 2, 3, 6} months, refitted monthly under §7's boundary rule, beside W12.
+   - **Minimum training coverage:** ⌈0.7·21·W⌉ sessions per type (15, 30, 45, 89), in place of §7's 150, which only W12 and longer can meet.
+   - **Test months:** SPX and SPY 2011-01 to 2023-12; the five of §16.15 2017-01 to 2023-12. Common months only.
+2. **Fewer options per session.**
+   - **Window:** W12, with the test pairs unchanged.
+   - **Thinning:** within each training session and type, keep a random fraction φ ∈ {0.25, 0.05, 0.01} of the pairs (at least one), or a fixed k ∈ {10, 3} pairs.
+   - **Seeds:** five, 2026 to 2030.
+   - **Chronology:** thinning happens inside the chronological training window and never touches the test set, so this is not a random train/test split.
+
+**Reported, for both axes**
+- The yearly Gain over R1 and over R2 (full-data W12), with session-block intervals as in §14 item 2.
+- The median yearly Gain over 2011–2023 and over 2015–2023 (for the five, 2017–2023).
+- The change from the full-data W12 fit, on common months.
+- 2020 and 2022 shown separately: there a short window could adapt faster to a changed level.
+- For thinning, the spread over the five seeds: the minimum, median and maximum of each yearly Gain and of the median yearly Gain.
+
+**Underlyings:** SPX, SPY and the five of §16.15.
+
+### 16.14 Hedging error at the level of a book. Specified 2026-11-05; revised 2026-11-06, before any run
+
+At the author's request, after every result above had been seen. Descriptive.
+
+**The question.** The Gain pools every option's squared error as if each were hedged alone, but a dealer hedges the net delta of a book. Errors specific to one option diversify away across a book, while errors common to the session, which the minimum-variance correction targets, add up. Is the Gain on a book larger or smaller?
+
+**Books,** formed each session from that session's analysis pairs, using day-one information only, with one contract of each option:
+1. all calls;
+2. all puts;
+3. a long-volatility book: out-of-the-money puts (K ≤ F) and out-of-the-money calls (K ≥ F), all long;
+4. a risk reversal: long out-of-the-money calls and short out-of-the-money puts. Their volatility exposures partly cancel, so the corrections should partly cancel too. This book is the control.
+
+**The book's error** on a session is the mean of its options' normalized errors (weights 1/N_t). That way the growth in listed strikes over the years doesn't weight the later sessions more.
+
+**Reported for each year 2011–2023 on W12** (the five of §16.15: 2017–2023), with 2020 and 2022 shown separately in the summaries:
+- the book Gain 1 − Σ_t B_t(rule)²/Σ_t B_t(R1)², for the preamble's rules, over R1 and over R2, with §14 item 2's session-block intervals;
+- beside it, each book's pooled per-option Gain;
+- the common share Σ_t B_t(R1)² / Σ_t mean_i e_it(R1)², the part of the per-option error that survives averaging.
+
+**Underlyings:** SPX, SPY and the five of §16.15.
+
+### 16.15 Single stocks and ETFs: the SPY protocol on five underlyings. Specified 2026-11-05; revised 2026-11-06, before any run
+
+At the author's request, after every result above had been seen, and before any outcome on these underlyings was computed. Exploratory; no verdict.
+
+**Context:** Hull and White's Table 3 (2004–2015, 36-month window) gives an average Gain over the 30 Dow stocks of 10.3% for calls and 2.5% for puts, and 7.7% and 2.5% for three commodity ETFs.
+
+**Data**
+- **The files:** `data/raw/optionsdx_stocks/`, 75 archives with `SHA256SUMS`, downloaded by the author on 2026-11-05. They cover AAPL, NVDA and TSLA (single stocks), QQQ (an index ETF) and SLV (a silver ETF; Hull and White used it among their commodity ETFs), for every month from 2016-01 to 2023-12.
+- **One anomaly:** TSLA's 2021 archive holds an empty July file. The July file in the 2021q3 archive is used.
+- **Format:** the same 33 columns as SPX and SPY; the project's parser reads them unchanged. In the month checked, volume never exceeds 998, so E7's reading of empty volume applies.
+
+**The pipeline, as for SPY (§16.1, §16.3)**
+- **Panels:** interim and step-3 panels under the SPY rules: P.M.-settled, no stamp window, NYSE sessions.
+- **The level:** the vendor's `UNDERLYING_LAST` is the primary S, and `S_close`, for these five.
+  - Why: no official close for them is in hand without reversing split and dividend adjustments (Stooq's files are adjusted for both).
+  - On SPX, the snapshot sat a median 0.7 bp from the official close.
+  - Level B is therefore the same series, and level A doesn't exist for American options.
+- **Splits:** a pair whose two sessions straddle a split is excluded and counted.
+  - Splits are identified by a one-session move in `UNDERLYING_LAST` above 30%, and checked against AAPL 4:1 (2020-08-31), NVDA 4:1 (2021-07-20), and TSLA 5:1 (2020-08-31) and 3:1 (2022-08-25).
+  - Hull and White also removed split days.
+- **Rates:** r(τ) from the same session's SPX parity curve (§16.1).
+- **Dividends:**
+  - TSLA and SLV pay none, so q = 0.
+  - For AAPL, NVDA and QQQ: cash dividends (ex-date and amount) from a public dividend history, with its source and download date in `data/external/SOURCES.csv`. Pricing uses q = the trailing 12 months' dividends over the price, as a continuous yield. Each pair's day-two dividend enters the hedge P&L as `div_next` (§16.3).
+  - If no history can be obtained, q = 0 and `div_next` = 0, flagged.
+- **Implied volatility and Greeks:** our own, as for SPY.
+  - Puts use Lecture 12's American CRR tree, with δ, ν and vanna by differences on the tree.
+  - Calls use the European Black–Scholes formula with yield q. That is exact for TSLA and SLV, where an American call is never exercised early, and an approximation for the dividend payers, as for SPY.
+  - The vendor's Greeks are a diagnostic only. So there is no out-of-the-money restriction: the full band, as for SPX and SPY.
+- **Pairs:** SPY's pair rules (§16.3).
+
+**The protocol, for each underlying separately.** The SPY protocol of §16.3, with these items:
+1. The light audit and the attrition table (§7, §12), before any outcome.
+2. **2020 as the test year,** with 2019 training on W12, under §8's verdict procedure (H1 and the secondary tests), as a descriptive replication, not a confirmatory test.
+   - Robustness variants: W36, F, S3, V, and the rest of 2020 (outside the stress period).
+   - Not run: level A (none exists), the marks, and the vanished-quote scenarios.
+3. **The walk-forward:** W12 from 2017-01, W36 from 2019-01 and W60 from 2021-01, to 2023-12. Yearly Gains and the median yearly Gain.
+4. **§16.10:**
+   - stress episodes: the S&P 500's, as market-wide stress, and each underlying's own RV episodes by the same definition;
+   - parameter stability;
+   - the maturity check.
+5. **§16.9 item 2:** level and shape, with the after-the-fact ceiling.
+6. **§16.11, §16.13 and §16.14.**
+7. **Hull and White's Table 3 comparison:** the mean of monthly Gains on W36, overall and by |δ| tenth.
+
+**Rules:** the preamble's, without Heston. R9 uses SPX's frozen hyperparameters.
+
+**Not run, with reasons:**
+- Heston: a daily calibration to American options on five underlyings doesn't fit the time;
+- short-dated options (§16.6);
+- the published-aggregation comparison other than Table 3;
+- the rules dropped in the preamble.
+
+**Year status:** every year of these five is untouched until these runs. Rows are added to `results/year_ledger.csv`.
