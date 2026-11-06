@@ -1,0 +1,12 @@
+D:\My Code\quant-finance\Fall 2026\Lecture 12\option_pricing.py:279: RuntimeWarning: overflow encountered in divide
+  np.divide(residual, deriv, out=step,
+aapl 2020 585496 {'converged': np.int64(528622), 'one_sided': np.int64(27529), 'outside_price_bounds': np.int64(19397), 'expired': np.int64(8596), 'below_volatility_bracket': np.int64(1058), 'not_identifiable': np.int64(247), 'above_volatility_bracket': np.int64(47)}
+D:\My Code\quant-finance\Fall 2026\Lecture 12\option_pricing.py:279: RuntimeWarning: overflow encountered in divide
+  np.divide(residual, deriv, out=step,
+aapl 2021 479644 {'converged': np.int64(422650), 'one_sided': np.int64(23967), 'outside_price_bounds': np.int64(14682), 'no_rate': np.int64(10534), 'expired': np.int64(7236), 'not_identifiable': np.int64(371), 'below_volatility_bracket': np.int64(116), 'above_volatility_bracket': np.int64(88)}
+D:\My Code\quant-finance\Fall 2026\Lecture 12\option_pricing.py:279: RuntimeWarning: overflow encountered in divide
+  np.divide(residual, deriv, out=step,
+aapl 2022 456040 {'converged': np.int64(380456), 'outside_price_bounds': np.int64(40823), 'one_sided': np.int64(27425), 'expired': np.int64(6524), 'not_identifiable': np.int64(726), 'above_volatility_bracket': np.int64(82), 'below_volatility_bracket': np.int64(4)}
+D:\My Code\quant-finance\Fall 2026\Lecture 12\option_pricing.py:279: RuntimeWarning: overflow encountered in divide
+  np.divide(residual, deriv, out=step,
+aapl 2023 513084 {'converged': np.int64(398296), 'outside_price_bounds': np.int64(60662), 'one_sided': np.int64(44046), 'expired': np.int64(6762), 'no_rate': np.int64(2154), 'not_identifiable': np.int64(1092), 'above_volatility_bracket': np.int64(72)}

@@ -1,0 +1,9 @@
+tsla 2016: 375,572 rows -> data\processed\optionsdx_long\underlying=tsla\year=2016\tsla_long_2016.parquet (peak memory so far 0.5 GB)
+tsla 2017: 485,934 rows -> data\processed\optionsdx_long\underlying=tsla\year=2017\tsla_long_2017.parquet (peak memory so far 0.6 GB)
+tsla 2018: 632,318 rows -> data\processed\optionsdx_long\underlying=tsla\year=2018\tsla_long_2018.parquet (peak memory so far 0.7 GB)
+tsla 2019: 678,990 rows -> data\processed\optionsdx_long\underlying=tsla\year=2019\tsla_long_2019.parquet (peak memory so far 0.8 GB)
+tsla 2020: 1,845,688 rows -> data\processed\optionsdx_long\underlying=tsla\year=2020\tsla_long_2020.parquet (peak memory so far 1.7 GB)
+tsla 2021: 1,540,312 rows -> data\processed\optionsdx_long\underlying=tsla\year=2021\tsla_long_2021.parquet (peak memory so far 1.7 GB)
+tsla 2022: 1,253,528 rows -> data\processed\optionsdx_long\underlying=tsla\year=2022\tsla_long_2022.parquet (peak memory so far 1.7 GB)
+tsla 2023: 1,001,212 rows -> data\processed\optionsdx_long\underlying=tsla\year=2023\tsla_long_2023.parquet (peak memory so far 1.7 GB)
+wrote results\stocks\tsla\processed_summary_tsla.csv

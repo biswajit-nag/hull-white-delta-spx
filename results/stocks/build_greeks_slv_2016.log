@@ -1,0 +1,37 @@
+D:\My Code\quant-finance\Fall 2026\Lecture 12\option_pricing.py:279: RuntimeWarning: overflow encountered in divide
+  np.divide(residual, deriv, out=step,
+slv 2016 297452 {'converged': np.int64(187828), 'one_sided': np.int64(69819), 'outside_price_bounds': np.int64(31212), 'expired': np.int64(4574), 'not_identifiable': np.int64(3880), 'above_volatility_bracket': np.int64(139)}
+D:\My Code\quant-finance\Fall 2026\Lecture 12\option_pricing.py:279: RuntimeWarning: overflow encountered in divide
+  np.divide(residual, deriv, out=step,
+slv 2017 254804 {'converged': np.int64(147812), 'one_sided': np.int64(67454), 'outside_price_bounds': np.int64(30068), 'not_identifiable': np.int64(5698), 'expired': np.int64(3664), 'above_volatility_bracket': np.int64(108)}
+D:\My Code\quant-finance\Fall 2026\Lecture 12\option_pricing.py:279: RuntimeWarning: overflow encountered in divide
+  np.divide(residual, deriv, out=step,
+slv 2018 202842 {'converged': np.int64(114070), 'one_sided': np.int64(54141), 'outside_price_bounds': np.int64(26030), 'not_identifiable': np.int64(5425), 'expired': np.int64(3054), 'above_volatility_bracket': np.int64(122)}
+D:\My Code\quant-finance\Fall 2026\Lecture 12\option_pricing.py:279: RuntimeWarning: overflow encountered in divide
+  np.divide(residual, deriv, out=step,
+slv 2019 225652 {'converged': np.int64(135802), 'one_sided': np.int64(55688), 'outside_price_bounds': np.int64(23266), 'not_identifiable': np.int64(6214), 'expired': np.int64(2694), 'no_rate': np.int64(1914), 'above_volatility_bracket': np.int64(74)}
+D:\My Code\quant-finance\Fall 2026\Lecture 12\option_pricing.py:279: RuntimeWarning: overflow encountered in divide
+  np.divide(residual, deriv, out=step,
+Traceback (most recent call last):
+  File "D:\My Code\Erdos quant-finance project\scripts\build_greeks_stocks.py", line 137, in <module>
+    main(sys.argv[1], int(sys.argv[2]), int(sys.argv[3]) if len(sys.argv) > 3 else int(sys.argv[2]))
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\My Code\Erdos quant-finance project\scripts\build_greeks_stocks.py", line 127, in main
+    g = build(u, year, yields)
+  File "D:\My Code\Erdos quant-finance project\scripts\build_greeks_stocks.py", line 102, in build
+    res, st = tree_chunks(x, op)
+              ~~~~~~~~~~~^^^^^^^
+  File "D:\My Code\Erdos quant-finance project\scripts\build_greeks_stocks.py", line 61, in tree_chunks
+    res["theta"][idx] = (px(S, sg, T - 1 / 365) - mid) * 365  # per year, as the lectures' theta
+                         ~~^^^^^^^^^^^^^^^^^^^^
+  File "D:\My Code\Erdos quant-finance project\scripts\build_greeks_stocks.py", line 49, in <lambda>
+    px = lambda s, v, tt=T: op.bs_american_put(s, K, v, tt, R, Q, n_steps=STEPS, control_variate=True)
+                            ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\My Code\quant-finance\Fall 2026\Lecture 12\option_pricing.py", line 565, in bs_american_put
+    return bs_american_price(S0, K, sigma, t, r, q, option="put", n_steps=n_steps,
+                             batch_size=batch_size, control_variate=control_variate)
+  File "D:\My Code\quant-finance\Fall 2026\Lecture 12\option_pricing.py", line 522, in bs_american_price
+    arrays = _ba_arrays(S0, K, sigma, t, r, q)
+  File "D:\My Code\quant-finance\Fall 2026\Lecture 12\option_pricing.py", line 415, in _ba_arrays
+    raise ValueError("Require sigma >= 0 and t >= 0.")
+ValueError: Require sigma >= 0 and t >= 0.

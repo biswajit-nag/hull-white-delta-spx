@@ -1,0 +1,9 @@
+slv 2016: 297,452 rows -> data\processed\optionsdx_long\underlying=slv\year=2016\slv_long_2016.parquet (peak memory so far 0.4 GB)
+slv 2017: 254,804 rows -> data\processed\optionsdx_long\underlying=slv\year=2017\slv_long_2017.parquet (peak memory so far 0.4 GB)
+slv 2018: 203,656 rows -> data\processed\optionsdx_long\underlying=slv\year=2018\slv_long_2018.parquet (peak memory so far 0.4 GB)
+slv 2019: 225,652 rows -> data\processed\optionsdx_long\underlying=slv\year=2019\slv_long_2019.parquet (peak memory so far 0.4 GB)
+slv 2020: 346,222 rows -> data\processed\optionsdx_long\underlying=slv\year=2020\slv_long_2020.parquet (peak memory so far 0.5 GB)
+slv 2021: 371,914 rows -> data\processed\optionsdx_long\underlying=slv\year=2021\slv_long_2021.parquet (peak memory so far 0.5 GB)
+slv 2022: 333,884 rows -> data\processed\optionsdx_long\underlying=slv\year=2022\slv_long_2022.parquet (peak memory so far 0.5 GB)
+slv 2023: 315,114 rows -> data\processed\optionsdx_long\underlying=slv\year=2023\slv_long_2023.parquet (peak memory so far 0.5 GB)
+wrote results\stocks\slv\processed_summary_slv.csv

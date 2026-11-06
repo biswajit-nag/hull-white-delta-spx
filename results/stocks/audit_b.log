@@ -1,0 +1,16 @@
+tsla 2016 {'sessions': 251, 'nyse_sessions': 252, 'volume_max': 999.0, 'pairs_E1_9': 88925, 'usable_share': 0.9953331459094743, 'iv_fail_rate': np.float64(0.1322417062957365)}
+tsla 2017 {'sessions': 250, 'nyse_sessions': 251, 'volume_max': 999.0, 'pairs_E1_9': 128847, 'usable_share': 0.9953743587355546, 'iv_fail_rate': np.float64(0.13994451002999586)}
+tsla 2018 {'sessions': 251, 'nyse_sessions': 251, 'volume_max': 999.0, 'pairs_E1_9': 232985, 'usable_share': 0.999639461767925, 'iv_fail_rate': np.float64(0.08509294747328078)}
+tsla 2019 {'sessions': 252, 'nyse_sessions': 252, 'volume_max': 999.0, 'pairs_E1_9': 233593, 'usable_share': 0.9998458857928105, 'iv_fail_rate': np.float64(0.10736907399769147)}
+tsla 2020 {'sessions': 250, 'nyse_sessions': 253, 'volume_max': 999.0, 'pairs_E1_9': 758693, 'usable_share': 0.9893013379588318, 'iv_fail_rate': np.float64(0.0493774412689989)}
+tsla 2021 {'sessions': 252, 'nyse_sessions': 252, 'volume_max': 999.0, 'pairs_E1_9': 564759, 'usable_share': 0.99998937599932, 'iv_fail_rate': np.float64(0.06268503332887543)}
+tsla 2022 {'sessions': 247, 'nyse_sessions': 251, 'volume_max': 159541.0, 'pairs_E1_9': 341420, 'usable_share': 0.9849862339640326, 'iv_fail_rate': np.float64(0.08011187928612018)}
+tsla 2023 {'sessions': 250, 'nyse_sessions': 250, 'volume_max': 263982.0, 'pairs_E1_9': 302054, 'usable_share': 0.9961993550822038, 'iv_fail_rate': np.float64(0.11295922782349632)}
+slv 2016 {'sessions': 251, 'nyse_sessions': 252, 'volume_max': 999.0, 'pairs_E1_9': 49869, 'usable_share': 0.9910565682087068, 'iv_fail_rate': np.float64(0.1579447590099481)}
+slv 2017 {'sessions': 250, 'nyse_sessions': 251, 'volume_max': 999.0, 'pairs_E1_9': 39807, 'usable_share': 0.9876906071796417, 'iv_fail_rate': np.float64(0.19530067615387126)}
+slv 2018 {'sessions': 251, 'nyse_sessions': 251, 'volume_max': 999.0, 'pairs_E1_9': 40748, 'usable_share': 0.9835820162952783, 'iv_fail_rate': np.float64(0.21680501486470716)}
+slv 2019 {'sessions': 248, 'nyse_sessions': 252, 'volume_max': 999.0, 'pairs_E1_9': 52774, 'usable_share': 0.9719369386440293, 'iv_fail_rate': np.float64(0.17872952901618322)}
+slv 2020 {'sessions': 250, 'nyse_sessions': 253, 'volume_max': 999.0, 'pairs_E1_9': 140466, 'usable_share': 0.9805789301325588, 'iv_fail_rate': np.float64(0.07305734928501106)}
+slv 2021 {'sessions': 252, 'nyse_sessions': 252, 'volume_max': 999.0, 'pairs_E1_9': 152472, 'usable_share': 0.9943530615457264, 'iv_fail_rate': np.float64(0.06686308884585146)}
+slv 2022 {'sessions': 247, 'nyse_sessions': 251, 'volume_max': 80213.0, 'pairs_E1_9': 68892, 'usable_share': 0.98488939209197, 'iv_fail_rate': np.float64(0.1479430842552606)}
+slv 2023 {'sessions': 250, 'nyse_sessions': 250, 'volume_max': 101906.0, 'pairs_E1_9': 55195, 'usable_share': 0.9962315427122022, 'iv_fail_rate': np.float64(0.22378115091825324)}

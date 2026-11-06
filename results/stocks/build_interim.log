@@ -1,0 +1,86 @@
+done aapl_eod_2016-kak6vo.7z: 12 months
+done aapl_eod_2017-b6lbj3.7z: 12 months
+done aapl_eod_2018-cv9cwv.7z: 12 months
+done aapl_eod_2021q1-uihhxy.7z: 3 months
+done aapl_eod_2019-ubqxfb.7z: 12 months
+done aapl_eod_2021q2_3-cvuztr.7z: 6 months
+done aapl_eod_2021q4-0cqqyj.7z: 3 months
+done aapl_eod_2022q1-u6deld.7z: 3 months
+done aapl_eod_2020-e0djad.7z: 12 months
+done aapl_eod_2022q4-86egbl.7z: 3 months
+done aapl_eod_2022q2_3-ym725q.7z: 6 months
+done aapl_eod_2023q1-fslib7.7z: 3 months
+done aapl_eod_2023q2-h7shek.7z: 3 months
+done aapl_eod_2023q3-txbn2q.7z: 3 months
+done aapl_eod_2023q4-bgpxeg.7z: 3 months
+done nvda_eod_2016.7z: 12 months
+done nvda_eod_2017.7z: 12 months
+done nvda_eod_2018.7z: 12 months
+done nvda_eod_2019.7z: 12 months
+done nvda_eod_2022q1-oukjbi.7z: 3 months
+done nvda_eod_2022q2-v8t2sp.7z: 3 months
+done nvda_eod_2020-j87zgv.7z: 12 months
+done nvda_eod_2022q3-q6zndi.7z: 3 months
+done nvda_eod_2022q4-l24d1d.7z: 3 months
+done nvda_eod_2021-nwwihl.7z: 12 months
+done nvda_eod_2023q1-0x56e5.7z: 3 months
+done nvda_eod_2023q2-miyyse.7z: 3 months
+done nvda_eod_2023q3-vzquiq.7z: 3 months
+done nvda_eod_2023q4-jf5cdq.7z: 3 months
+done qqq_eod_2016-xkwtz0.7z: 12 months
+done qqq_eod_2017-s8pdzm.7z: 12 months
+done qqq_eod_2018-98tgoe.7z: 12 months
+done qqq_eod_2019-qwdtjt.7z: 12 months
+done qqq_eod_2021q3-7owdhx.7z: 3 months
+done qqq_eod_2021q12-xlxhz5.7z: 6 months
+done qqq_eod_2020-53tfvm.7z: 12 months
+done qqq_eod_2022q1-xmjvuc.7z: 3 months
+done qqq_eod_2021q4-abp0hg.7z: 3 months
+done qqq_eod_2022q4-e0jxex.7z: 3 months
+done qqq_eod_2022q2-jfc907.7z: 3 months
+done qqq_eod_2022q3-d7lqwd.7z: 3 months
+done qqq_eod_2023q1-nereup.7z: 3 months
+done qqq_eod_2023q2-wr1vlc.7z: 3 months
+done qqq_eod_2023q3-whqere.7z: 3 months
+done slv_eod_2016-hvjw0m.7z: 12 months
+done slv_eod_2017-vxcwnm.7z: 12 months
+done qqq_eod_2023q4-a14de3.7z: 3 months
+done slv_eod_2018-hhxzin.7z: 12 months
+done slv_eod_2019-jryjyd.7z: 12 months
+done slv_eod_2021q1-zzehse.7z: 3 months
+done slv_eod_2020-dioo17.7z: 12 months
+done slv_eod_2021q4-a3pugv.7z: 3 months
+done slv_eod_2021q23-tpxmsd.7z: 6 months
+done slv_eod_2022q1-tu6jaj.7z: 3 months
+done slv_eod_2022q4-sgzqqt.7z: 3 months
+done slv_eod_2023q1-wpjskh.7z: 3 months
+done slv_eod_2022q2_3-rry1fo.7z: 6 months
+done slv_eod_2023q2-6zmpxw.7z: 3 months
+done slv_eod_2023q3-wv0n0d.7z: 3 months
+done slv_eod_2023q4-wyovj2.7z: 3 months
+done tsla_eod_2016.7z: 12 months
+done tsla_eod_2017.7z: 12 months
+done tsla_eod_2018.7z: 12 months
+done tsla_eod_2019.7z: 12 months
+done tsla_eod_2021q3-no9ivn.7z: 3 months
+skipped empty member tsla_eod_202107.txt in tsla_eod_2021.7z
+done tsla_eod_2021.7z: 6 months
+done tsla_eod_2021q4-yatg4t.7z: 3 months
+done tsla_eod_2022q1-ewakud.7z: 3 months
+done tsla_eod_2022q4-6urlh3.7z: 3 months
+done tsla_eod_2020.7z: 12 months
+done tsla_eod_2023q1-hbzzpm.7z: 3 months
+done tsla_eod_2022q2_3-nkhhuo.7z: 6 months
+done tsla_eod_2023q2-fldelo.7z: 3 months
+done tsla_eod_2023q3-ylr89l.7z: 3 months
+done tsla_eod_2023q4-q3rxa3.7z: 3 months
+Traceback (most recent call last):
+  File "D:\My Code\Erdos quant-finance project\scripts\build_interim.py", line 90, in <module>
+    main()
+    ~~~~^^
+  File "D:\My Code\Erdos quant-finance project\scripts\build_interim.py", line 86, in main
+    print(f"wrote {len(rows)} months to {args.manifest.relative_to(ROOT)}")
+                                         ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\bipla\AppData\Roaming\uv\python\cpython-3.14-windows-x86_64-none\Lib\pathlib\__init__.py", line 490, in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+ValueError: 'results\\stocks\\data_manifest_stocks.csv' is not in the subpath of 'D:\\My Code\\Erdos quant-finance project'

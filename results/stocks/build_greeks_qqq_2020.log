@@ -1,0 +1,3 @@
+D:\My Code\quant-finance\Fall 2026\Lecture 12\option_pricing.py:279: RuntimeWarning: overflow encountered in divide
+  np.divide(residual, deriv, out=step,
+qqq 2020 1477248 {'converged': np.int64(1362154), 'one_sided': np.int64(51266), 'outside_price_bounds': np.int64(46079), 'expired': np.int64(15210), 'below_volatility_bracket': np.int64(1897), 'not_identifiable': np.int64(632), 'above_volatility_bracket': np.int64(10)}

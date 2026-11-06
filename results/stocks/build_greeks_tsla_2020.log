@@ -1,0 +1,6 @@
+D:\My Code\quant-finance\Fall 2026\Lecture 12\option_pricing.py:279: RuntimeWarning: overflow encountered in divide
+  np.divide(residual, deriv, out=step,
+tsla 2020 1845688 {'converged': np.int64(1690956), 'outside_price_bounds': np.int64(85297), 'one_sided': np.int64(45910), 'expired': np.int64(20990), 'above_volatility_bracket': np.int64(2394), 'below_volatility_bracket': np.int64(77), 'not_identifiable': np.int64(64)}
+D:\My Code\quant-finance\Fall 2026\Lecture 12\option_pricing.py:279: RuntimeWarning: overflow encountered in divide
+  np.divide(residual, deriv, out=step,
+tsla 2021 1540312 {'converged': np.int64(1331634), 'outside_price_bounds': np.int64(86774), 'one_sided': np.int64(66896), 'no_rate': np.int64(32884), 'expired': np.int64(19842), 'above_volatility_bracket': np.int64(1855), 'not_identifiable': np.int64(411), 'below_volatility_bracket': np.int64(14), 'infinite_volatility_bound': np.int64(2)}

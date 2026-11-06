@@ -183,6 +183,8 @@ def main() -> None:
                     continue
                 e = E[m]
                 g = gains(e, fr, RULES, COMPS, episode=i, definition=ep.definition, start=ep.start, end=ep.end, window=W)
+                if g.empty:  # an episode with fewer than 3 test sessions on this window
+                    continue
                 yrs = s.dt.year.between(ep.start.year, ep.end.year).to_numpy()
                 d = fr.loc[e.index]
                 for cp in ("C", "P"):

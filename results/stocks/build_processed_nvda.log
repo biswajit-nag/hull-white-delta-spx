@@ -1,0 +1,9 @@
+nvda 2016: 236,224 rows -> data\processed\optionsdx_long\underlying=nvda\year=2016\nvda_long_2016.parquet (peak memory so far 0.3 GB)
+nvda 2017: 298,522 rows -> data\processed\optionsdx_long\underlying=nvda\year=2017\nvda_long_2017.parquet (peak memory so far 0.4 GB)
+nvda 2018: 336,196 rows -> data\processed\optionsdx_long\underlying=nvda\year=2018\nvda_long_2018.parquet (peak memory so far 0.5 GB)
+nvda 2019: 323,370 rows -> data\processed\optionsdx_long\underlying=nvda\year=2019\nvda_long_2019.parquet (peak memory so far 0.5 GB)
+nvda 2020: 604,228 rows -> data\processed\optionsdx_long\underlying=nvda\year=2020\nvda_long_2020.parquet (peak memory so far 0.7 GB)
+nvda 2021: 793,002 rows -> data\processed\optionsdx_long\underlying=nvda\year=2021\nvda_long_2021.parquet (peak memory so far 0.9 GB)
+nvda 2022: 700,292 rows -> data\processed\optionsdx_long\underlying=nvda\year=2022\nvda_long_2022.parquet (peak memory so far 0.9 GB)
+nvda 2023: 1,041,130 rows -> data\processed\optionsdx_long\underlying=nvda\year=2023\nvda_long_2023.parquet (peak memory so far 1.1 GB)
+wrote results\stocks\nvda\processed_summary_nvda.csv

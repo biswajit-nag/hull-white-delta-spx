@@ -918,6 +918,14 @@ for u in U:
     print(u.upper(), "R2 over R1 in 2020 and 2022")
     display(x.pivot_table(index=["year", "book"], columns="measure", values=["gain", "lo", "hi"]).round(3))"""),
     md("""
+**Reading (SPX; SPY is the same in direction).**
+- **A dealer hedging a book sees more of the Gain than the per-option numbers suggest.** SPX's median yearly Gain of R2 over Black–Scholes is 0.22 on the call book against 0.15 per option, and 0.17 against 0.12 for puts.
+- **The reason:** about 70% of an option's squared error survives averaging across a book. That is the day's shared move, which the correction targets; option-specific noise diversifies away.
+- **The amplification works both ways:** in 2022 the SPX put book lost 0.14, against 0.06 per option.
+- **The risk reversal is the control.** Its volatility exposures cancel, so it keeps 12% of the error, and the corrections gain 0.04.
+- **Heston's H_mv loses on books too.**
+"""),
+    md("""
 ## 2. Data starvation (§16.13)
 
 **Fewer sessions:** 1-, 2-, 3- and 6-month windows. **Fewer options per session:** 12-month fits on 25%, 5% or 1% of each training session's options, or on 10 or 3 per session and type, with five seeds.
@@ -942,6 +950,15 @@ for u in U:
         p.plot(ax=ax, marker="o", ms=3)
         ax.axhline(0, color="k", lw=0.8); ax.set_title(f"{u.upper()} {'calls' if cp == 'C' else 'puts'}: R2 over R1 by training window")
     plt.tight_layout()"""),
+    md("""
+**Reading.**
+- **The plan's expectation holds: the information is in the number of sessions, not options.**
+  - On SPX, three options per session and type keep a median yearly Gain of 0.138 (calls) and 0.124 (puts), against 0.151 and 0.120 with every option. Over five seeds the range is 0.130–0.140 and 0.120–0.131.
+  - Windows of one or two months cut the Gain to about 0.09 and 0.03–0.05.
+- **Short windows adapt faster to a regime change.** In 2022 a 3-month window gave +0.071 and +0.047, against +0.002 and −0.058 on 12 months. In 2020 the 12-month window was best.
+- **No window is best every year:** a long window estimates the level precisely but goes stale; a short one tracks it but is noisy.
+- **SPY shows the same.** R9, a tree learner, loses more than R2 when thinned: it needs more data than three linear coefficients.
+"""),
     md("""
 ## 3. Held positions (§16.11)
 
@@ -983,6 +1000,19 @@ for u in U:
     display(pd.read_csv(R / "extensions" / u / "paths_attrition.csv").groupby("H")[["eligible", "complete", "left_band"]].sum())
     display(pd.read_csv(R / "extensions" / u / "paths_day0_check.csv").max_abs_diff.max())"""),
     md("""
+**Reading (SPX).**
+- **Checks.**
+  - On 2,271,477 first days the path code's error equals the walk-forward's exactly.
+  - 94% (5 sessions) and 89% (10 sessions) of eligible paths complete.
+  - 15% and 25% of completed paths leave the band at least once. They would have been lost had positions been dropped there, and on the in-band-only subset the Gain is smaller.
+- **On real SPX quotes the Gain grows with the holding period.** In 2011–2019, R2 removes 0.185 / 0.200 of a 5-session position's squared error and 0.241 / 0.338 of a 10-session one's, against 0.133 / 0.118 one session at a time.
+  - In 2020: 0.256 / 0.277 (5 sessions) and 0.313 / 0.385 (10).
+  - Two reasons: quote noise in the mids telescopes away in a path's sum, and the spot–volatility move accumulates over a multi-day sell-off.
+- **Losses grow too:** 2021–2023 puts −0.108 over 5 sessions.
+- **The expected-P&L cost of the correction is about 1 bp of the index over 5 sessions, and not significant,** so the Sharpe-ratio argument's assumption roughly holds.
+- **SPY** shows the same growth in 2011–2019. But its Greeks exist only for first-day candidates, so its paths are restricted to traded days with at least 14 days to expiry (§15).
+"""),
+    md("""
 ## 4. Do the intervals cover the truth? A simulation (§16.12)
 
 A regression-level market with a known true Gain is calibrated to 2019; the whole test is repeated 1,000 times per effect size κ (κ = 1 is 2019's effect). Three scenarios are run: stationary GARCH years; a calm path (2018 → 2019); and 2020's own volatility path (2019 → 2020).
@@ -996,6 +1026,20 @@ display(a[a.cp.isin(["C", "P"])].pivot_table(index=["scenario", "kappa"], column
         values=["coverage_cond", "bias_cond", "median_width", "mean_G_cond"]).round(3))
 display(a[a.h1_pass_rate.notna()].pivot_table(index="kappa", columns="scenario", values="h1_pass_rate").round(3))
 display(a.groupby("scenario").median_top10_share.median().round(3))"""),
+    md("""
+**Reading.**
+- **The 95% intervals undercover everywhere, and worst in a year like 2020.**
+  - On 2020's own volatility path, at 2019's effect size, they contain the true conditional Gain 78–79% of the time; at twice that effect, 57–62%.
+  - In stationary years at 2019's effect, coverage is 86–87%.
+- **H1 would pass only 25% of the time on 2020's path at 2019's effect size,** against 72% in stationary years. With no effect it passes 1–2% of the time.
+- **On 2020's path the true conditional Gain of 2019's effect is only about 0.02–0.03:** the crash days' gamma and volatility noise swamp the signal.
+- **So "Inconclusive" was the likely outcome of a crash test year** even if the rule worked as it did in 2019, and the real 2020 intervals, wide as they are, probably understate the uncertainty.
+- **Caveats:**
+  - the calibration uses a gamma scale (0.46) and a noise rescale, both fitted to 2019;
+  - the spot–volatility relation is stationary in the simulation.
+
+Details: `notes/background/coverage-simulation.md` (private notes).
+"""),
 ])
 
 

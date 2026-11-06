@@ -1,0 +1,9 @@
+aapl 2016: 310,878 rows -> data\processed\optionsdx_long\underlying=aapl\year=2016\aapl_long_2016.parquet (peak memory so far 0.4 GB)
+aapl 2017: 374,050 rows -> data\processed\optionsdx_long\underlying=aapl\year=2017\aapl_long_2017.parquet (peak memory so far 0.5 GB)
+aapl 2018: 385,880 rows -> data\processed\optionsdx_long\underlying=aapl\year=2018\aapl_long_2018.parquet (peak memory so far 0.5 GB)
+aapl 2019: 374,400 rows -> data\processed\optionsdx_long\underlying=aapl\year=2019\aapl_long_2019.parquet (peak memory so far 0.6 GB)
+aapl 2020: 585,496 rows -> data\processed\optionsdx_long\underlying=aapl\year=2020\aapl_long_2020.parquet (peak memory so far 0.7 GB)
+aapl 2021: 479,644 rows -> data\processed\optionsdx_long\underlying=aapl\year=2021\aapl_long_2021.parquet (peak memory so far 0.7 GB)
+aapl 2022: 472,008 rows -> data\processed\optionsdx_long\underlying=aapl\year=2022\aapl_long_2022.parquet (peak memory so far 0.7 GB)
+aapl 2023: 513,084 rows -> data\processed\optionsdx_long\underlying=aapl\year=2023\aapl_long_2023.parquet (peak memory so far 0.7 GB)
+wrote results\stocks\aapl\processed_summary_aapl.csv
