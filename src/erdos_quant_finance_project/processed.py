@@ -124,6 +124,23 @@ def official_closes(external: Path, underlying: str = "spx") -> pd.DataFrame:
     })
 
 
+STOCKS = ("aapl", "nvda", "tsla", "qqq", "slv")
+
+
+def vendor_closes(interim: Path, underlying: str) -> pd.DataFrame:
+    """For single stocks and ETFs (analysis_plan.md section 16.15): the vendor's UNDERLYING_LAST is the level and
+    also S_close. Takes the (unique) value per quote date."""
+    t = ds.dataset(interim, format="parquet", partitioning="hive").to_table(
+        columns=["quote_date", "underlying_last"], filter=ds.field("underlying") == underlying).to_pandas()
+    g = t.groupby("quote_date").underlying_last
+    if (g.nunique() != 1).any():
+        raise ValueError(f"{underlying}: more than one UNDERLYING_LAST on a quote date")
+    out = pd.DataFrame({"S_close": g.first()})
+    out.index = pd.to_datetime(out.index)
+    out["S_close_source"] = "vendor_last"
+    return out
+
+
 def to_long(wide: pd.DataFrame) -> pd.DataFrame:
     parts = []
     for cp in ("c", "p"):

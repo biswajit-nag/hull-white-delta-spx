@@ -880,6 +880,221 @@ P[P.rule == "R2"].pivot_table(index=["window", "period", "sample"], columns="cp"
 ])
 
 
+NOTEBOOKS["11"] = ("11_books_starvation_held_positions_simulation", [
+    md("""
+# 11 · Books, data starvation, held positions, and a simulation of the intervals
+
+Plan §16.11–§16.14, specified 2026-11-05 and revised 2026-11-06 before any of them ran. All are descriptive and exploratory; only SPX 2020's verdict is a pre-registered test. The rules are those of the preamble to §16.11:
+- R1 (Black–Scholes), R2 (Hull–White), R3 (Ruf–Wang fixed), R4 (Ruf–Wang fitted), R6 (delta–vega–vanna), R9 (LightGBM on δ), P0 (a constant correction);
+- on SPX, Heston's H_model, H_mv and H_fit.
+
+Each is refitted monthly on the trailing 12 months unless stated. The intervals are session-block bootstraps, as everywhere in the project.
+"""),
+    code(SETUP + """
+U = [u for u in ("spx", "spy") if (R / "extensions" / u).exists()]
+U"""),
+    md("""
+## 1. Books (§16.14)
+
+The Gain pools each option's squared error as if each were hedged alone. A dealer hedges the net delta of a book, where option-specific errors diversify away and the day's shared move adds up.
+
+Four books are formed each session from day-one information: all calls; all puts; out-of-the-money puts and calls (long volatility); and a risk reversal, long OTM calls and short OTM puts, as the control. A book's error is the mean of its options' errors.
+"""),
+    code("""
+for u in U:
+    m = pd.read_csv(R / "extensions" / u / "books_median_yearly_gain.csv")
+    m = m[(m.base == "R1") & m.rule.isin(["R2", "P0", "R3", "R4", "R9", "H_mv"])]
+    print(u.upper(), "median yearly Gain over Black-Scholes, 2011-2023")
+    display(m.pivot_table(index=["book", "rule"], columns="measure", values="median_yearly_gain").round(3))"""),
+    code("""
+for u in U:
+    s = pd.read_csv(R / "extensions" / u / "books_common_share.csv")
+    print(u.upper(), "share of the per-option squared error that survives averaging (median over years)")
+    display(s.groupby("book").common_share_R1.median().round(3))"""),
+    code("""
+for u in U:
+    b = pd.read_csv(R / "extensions" / u / "books_by_year.csv")
+    x = b[(b.rule == "R2") & (b.base == "R1") & b.year.isin([2020, 2022])]
+    print(u.upper(), "R2 over R1 in 2020 and 2022")
+    display(x.pivot_table(index=["year", "book"], columns="measure", values=["gain", "lo", "hi"]).round(3))"""),
+    md("""
+## 2. Data starvation (§16.13)
+
+**Fewer sessions:** 1-, 2-, 3- and 6-month windows. **Fewer options per session:** 12-month fits on 25%, 5% or 1% of each training session's options, or on 10 or 3 per session and type, with five seeds.
+
+The plan stated the expectation in advance: the information is in the number of sessions, because every option on a day shares that day's index move.
+"""),
+    code("""
+for u in U:
+    sp = pd.read_csv(R / "extensions" / u / "starve_seed_spread.csv")
+    first = sp.span.iloc[0]
+    x = sp[(sp.base == "R1") & sp.rule.isin(["R2", "P0", "R9"]) & (sp.span == first)]
+    print(u.upper(), "median yearly Gain over R1,", first, "(median over seeds; min and max for thinning)")
+    display(x.pivot_table(index="config", columns=["rule", "cp"], values="median").round(3))
+    display(x[x.config.str.startswith(("frac", "k"))].pivot_table(index=["config", "rule"], columns="cp", values=["min", "max"]).round(3))"""),
+    code("""
+for u in U:
+    G = pd.read_csv(R / "extensions" / u / "starve_by_year.csv")
+    w = G[(G.rule == "R2") & (G.base == "R1") & G.config.isin(["W1", "W2", "W3", "W6", "W12"])]
+    fig, axes = plt.subplots(1, 2, figsize=(11, 3.6), sharey=True)
+    for ax, cp in zip(axes, "CP"):
+        p = w[w.cp == cp].pivot_table(index="year", columns="config", values="gain")[["W1", "W2", "W3", "W6", "W12"]]
+        p.plot(ax=ax, marker="o", ms=3)
+        ax.axhline(0, color="k", lw=0.8); ax.set_title(f"{u.upper()} {'calls' if cp == 'C' else 'puts'}: R2 over R1 by training window")
+    plt.tight_layout()"""),
+    md("""
+## 3. Held positions (§16.11)
+
+A path is H one-session hedges in a row on one contract (H = 5 or 10 sessions), re-hedged at every close with that day's ratio, as a desk would do. After the start, the contract is followed whatever its delta, maturity or volume, because dropping it when it leaves the band would select on the outcome.
+
+The path error is the sum of the daily dollar errors, in units of the index level on the start day. The one-session Gain on exactly the same pairs is reported beside it.
+"""),
+    code("""
+for u in U:
+    f = R / "extensions" / u / "paths_gains.csv"
+    if not f.exists():
+        continue
+    G = pd.read_csv(f)
+    x = G[(G.subset == "all") & (G.base == "R1") & G.rule.isin(["R2", "P0", "R3", "R4", "R9"]) & ~G.period.str.fullmatch(r"\\d{4}")]
+    print(u.upper(), "pooled periods: path Gain against the one-session Gain on the same pairs")
+    display(x.pivot_table(index=["H", "period", "rule"], columns=["measure", "cp"], values="gain").round(3))"""),
+    code("""
+for u in U:
+    f = R / "extensions" / u / "paths_gains.csv"
+    if not f.exists():
+        continue
+    G = pd.read_csv(f)
+    y = G[(G.subset == "all") & (G.base == "R1") & (G.rule == "R2") & G.period.str.fullmatch(r"\\d{4}")]
+    fig, axes = plt.subplots(1, 2, figsize=(11, 3.6), sharey=True)
+    for ax, cp in zip(axes, "CP"):
+        p = y[y.cp == cp].pivot_table(index="period", columns=["H", "measure"], values="gain")
+        p.plot(ax=ax, marker="o", ms=3)
+        ax.axhline(0, color="k", lw=0.8); ax.set_title(f"{u.upper()} {'calls' if cp == 'C' else 'puts'}: R2 over R1, paths and one session")
+    plt.tight_layout()"""),
+    code("""
+for u in U:
+    f = R / "extensions" / u / "paths_mean_error.csv"
+    if not f.exists():
+        continue
+    M = pd.read_csv(f)
+    print(u.upper(), "mean path error and its difference from Black-Scholes (units of the start-day index level)")
+    display(M[(M.subset == "all") & M.rule.isin(["R2", "P0", "R3", "R4"]) & ~M.period.str.fullmatch(r"\\d{4}")]
+            .pivot_table(index=["H", "period", "rule"], columns="cp", values=["diff_vs_R1", "diff_lo", "diff_hi"]).round(6))
+    display(pd.read_csv(R / "extensions" / u / "paths_attrition.csv").groupby("H")[["eligible", "complete", "left_band"]].sum())
+    display(pd.read_csv(R / "extensions" / u / "paths_day0_check.csv").max_abs_diff.max())"""),
+    md("""
+## 4. Do the intervals cover the truth? A simulation (§16.12)
+
+A regression-level market with a known true Gain is calibrated to 2019; the whole test is repeated 1,000 times per effect size κ (κ = 1 is 2019's effect). Three scenarios are run: stationary GARCH years; a calm path (2018 → 2019); and 2020's own volatility path (2019 → 2020).
+
+Coverage is the share of 95% intervals that contain the true conditional Gain. The H1 pass rate is the share of replications in which both lower bounds are above 0. Design and caveats: `notes/background/coverage-simulation.md`.
+"""),
+    code("""
+C = pd.read_csv(R / "simulation/coverage.csv")
+a = C[C.subset == "all"]
+display(a[a.cp.isin(["C", "P"])].pivot_table(index=["scenario", "kappa"], columns="cp",
+        values=["coverage_cond", "bias_cond", "median_width", "mean_G_cond"]).round(3))
+display(a[a.h1_pass_rate.notna()].pivot_table(index="kappa", columns="scenario", values="h1_pass_rate").round(3))
+display(a.groupby("scenario").median_top10_share.median().round(3))"""),
+])
+
+
+NOTEBOOKS["12"] = ("12_single_stocks_and_etfs", [
+    md("""
+# 12 · Single stocks and ETFs: AAPL, NVDA, TSLA, QQQ and SLV, 2016–2023
+
+Plan §16.15: the SPY protocol on five more underlyings, specified before any of their outcomes was computed. Exploratory; no verdict.
+
+**Data and method.**
+- OptionsDX end-of-day files, the same format as SPX and SPY, with our own implied volatilities and Greeks:
+  - puts from Lecture 12's American tree;
+  - calls from European Black–Scholes with the dividend yield;
+  - rates from SPX's parity curve;
+  - dividends from Nasdaq's history (TSLA and SLV pay none).
+- The level is the vendor's snapshot. Pairs straddling a stock split are excluded.
+- The rules are the preamble's without Heston: R1–R4, R6, R9 and P0.
+
+**Context.** Hull and White's Table 3 (2004–2015, 36-month window) gives an average Gain over the 30 Dow stocks of 10.3% for calls and 2.5% for puts, and 7.7% and 2.5% for three commodity ETFs, one of them SLV.
+"""),
+    code(SETUP + """
+U = [u for u in ("aapl", "nvda", "tsla", "qqq", "slv") if (R / "stocks" / u / "walkforward_gains_by_year.csv").exists()]
+U"""),
+    md("## Data audit and attrition"),
+    code("""
+for u in U:
+    for f in sorted((R / "stocks" / u).glob("audit*.csv")) + sorted((R / "stocks" / u).glob("attrition*.csv")):
+        print(u.upper(), f.name); display(pd.read_csv(f).head(20))
+    s = R / "stocks" / u / "splits.csv"
+    if s.exists():
+        print(u.upper(), "splits detected"); display(pd.read_csv(s))"""),
+    md("## 2020 as the test year (2019 training, 12-month window), under the verdict procedure of §8"),
+    code("""
+rows = []
+for u in U:
+    v = pd.read_csv(R / "stocks" / u / "test2020_verdict.csv").assign(underlying=u.upper())
+    rows.append(v)
+pd.concat(rows)[["underlying", "variant", "verdict", "G_C", "G_C_lo", "G_C_hi", "G_P", "G_P_lo", "G_P_hi", "C_vs_R3", "C_vs_R4", "P_vs_R3", "P_vs_R4"]].round(3)"""),
+    md("## The walk-forward: Gain over Black–Scholes by year"),
+    code("""
+for u in U:
+    G = pd.read_csv(R / "stocks" / u / "walkforward_gains_by_year.csv")
+    x = G[(G.window == 12) & (G.base == "R1") & G.rule.isin(["R2", "R3", "R4", "R6", "R9", "P0"])]
+    print(u.upper(), "W12, Gain over R1")
+    display(x.pivot_table(index="year", columns=["rule", "cp"], values="gain").round(3))"""),
+    code("""
+med = []
+for u in U:
+    m = pd.read_csv(R / "stocks" / u / "walkforward_median_yearly_gain.csv").assign(underlying=u.upper())
+    med.append(m[(m.base == "R1") & m.rule.isin(["R2", "R3", "R4", "R9", "P0"])])
+pd.concat(med).pivot_table(index=["underlying", "window"], columns=["rule", "cp"], values="median_yearly_gain").round(3)"""),
+    md("## Beside Hull and White's Table 3 (mean of monthly Gains, 36-month window)"),
+    code("""
+hw = {"C": {"Stocks": 0.103, "Commodity ETFs": 0.077}, "P": {"Stocks": 0.025, "Commodity ETFs": 0.025}}
+rows = []
+for u in U:
+    t = pd.read_csv(R / "stocks" / u / "hw_table3_comparison.csv")
+    a = t[t.bucket.astype(str) == "all"].set_index("cp").gain
+    rows.append({"underlying": u.upper(), "calls (ours)": a.get("C"), "puts (ours)": a.get("P")})
+display(pd.DataFrame(rows).round(3)); hw"""),
+    md("## Stress episodes, parameter stability, level and shape, maturity"),
+    code("""
+for u in U:
+    S = pd.read_csv(R / "stocks" / u / "stress_gains.csv")
+    x = S[(S.window == 12) & (S.rule == "R2") & (S.base == "R1")]
+    print(u.upper(), "stress episodes, R2 over R1 (W12)")
+    display(x[["definition", "start", "end", "cp", "gain", "lo", "hi", "sessions", "best_constant", "fitted_constant"]].round(3))"""),
+    code("""
+for u in U:
+    L = pd.read_csv(R / "stocks" / u / "level_shape_by_year.csv")
+    print(u.upper(), "level (P0 over R1), shape (R2 over P0) and the ceiling, by year")
+    display(L.pivot_table(index="year", columns="cp", values=["level_P0_over_R1", "shape_R2_over_P0", "ceiling_best_over_R1"]).round(3))
+    P = pd.read_csv(R / "stocks" / u / "parameter_stability_summary.csv")
+    display(P[(P.rule == "P0")].round(3))"""),
+    code("""
+for u in U:
+    M = pd.read_csv(R / "stocks" / u / "maturity_by_year.csv")
+    print(u.upper(), "tau^(-alpha) against alpha = 0.5 (R2)")
+    display(M.pivot_table(index=["sessions_kind", "year"], columns=["rule", "cp"], values="gain").round(3))"""),
+    md("## Books, data starvation and held positions on the five (§16.11, §16.13, §16.14)"),
+    code("""
+for u in U:
+    d = R / "extensions" / u
+    if (d / "books_median_yearly_gain.csv").exists():
+        m = pd.read_csv(d / "books_median_yearly_gain.csv")
+        print(u.upper(), "books, median yearly Gain over R1")
+        display(m[(m.base == "R1") & m.rule.isin(["R2", "P0", "R4"])].pivot_table(index=["book", "rule"], columns="measure", values="median_yearly_gain").round(3))
+    if (d / "starve_seed_spread.csv").exists():
+        sp = pd.read_csv(d / "starve_seed_spread.csv")
+        print(u.upper(), "starvation, median yearly Gain of R2 over R1")
+        display(sp[(sp.base == "R1") & (sp.rule == "R2")].pivot_table(index="config", columns="cp", values="median").round(3))
+    if (d / "paths_gains.csv").exists():
+        G = pd.read_csv(d / "paths_gains.csv")
+        print(u.upper(), "held positions, R2 over R1, pooled periods")
+        display(G[(G.subset == "all") & (G.base == "R1") & (G.rule == "R2") & ~G.period.str.fullmatch(r"\\d{4}")]
+                .pivot_table(index=["H", "period"], columns=["measure", "cp"], values="gain").round(3))"""),
+])
+
+
 def build(key: str) -> None:
     name, cells = NOTEBOOKS[key]
     nb = nbformat.v4.new_notebook()

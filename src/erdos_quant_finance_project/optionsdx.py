@@ -29,7 +29,7 @@ STRING_COLUMNS = {"QUOTE_READTIME"}
 SIZE_COLUMNS = {"C_SIZE": "c", "P_SIZE": "p"}
 SIZE_PATTERN = r"^\d+ x \d+$"
 
-MEMBER_RE = re.compile(r"^(spx|spy)_eod_(\d{4})(\d{2})\.txt$")
+MEMBER_RE = re.compile(r"^(spx|spy|aapl|nvda|tsla|qqq|slv)_eod_(\d{4})(\d{2})\.txt$")
 
 
 def _clean(col: pa.ChunkedArray) -> pa.ChunkedArray:

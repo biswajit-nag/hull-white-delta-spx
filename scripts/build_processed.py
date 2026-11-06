@@ -16,7 +16,8 @@ try:
 except ImportError:
     psutil = None
 
-from erdos_quant_finance_project.processed import build_year, nyse_sessions, official_closes, write_year
+from erdos_quant_finance_project.runlog import timed
+from erdos_quant_finance_project.processed import build_year, nyse_sessions, official_closes, vendor_closes, write_year, STOCKS
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -32,25 +33,31 @@ def summarize(long, underlying: str, year: int) -> dict:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--underlying", default="spx", choices=["spx", "spy"])
+    ap.add_argument("--underlying", default="spx", choices=["spx", "spy", "aapl", "nvda", "tsla", "qqq", "slv"])
     ap.add_argument("--years", default="2010-2023", help="e.g. 2019-2020")
     args = ap.parse_args()
     first, last = (int(y) for y in args.years.split("-"))
 
     sessions = nyse_sessions(f"{first - 1}-11-01", f"{last + 10}-12-31")  # LEAPS run years ahead
-    closes = official_closes(ROOT / "data/external", args.underlying)
+    if args.underlying in STOCKS:
+        closes = vendor_closes(ROOT / "data/interim/optionsdx", args.underlying)
+    else:
+        closes = official_closes(ROOT / "data/external", args.underlying)
     out_root = ROOT / "data/processed/optionsdx_long"
     rows = []
     for year in range(first, last + 1):
-        long = build_year(ROOT / "data/interim/optionsdx", args.underlying, year, sessions, closes)
-        out = write_year(long, out_root, args.underlying, year)
+        with timed("build_processed", inputs=f"{args.underlying} {year}") as run:
+            long = build_year(ROOT / "data/interim/optionsdx", args.underlying, year, sessions, closes)
+            out = write_year(long, out_root, args.underlying, year)
+            run["rows_out"] = len(long)
         rows.append(summarize(long, args.underlying, year))
         peak = f" (peak memory so far {psutil.Process().memory_info().peak_wset / 1024 ** 3:.1f} GB)" if psutil else ""
         print(f"{args.underlying} {year}: {len(long):,} rows -> {out.relative_to(ROOT)}{peak}", flush=True)
         del long
 
-    summary = ROOT / f"results/processed_summary_{args.underlying}.csv"
+    summary = (ROOT / f"results/stocks/{args.underlying}" if args.underlying in STOCKS else ROOT / "results") / f"processed_summary_{args.underlying}.csv"
     fields = sorted({k for r in rows for k in r}, key=lambda k: (k not in ("underlying", "year", "rows", "quote_dates"), k))
+    summary.parent.mkdir(parents=True, exist_ok=True)
     with open(summary, "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=fields, restval=0)
         w.writeheader()

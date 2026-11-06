@@ -74,8 +74,13 @@ def build_year(year: int, panel: Path, greeks: Path, sessions: pd.DataFrame, clo
     p["E2"] = ~p.f_stamp_window
     p["E3"] = ~flags
     p["E4"] = (p.bid > 0) & (p.ask >= p.bid)
-    p["E5"] = p.tau >= 14 / 365 if maturity == "main" else p.tau < 14 / 365
+    # maturity="any" (plan §16.11): every maturity and delta, for the later days of a held position;
+    # E6 is then not a filter, and `in_band` records E5 and E6 of the main sample
+    p["E5"] = {"main": p.tau >= 14 / 365, "short": p.tau < 14 / 365, "any": p.tau > 0}[maturity]
     p["E6"] = p.delta.abs().between(0.05, 0.95)
+    if maturity == "any":
+        p["in_band"] = p.E6 & (p.tau >= 14 / 365)
+        p["E6"] = True
     # the vendor codes "no last price" as 0; empty volume with a positive last is a day of 1,000+ contracts
     p["E7"] = (p.volume > 0) | (p.volume.isna() & (p["last"] > 0))
     p["E7_strict"] = p.volume > 0
@@ -95,7 +100,7 @@ def build_year(year: int, panel: Path, greeks: Path, sessions: pd.DataFrame, clo
                                          "F": "F_next", "D": "D_next", "tau": "tau_next",
                                          "bid_size": "bid_size_next", "ask_size": "ask_size_next"})
     p = p.merge(two.drop_duplicates(["next_session"] + CONTRACT_KEY), on=["next_session"] + CONTRACT_KEY, how="left")
-    if maturity == "short":
+    if maturity in ("short", "any"):
         p = p[~(p.tau_next <= 0)]  # rows without a day-two quote stay, as attrition
 
     lvl = sessions.set_index("quote_date")

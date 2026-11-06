@@ -16,6 +16,7 @@ import tempfile
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
+from erdos_quant_finance_project.runlog import timed
 from erdos_quant_finance_project.optionsdx import MEMBER_RE, month_summary, read_month, write_month
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -39,6 +40,9 @@ def convert_archive(archive: Path, out_root: Path, tmp_root: Path, sha256: str) 
             if not m:
                 raise ValueError(f"{archive.name}: unexpected member {member.name}")
             underlying, year, month = m.groups()
+            if member.stat().st_size == 0:  # e.g. tsla_eod_202107.txt in tsla_eod_2021.7z: the month is in another archive
+                print(f"skipped empty member {member.name} in {archive.name}", flush=True)
+                continue
             table, diag = read_month(member)
             summary = month_summary(table)
             out = write_month(table, out_root, underlying, year, member.stem)
@@ -69,9 +73,11 @@ def main() -> None:
         sys.exit("archives in data/raw/optionsdx do not match SHA256SUMS")
     tmp_root = ROOT / "data/_extract"
     tmp_root.mkdir(parents=True, exist_ok=True)
-    with ThreadPoolExecutor(args.workers) as pool:
-        results = pool.map(lambda a: convert_archive(a, args.out, tmp_root, sums[a.name]), archives)
-        rows = [r for batch in results for r in batch]
+    with timed("build_interim", inputs=f"{args.raw.name}, {len(archives)} archives") as run:
+        with ThreadPoolExecutor(args.workers) as pool:
+            results = pool.map(lambda a: convert_archive(a, args.out, tmp_root, sums[a.name]), archives)
+            rows = [r for batch in results for r in batch]
+        run["rows_out"] = sum(r["rows"] for r in rows)
     shutil.rmtree(tmp_root)
 
     rows.sort(key=lambda r: (r["underlying"], r["year"], r["month"]))
@@ -80,7 +86,7 @@ def main() -> None:
         w = csv.DictWriter(f, fieldnames=list(rows[0]))
         w.writeheader()
         w.writerows(rows)
-    print(f"wrote {len(rows)} months to {args.manifest.relative_to(ROOT)}")
+    print(f"wrote {len(rows)} months to {args.manifest.resolve().relative_to(ROOT)}")
 
 
 if __name__ == "__main__":
