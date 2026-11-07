@@ -656,19 +656,16 @@ c.groupby(["window", "cp"]).degree.value_counts().unstack(fill_value=0)"""),
 Refit on 2019 (the window that feeds January 2020): R2's quadratic, R9's tuned h(δ) and the constant fit, as corrections g(δ) in the hedge δ + ν/(S√τ)·g(δ). The x² weights that the loss uses peak near the money.
 """),
     code("""
-from erdos_quant_finance_project import hedging as h, learners as L
-P = h.load_pairs([2018, 2019]); P = P[P.next_session < h.UNBLIND]
-fr = h.ingredients(P); z = L.features(fr, P); ok = L.complete(fr, z)
-p9 = json.loads((R / "rehearsal/r9_params_2019.json").read_text())
+# fitted on the 2019 pairs by scripts/correction_curves.py; the shaded bars are the x²-weighted distribution of δ
+cur = pd.read_csv(R / "rehearsal/correction_curves_2019.csv")
+wts = pd.read_csv(R / "rehearsal/correction_weights_2019.csv")
 fig, axes = plt.subplots(1, 2, figsize=(11, 4))
 for ax, cp in zip(axes, "CP"):
-    tr = ok & (fr.cp == cp) & (P.quote_date >= "2019-01-01"); dd = fr[tr]
-    beta = h.ols(*h.design("R2", dd)); c0 = float((dd.x * dd.y).sum() / (dd.x ** 2).sum())
-    m9 = L.fit_direct(dd, z[tr][["delta"]], p9[cp])
-    grid = np.linspace(0.05, 0.95, 91) * (1 if cp == "C" else -1)
-    ax.plot(grid, h.poly(grid) @ beta, label="R2 quadratic"); ax.plot(grid, m9.predict(grid[:, None]), label="R9 tuned h(δ)")
-    ax.axhline(c0, ls="--", color="gray", label="constant (P0)")
-    ax2 = ax.twinx(); ax2.hist(dd.delta, bins=45, weights=dd.x ** 2, alpha=0.15, color="k"); ax2.set_yticks([])
+    c, w = cur[cur.cp == cp], wts[wts.cp == cp]
+    ax.plot(c.delta, c.R2, label="R2 quadratic"); ax.plot(c.delta, c.R9, label="R9 tuned h(δ)")
+    ax.axhline(c.P0.iloc[0], ls="--", color="gray", label="constant (P0)")
+    edges = np.r_[w.left.to_numpy(), w.right.iloc[-1]]
+    ax2 = ax.twinx(); ax2.hist(w.left, bins=edges, weights=w.weight, alpha=0.15, color="k"); ax2.set_yticks([])
     ax.set_title({"C": "calls", "P": "puts"}[cp] + ": correction g(δ), SPX 2019"); ax.set_xlabel("δ"); ax.legend()
 plt.tight_layout()"""),
     md("""

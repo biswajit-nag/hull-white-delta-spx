@@ -96,21 +96,14 @@ The years' status matters: 2015–2020 had been used for fitting or evaluation b
 
 ## Reproducing
 
-```
-uv sync
-uv run python -I scripts/build_interim.py
-uv run python -I scripts/build_processed.py --underlying spx --years 2010-2023
-uv run python -I scripts/build_greeks.py 2010 2023
-uv run python -I scripts/build_pairs.py 2010 2023
-uv run pytest
-uv run python -I scripts/run_rehearsal.py
-uv run python -I scripts/tune_r8.py 2019
-uv run python -I scripts/run_test_year.py 2020 <plan-commit>
-uv run python -I scripts/run_walkforward.py
-uv run python scripts/make_notebooks.py
-```
-
-**What you need first:** the vendor archives and external files, and a clone of the boot camp's lecture repository for `option_pricing.py` (set `ERDOS_LECTURE12`); see `DATA.md`.
+[`REPRODUCING.md`](REPRODUCING.md) gives every step. The full test suite and the rebuild need the boot camp's lecture repository at commit b2709e9, with `ERDOS_LECTURE12` set to its `Fall 2026/Lecture 12` folder.
+- **Without the vendor data.** These commands install the locked environment, run the tests, and re-execute every notebook from the committed tables in `results/`:
+  ```
+  uv sync --locked
+  uv run pytest
+  uv run python -I scripts/make_notebooks.py
+  ```
+- **From the raw data.** The rebuild needs the OptionsDX archives and the external files, which are not redistributed here. With them, the pipeline rebuilds every table in `results/`. The 2020 test (Stages 0–2) takes under an hour, and everything about 18 hours. `scripts/check_inputs.py` checks your inputs against the checksums of the files the study used.
 
 **The record.** `results/runtime_log.csv` records every run, with its commit and wall time. `results/year_ledger.csv` records which years' outcomes were seen, and when.
 
@@ -120,6 +113,7 @@ uv run python scripts/make_notebooks.py
 |---|---|
 | `analysis_plan.md` | The pre-registered plan, its deviation log (§15) and extension specifications (§16) |
 | `DATA.md` | Data sources and every processing rule |
+| `REPRODUCING.md` | How to reproduce the results, with and without the vendor data |
 | `src/erdos_quant_finance_project/` | The package: parsing, parity, Black–Scholes, pairs, hedging, diagnostics, learners, verdict |
 | `scripts/` | Pipeline steps and experiments, each with usage in its header |
 | `tests/` | pytest checks: Greeks against finite differences and the lecture library, parity recovery, known coefficients, no look-ahead, the bootstrap, the verdict table |

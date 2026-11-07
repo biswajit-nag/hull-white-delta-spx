@@ -14,28 +14,32 @@ This file says where the data come from and exactly how the code turns them into
 | SPY daily closes, dividend-adjusted, 2010 on | Stooq: https://stooq.com/q/d/l/?s=spy.us&i=d (supplied by the author, 2026-11-05) | SPY's index level before 2016-11-03, with the dividend adjustment reversed (below) |
 | SPY distributions, 1993 on | State Street (the sponsor), SPDR distributions workbook: https://www.ssga.com/library-content/products/fund-data/etfs/us/spdr-etf-historical-distributions.xlsx (SPY rows) | SPY ex-dates and cash amounts |
 | Boot-camp option-pricing library | `option_pricing.py`, version 2026.11.02.1, in Lecture 12 of github.com/TheErdosInstitute/quant-finance (commit b2709e9). Imported from a local clone; set `ERDOS_LECTURE12` to its folder | Implied-volatility solver; Black–Scholes and American pricers |
+| AAPL, NVDA, TSLA, QQQ and SLV end-of-day option chains, 2016–2023 | OptionsDX, as above; 75 archives in `data/raw/optionsdx_stocks/`, listed in `results/stocks/data_manifest_stocks.csv` | The five underlyings of `analysis_plan.md` §16.15, whose rules are in that section and the `scripts/*_stocks.py` headers |
+| Cash dividends by ex-date | Nasdaq, one file per ticker: `https://api.nasdaq.com/api/quote/<TICKER>/dividends?assetclass=stocks` (`etf` for QQQ and SLV), saved as `nasdaq_<TICKER>_dividends.json` | The five underlyings' dividend yields and day-two dividends; TSLA and SLV pay none |
 
-`data/external/SOURCES.csv` records the download time of each external file. FRED serves only the most recent ten years of `SP500`. Where both closes exist (2016-10 to 2023), Cboe's file matches FRED to the cent on 99.5% of 1,804 dates. One Cboe value is stale (2019-02-28 repeats 2019-02-27), which is why FRED takes precedence.
+### The external files: checksums, not copies
+
+The external files are not in the repository, because their providers' terms do not allow redistribution. For example, FRED's `SP500` series carries S&P Dow Jones Indices' notice that "reproduction of S&P 500 in any form is prohibited except with the prior written permission". The author can supply the exact files on request.
+
+**The checksums are tracked.** `results/external_manifest.csv` gives, for each file the study used: its size, SHA-256 checksum, row count, date range, URL and download time. `scripts/check_inputs.py` checks your copies against it, and the OptionsDX archives against the two data manifests (`REPRODUCING.md`, Stage 0). `data/external/SOURCES.csv`, from which the manifest is written, records the download times.
+
+**A later download is a different file.** Where a file differs, `check_inputs.py` says so. The effect on the results has been measured only where stated.
+
+| File | Why a later download differs | What that changes |
+|---|---|---|
+| `fred_SP500.csv` | FRED serves ten years of daily history. The study's file, downloaded 2026-10-28, starts on 2016-10-28, so later downloads start later | Where FRED has no close, `processed.py` takes Cboe's. Where both closes exist (2016-10 to 2023), Cboe's file matches FRED to the cent on 99.5% of 1,804 dates. One Cboe value is stale (2019-02-28 repeats 2019-02-27), which is why FRED takes precedence |
+| `cboe_SPX_History.csv` | It grows by a row each session | Nothing, unless Cboe revises a past close |
+| `stooq_spy_us_d.csv` | Its closes are dividend-adjusted, so every later SPY distribution rescales every past close | The reversal (`processed.stooq_unadjusted`, below) works back from the file's last session through every SSGA ex-date. So pair a later Stooq file with an SSGA file at least as recent. Not measured |
+| `ssga_SPY_distributions.csv`, `nasdaq_*_dividends.json` | They grow with each new distribution | Nothing for 2010–2023, unless a past entry is revised. AAPL's and NVDA's amounts are as paid, not adjusted for later splits |
+| `nasdaq_SPY_history.csv` | The date range is fixed in the request (2009-12-01 to 2024-01-31), but the depth of Nasdaq's history may change | Not measured |
 
 ## Reproducing
 
-1. Install [uv](https://docs.astral.sh/uv/) and run `uv sync` (Python 3.14, pinned by `uv.lock`).
-2. Download the OptionsDX SPX (and SPY) end-of-day archives for every year used and put them, unrenamed, in `data/raw/optionsdx/`. `results/data_manifest.csv` lists the 42 archives, each with its SHA-256 checksum and row counts, so you can check your copies match.
-3. Put the external files in `data/external/` as `fred_SP500.csv` and `cboe_SPX_History.csv` (and, for SPY, `nasdaq_SPY_history.csv` and `ssga_SPY_distributions.csv`, with columns `date, open, high, low, close, volume` and `ex_date, record_date, pay_date, dividend`).
-4. Clone the lecture repository and point `ERDOS_LECTURE12` at its `Fall 2026/Lecture 12` folder.
-5. Run, from the repository root:
-   ```
-   uv run python -I scripts/build_interim.py
-   uv run python -I scripts/build_processed.py --underlying spx --years 2010-2023
-   uv run python -I scripts/build_greeks.py 2010 2023
-   uv run python -I scripts/build_pairs.py 2010 2023
-   uv run pytest
-   ```
-   The analysis steps that follow are in `analysis_plan.md` §10–§13 and the `scripts/` headers.
+[`REPRODUCING.md`](REPRODUCING.md) gives every step: what you need, the stages from raw archives to the committed tables, their run times, and what to compare.
 
 ## Step 1: raw archives
 
-The archives are kept exactly as downloaded, and `data/raw/optionsdx/SHA256SUMS` holds their checksums. No script writes to this folder.
+The archives are kept exactly as downloaded, and `data/raw/optionsdx/SHA256SUMS` holds their checksums. No script writes to this folder, except `scripts/check_inputs.py --write-sums`, which writes `SHA256SUMS` when it is absent and every archive matches the manifest.
 
 ## Step 2: interim Parquet (`scripts/build_interim.py`, `src/.../optionsdx.py`)
 

@@ -6,6 +6,9 @@ from scipy.integrate import quad
 
 from erdos_quant_finance_project import blackscholes as bs
 from erdos_quant_finance_project import heston as H
+from erdos_quant_finance_project.lecture import lecture12_path
+
+needs_lecture = pytest.mark.skipif(not lecture12_path().exists(), reason="Lecture 12 clone absent (set ERDOS_LECTURE12)")
 
 S, R, Q = 3000.0, 0.02, 0.018
 SETS = [(0.027, 10.0, 0.041, 2.8, -0.65),   # a typical 2019–2020 calibration
@@ -39,6 +42,7 @@ def _grid():
     return K, T, cp
 
 
+@needs_lecture  # bs.implied_vol calls the lecture library's IV solver
 @pytest.mark.parametrize("p", SETS)
 def test_matches_adaptive_quadrature_within_a_hundredth_of_a_vol_point(p):
     K, T, cp = _grid()
