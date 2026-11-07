@@ -2,7 +2,7 @@
 
 There are two levels:
 
-- **Without the vendor data** (anyone, a few minutes). Install the locked environment, run the tests, and re-execute every notebook, the story in `00_the_story` and the detail in 01–11, from the committed tables in `results/`.
+- **Without the vendor data** (anyone, a few minutes). Install the locked environment, run the tests, and re-execute every notebook from the committed tables in `results/`: the story in `00_the_story` and the detail in 01–11.
 - **From the raw data.** This needs the OptionsDX files. Rebuild the tables in `results/` from the vendor archives, then compare them with the committed ones. The SPX test of 2020, the confirmatory result, takes under an hour; everything takes about 18 hours.
 
 Run every command from the repository root. Each script's header gives its usage and its outputs. Times come from `results/runtime_log.csv`, on the author's machine (Windows 11, 6 cores; peak memory about 5 GB).
@@ -38,9 +38,9 @@ git status --short
 
 **What to expect:**
 - **Tests:** all 44 pass with the lecture clone; without it, 38 pass and 6 are skipped.
-- **Notebooks:** `make_notebooks.py` builds the 12 notebooks, 00–11, from the cell definitions in `scripts/make_notebooks.py` and executes them against `results/`. `00_the_story` recomputes every number in the executive summary from those tables, so running it checks the summary. In a fresh clone on the author's machine (2026-11-06), every printed number came out the same and every figure byte-identical. On another platform, font rendering may change the figures' bytes, but not what they show.
-- **Two figures are images, not code.** Notebooks 00 and 04 show `results/figures/cumulative_sse_2020.png` (and 06 shows `walkforward_by_year.png`), which `scripts/make_figures.py` draws in Stage 7; the cumulative figure needs the per-pair errors of Stage 2, which are not committed. Every other figure is drawn in the notebook from the committed tables.
-- **`git status`:** shows the notebooks as modified. That comes from matplotlib's object addresses (`<matplotlib.legend.Legend at 0x…>`), not from any result.
+- **Notebooks:** `make_notebooks.py` builds the 12 notebooks, 00–11, from the cell definitions in `scripts/make_notebooks.py` and executes them against `results/`. `00_the_story` recomputes the principal results from the committed tables, and points to the detail notebooks or sources for the other numbers. The fresh-clone test on the author's machine (2026-11-06) covered commit 3cfc09c, when the builder made only notebooks 01–11, before notebook 00 existed. In that test, every printed number came out the same and every figure was byte-identical. On another platform, font rendering may change the figures' bytes, but not what they show.
+- **Two figures.** Notebooks 00 and 04 show `results/figures/cumulative_sse_2020.png`, and 06 shows `walkforward_by_year.png`, as images rather than drawing them in code. `scripts/make_figures.py` draws them in Stage 7; the cumulative figure needs the per-pair errors of Stage 2, which are not committed. Every other figure is drawn in the notebook from the committed tables.
+- **`git status`:** shows the notebooks as modified. That comes from matplotlib's object addresses (`<matplotlib.legend.Legend at 0x…>`), pytest's elapsed time in notebook 02, and how the kernel splits printed output into chunks, not from any result.
 
 ## Level 2: from the raw data
 
@@ -248,7 +248,7 @@ These differences are expected:
 - **`results/runtime_log.csv`** gains a row for every run.
 - **The `.log` files** record local paths and warnings.
 - **The tuning logs** (`results/**/r*_trials_*.csv`) differ in Optuna's `datetime_start`, `datetime_complete` and `duration` columns. Each trial's parameters and value are the same.
-- **Notebooks** differ in matplotlib's object addresses, after Level 1 or Stage 7.
+- **Notebooks** differ in matplotlib's object addresses, pytest's elapsed time and the chunking of printed output, after Level 1 or Stage 7.
 - **External files downloaded later** can change the tables that use them. `check_inputs.py` reports which files differ, and `DATA.md` says what each difference changes. For example, FRED serves ten years of S&P 500 closes, so a later download falls back to Cboe's closes for the earliest dates.
 - **Partial runs.** A tracked table that a stage you didn't run would have written stays as committed.
 

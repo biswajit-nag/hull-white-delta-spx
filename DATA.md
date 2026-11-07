@@ -2,7 +2,7 @@
 
 This file says where the data come from and exactly how the code turns them into the analysis panel. The vendor files are not in the repository; the rules below rebuild everything from them.
 
-**In short** (the story's data section, `notebooks/00_the_story.ipynb` §2): OptionsDX supplies end-of-day SPX and SPY quotes for 2010–2023, and AAPL, NVDA, TSLA, QQQ and SLV quotes for 2016–2023. Underlying levels come from FRED for the S&P 500 (Cboe before 2016-10), from Nasdaq for SPY (Stooq before 2016-11), and from vendor snapshots for the five stocks and ETFs. Dividends come from SSGA for SPY and from Nasdaq for AAPL, NVDA and QQQ; rates and the S&P 500's dividend yield come from put–call parity on the quotes themselves. Each observation pairs one contract at consecutive NYSE closes: 1.06 million pairs in SPX 2020, and about 7.6 million over 2011–2023. Notebook 01 shows the audit and the attrition.
+**In short** (the story's data section, `notebooks/00_the_story.ipynb` §2): OptionsDX supplies end-of-day SPX and SPY quotes for 2010–2023, and AAPL, NVDA, TSLA, QQQ and SLV quotes for 2016–2023. Underlying levels come from FRED for the S&P 500 (Cboe before 2016-10), from Nasdaq for SPY (Stooq before 2016-11), and from vendor snapshots for the five stocks and ETFs. Dividends come from SSGA for SPY and from Nasdaq for AAPL, NVDA and QQQ. Rates and the S&P 500's dividend yield come from put–call parity on the quotes themselves. Each observation pairs one contract at consecutive NYSE closes: 1.06 million pairs in SPX 2020, and about 7.6 million over 2011–2023. Notebook 01 shows the audit and the attrition.
 
 ## Sources
 
@@ -147,13 +147,14 @@ Per session and expiry, `data/processed/greeks/underlying=spx/year=YYYY/` holds 
 
 ## From the panel to the analysis sample
 
-The panel above removes nothing; the eligibility rules of `analysis_plan.md` §5 define the sample, using day-one information only:
-- **E1–E4, data validity:** day one is an NYSE session and not a vendor non-session row; neither end of the pair touches the April 2019 stamp window; the contract is neither settled nor ambiguous; and the day-one quote is two-sided.
-- **E5 and E6, Hull and White's filters:** at least 14 calendar days to expiry, and 0.05 ≤ |δ| ≤ 0.95 with the recomputed day-one delta. Both in- and out-of-the-money options enter: in 2020, 55% of the calls and 29% of the puts are in the money.
-- **E7, Ruf and Wang's filter:** the contract traded on day one. Because of the volume coding above, that means a positive volume, or an empty volume with a positive last-trade price.
-- **E8:** an implied volatility and Greeks exist.
+The panel above removes nothing. The eligibility rules of `analysis_plan.md` §5 define the sample, using day-one information only:
 
-**The analysis sample** is the eligible pairs with a usable day-two quote (`next_status == "ok"`): 1,057,455 SPX pairs in 2020 and 7,644,088 over 2011–2023. In 2020, 98.7% of eligible pairs qualify (98.5% in 2019), and nearly all the rest fall on sessions the vendor lacks. Results are conditional on this sample, and attrition is reported beside them (`results/attrition/`, notebook 01).
+- E1–E4, data validity: day one is an NYSE session and not a vendor non-session row; neither end of the pair touches the April 2019 stamp window; the contract is neither settled nor ambiguous; and the day-one quote is two-sided.
+- E5 and E6, Hull and White's filters: at least 14 calendar days to expiry, and 0.05 ≤ |δ| ≤ 0.95 with the recomputed day-one delta. Both in- and out-of-the-money options enter: in 2020, 55% of the calls and 29% of the puts are in the money.
+- E7, Ruf and Wang's filter: the contract traded on day one. Because of the volume coding above, that means a positive volume, or an empty volume with a positive last-trade price.
+- E8: an implied volatility and Greeks exist.
+
+The analysis sample consists of eligible pairs with a usable day-two quote (`next_status == "ok"`): 1,057,455 SPX pairs in 2020 and 7,644,088 over 2011–2023. In 2020, 98.7% of eligible pairs qualify (98.5% in 2019), and nearly all the rest fall on sessions the vendor lacks. Results are conditional on this sample, and attrition is reported beside them (`results/attrition/`, notebook 01).
 
 ## Applying the rules to SPY
 
@@ -166,10 +167,11 @@ The panel above removes nothing; the eligibility rules of `analysis_plan.md` §5
 ## Applying the rules to the five stocks and ETFs
 
 AAPL, NVDA and TSLA (single stocks), QQQ (a Nasdaq-100 index ETF) and SLV (a silver ETF), 2016–2023, follow the SPY rules (`analysis_plan.md` §16.15), with these differences:
-- **The files:** 75 OptionsDX archives in `data/raw/optionsdx_stocks/`, in the same 33-column format. TSLA's 2021 archive holds an empty July file, so the July file in the 2021q3 archive is used.
-- **The level** is the vendor's `UNDERLYING_LAST` snapshot. No official close was in hand without reversing split and dividend adjustments; on SPX the snapshot sat a median 0.7 bp from the official close.
+
+- **Files.** There are 75 OptionsDX archives in `data/raw/optionsdx_stocks/`, in the same 33-column format. TSLA's 2021 archive holds an empty July file, so the July file in the 2021q3 archive is used.
+- **Underlying level.** The level is the vendor's `UNDERLYING_LAST` snapshot. No official close was in hand without reversing split and dividend adjustments; on SPX the snapshot sat a median 0.7 bp from the official close.
 - **Splits.** A pair whose two sessions straddle a split is excluded and counted (rule E9). Splits are found as one-session moves in the level above 30%: AAPL on 2020-08-31, NVDA on 2021-07-20, and TSLA on 2020-08-31 and 2022-08-25.
 - **Dividends and rates.** AAPL's, NVDA's and QQQ's cash dividends come from Nasdaq's histories (listed above); TSLA and SLV pay none. Pricing uses the trailing 12 months' dividends over the price as a continuous yield, and each pair's day-two dividend enters the hedge leg. Rates come from the same session's SPX parity curve.
-- **Implied volatilities and Greeks** are the project's own, as for SPY: puts from Lecture 12's American tree, calls from the European Black–Scholes formula with the dividend yield.
+- Implied volatilities and Greeks are the project's own, as for SPY: puts from Lecture 12's American tree, calls from the European Black–Scholes formula with the dividend yield.
 - **Volume coding.** AAPL, TSLA, QQQ and SLV follow the SPX and SPY coding through 2021. NVDA's files record volumes of 1,000 or more in 2016–2019, so there E7's empty-volume branch admits no pair and the sample is the strict reading's (`analysis_plan.md` §15, 2026-11-06).
-- **The sample:** 1.23M eligible pairs for AAPL, 1.36M for NVDA, 2.65M for TSLA, 2.67M for QQQ and 0.60M for SLV, of which 98.7–99.4% have a usable next-session quote. The audits and attrition tables are in `results/stocks/<u>/` and notebook 11.
+- **Sample.** There are 1.23M eligible pairs for AAPL, 1.36M for NVDA, 2.65M for TSLA, 2.67M for QQQ and 0.60M for SLV, of which 98.7–99.4% have a usable next-session quote. The audits and attrition tables are in `results/stocks/<u>/` and notebook 11.
