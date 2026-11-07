@@ -99,8 +99,9 @@ def walkforward_summary():
     axes[0].set_ylabel("Gain over the Black–Scholes delta")
     axes[0].legend(fontsize=8, loc="lower left")
     plt.tight_layout()
-    for ext in ("pdf", "png"):
-        fig.savefig(FIG / f"summary_yearly_gain.{ext}", dpi=200, bbox_inches="tight")
+    for ext in ("pdf", "png"):  # no creation date in the PDF, so that a rerun writes the same bytes
+        fig.savefig(FIG / f"summary_yearly_gain.{ext}", dpi=200, bbox_inches="tight",
+                    metadata={"CreationDate": None} if ext == "pdf" else None)
 
 
 if __name__ == "__main__":

@@ -53,7 +53,7 @@ uv run python -I scripts/check_inputs.py --write-sums
 
 This checks each archive against the manifests and each external file against `results/external_manifest.csv`. A folder that is absent is skipped. `build_interim.py` needs a `SHA256SUMS` file beside the archives, and `--write-sums` writes one from the manifest, once every archive in that folder matches.
 
-### Stage 1: the SPX data (about 15 minutes)
+### Stage 1: the SPX data (10–15 minutes)
 
 ```
 uv run python -I scripts/build_interim.py
@@ -78,7 +78,7 @@ cp results/audit_light.csv results/audit_light_2015_2019.csv
   - `results/audit_light*.csv`
   - the per-pair Parquet files in `data/processed/`
 
-### Stage 2: the 2020 test, the confirmatory result (about 30 minutes)
+### Stage 2: the 2020 test, the confirmatory result (20–30 minutes)
 
 ```
 uv run python -I scripts/run_rehearsal.py
@@ -246,8 +246,21 @@ After the rebuild, `git status --short results/` lists the tracked tables that c
 These differences are expected:
 - **`results/runtime_log.csv`** gains a row for every run.
 - **The `.log` files** record local paths and warnings.
-- **Notebooks** differ in matplotlib's object addresses.
+- **The tuning logs** (`results/**/r*_trials_*.csv`) differ in Optuna's `datetime_start`, `datetime_complete` and `duration` columns. Each trial's parameters and value are the same.
+- **Notebooks** differ in matplotlib's object addresses, after Level 1 or Stage 7.
 - **External files downloaded later** can change the tables that use them. `check_inputs.py` reports which files differ, and `DATA.md` says what each difference changes. For example, FRED serves ten years of S&P 500 closes, so a later download falls back to Cboe's closes for the earliest dates.
 - **Partial runs.** A tracked table that a stage you didn't run would have written stays as committed.
 
 `results/year_ledger.csv` and `results/spy/year_ledger_spy.csv` are records of which years' outcomes were seen and when. They are not outputs.
+
+## Record of the reproduction tests
+
+**2026-11-06, commit 3cfc09c, Windows 11.** The commit was cloned fresh from GitHub and run by an independent session that had only this repository, the input files and the lecture library.
+
+- **Level 1:** passed. The install and all 44 tests succeeded, and the 11 notebooks executed.
+- **Level 2, Stages 0–2,** plus Stage 3's `run_walkforward.py` and `spot_vol_slope.py`, then `drop_withdrawn.py` and `make_figures.py`: every command exited 0. Every table in `results/2020/`, `results/dryrun_2019/`, `results/rehearsal/`, `results/walkforward/`, `results/attrition/` and the audits came out byte-identical to the committed one, as did the PNG figures.
+- **The only differences:**
+  - the run log;
+  - the Optuna timestamps in `r8_trials_2019_*.csv`;
+  - six bytes of `summary_yearly_gain.pdf`, its creation date. Since then, `make_figures.py` writes the PDF without a creation date, so it reproduces exactly.
+- **Run times:** Stage 1 took 10.5 minutes and Stage 2 20 minutes.
