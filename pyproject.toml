@@ -1,7 +1,7 @@
 [project]
 name = "erdos-quant-finance-project"
 version = "0.1.0"
-description = "Add your description here"
+description = "A pre-registered validation of Hull and White's minimum-variance delta on SPX options, 2011-2023"
 readme = "README.md"
 authors = [
     { name = "Biswajit Nag", email = "biswajit.nag.math@gmail.com" }

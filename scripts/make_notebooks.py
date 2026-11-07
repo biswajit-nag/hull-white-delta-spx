@@ -36,9 +36,566 @@ def code(s):
 
 NOTEBOOKS: dict[str, tuple[str, list]] = {}
 
+NOTEBOOKS["00"] = ("00_the_story", [
+    md(r"""
+# 00 · The story: does Hull and White's minimum-variance delta hedge SPX options better?
+
+*A pre-registered model validation on SPX option quotes, 2011–2023.*
+
+This notebook tells the project's whole story, in the order of the executive summary ([`EXECUTIVE_SUMMARY.md`](../EXECUTIVE_SUMMARY.md)), with more detail. Every number it quotes is computed below from the committed tables in `results/`, so the story can be checked line by line. Each section names the notebooks that hold the detail:
+
+| Section | Detail in |
+|---|---|
+| Bottom line | this notebook |
+| 1. The problem | this notebook; `analysis_plan.md` §6 |
+| 2. Data | 01 (audit and attrition), 02 (forwards, implied volatilities, Greeks); `DATA.md` |
+| 3. Methodology | 03 (the rehearsal and the dry run); `analysis_plan.md` §§5–10 |
+| 4.1 The confirmatory test | 04 (the 2020 verdict), 05 (its robustness and breakdown) |
+| 4.2 Years and stress episodes | 06 (the 2011–2023 walk-forward), 09 (stress episodes), 07 (SPY) |
+| 4.3 Complex against simple rules | 06 (the scaling rules), 08 (the challengers) |
+| 4.4 The level and the assumption checks | 09 (level, shape, stability, maturity), 08 (polynomial degree), 03 (the checks made before 2020) |
+| 4.5 Extensions and published benchmarks | 10 (books, held positions, data starvation), 11 (stocks and ETFs), 08 (short-dated options), 09 (the published Gains) |
+| 5. Financial interpretation | 05 (where the error comes from), 06, 09, 10 |
+| 6. Assumptions, limitations and failure modes | 04, 05, 08, 09, 11 |
+| 7. Reproducibility | `REPRODUCING.md` |
+
+The finance is explained where it first appears, with the boot camp's lectures cited where they cover it.
+"""),
+    code(SETUP + r"""
+from IPython.display import Image, display
+CP = {"C": "calls", "P": "puts"}
+
+
+def fmt(r, d=3):
+    # A Gain with its 95% session-block bootstrap interval; * marks an interval that excludes 0
+    star = " *" if (r.lo > 0 or r.hi < 0) else ""
+    return f"{r.gain:+.{d}f} [{r.lo:+.2f}, {r.hi:+.2f}]{star}"
+
+
+# The SPX walk-forward, 2011-2023: every rule's yearly Gain with 12-, 36- and 60-month fits
+G = pd.read_csv(R / "walkforward/gains_by_year.csv")  # R1-R4
+WF = pd.concat([G,
+                pd.read_csv(R / "walkforward/degrees_by_year.csv"),  # P0-P8 and PCV
+                pd.read_csv(R / "walkforward/r9_r11_by_year.csv").query("rule != 'R2'"),  # LightGBM R9-R11
+                pd.read_csv(R / "walkforward/r5_r8_by_year.csv").query("rule != 'R2'").drop(columns="sample")],  # R5, R6, R8
+               ignore_index=True)
+
+
+def wf(rule, base, window=12):
+    return WF[(WF.rule == rule) & (WF.base == base) & (WF.window == window)].sort_values(["year", "cp"])
+
+
+def median_1523(rule, base, window=12):
+    # The median yearly Gain over 2015-2023, the span common to all three windows
+    x = wf(rule, base, window)
+    return x[x.year.between(2015, 2023)].groupby("cp").gain.median()"""),
+    md(r"""
+## Bottom line
+
+**The question.** Does adjusting the Black–Scholes delta for changing volatility improve daily SPX option hedges? A dealer hedges each option by holding delta units of the index. The Black–Scholes delta treats volatility as fixed, although implied volatility, the volatility consistent with an option's price, tends to rise when the index falls. Hull and White's minimum-variance delta corrects for this response, using monthly regressions on past prices. Its **Gain** is the fraction of the Black–Scholes delta's squared one-day hedging error that it removes.
+
+**The pre-registered SPX 2020 test is inconclusive.** The minimum-variance delta removed 18.5% of the squared error for calls and 12.0% for puts. But the March 2020 crash leaves 95% intervals spanning about −0.4 to +0.46, so neither an improvement nor a loss is established. The verdict rule was committed before any test-year number was computed. All 11 pre-specified robustness variants preserve the verdict.
+
+**Repeated out of sample over 2011–2023,** with monthly fits on the preceding 12 months, the correction usually helps. Its median yearly Gain over 2015–2023, the span common to all fitting windows, is 0.12 for calls and 0.10 for puts. In no year is it significantly worse than Black–Scholes. Its advantage disappears in 2022–2023, as implied volatility became less responsive to index moves.
+
+**Simpler rules do almost as well.** One fitted constant correction gives essentially the same Gain as the three-coefficient form. Machine-learning corrections add no material improvement, and two fail badly in the crash. Ruf and Wang's fixed 0.9/1.1 scaling, an unfitted rule of thumb read off their results, matches the minimum-variance delta's median Gain but fails in 2022–2023.
+
+**Figure 1** (below) carries the stability evidence: the yearly Gain of the minimum-variance delta over the Black–Scholes delta, for calls and puts, with 12-, 36- and 60-month fits and 95% session-block bootstrap intervals. Grey marks the clean held-out years (2011–2013 and 2021–2023), which no earlier step had touched; orange marks the pre-registered test year, 2020.
+"""),
+    code(r"""
+x = G[(G.rule == "R2") & (G.base == "R1")]
+fig, axes = plt.subplots(1, 2, figsize=(11, 3.8), sharey=True)
+for ax, cp in zip(axes, "CP"):
+    for yr in (2011, 2012, 2013, 2021, 2022, 2023):  # the clean held-out years
+        ax.axvspan(yr - 0.45, yr + 0.45, color="0.93", zorder=0, lw=0)
+    ax.axvspan(2019.55, 2020.45, color="#fde2c8", zorder=0, lw=0)  # the pre-registered test year
+    for W, c, off in ((12, "#1f77b4", -0.2), (36, "#ff7f0e", 0.0), (60, "#2ca02c", 0.2)):
+        z = x[(x.cp == cp) & (x.window == W)]
+        ax.errorbar(z.year + off, z.gain, yerr=[z.gain - z.lo, z.hi - z.gain], fmt="o", ms=4, color=c, capsize=2, lw=1, label=f"{W}-month fits")
+    ax.axhline(0, color="k", lw=0.8)
+    ax.set_title(CP[cp].capitalize()); ax.set_xticks(range(2011, 2024, 2))
+axes[0].set_ylabel("Gain over the Black–Scholes delta"); axes[0].legend(fontsize=8, loc="lower left")
+plt.suptitle("Figure 1. Yearly Gain of the minimum-variance delta over the Black–Scholes delta, SPX, 2011–2023", fontsize=10)
+plt.tight_layout(); plt.show()"""),
+    md(r"""
+## 1. The problem
+
+**A delta hedge** (Lectures 6–8). A dealer who holds one option and shorts h units of the index from one close to the next earns Δf − h·ΔS, where Δf is the option's price change and ΔS the index's. The Black–Scholes delta, δ_BS = ∂f/∂S, is the h that removes the index risk *if volatility does not move*. Lecture 7 builds this hedge and Lecture 8 backtests it.
+
+**Why volatility matters.** Implied volatility moves, and on average it moves *with* the index: it tends to rise when the index falls (Lecture 11's SPY smiles show the related skew across strikes). An option's sensitivity to volatility is its vega, ν = ∂f/∂σ (Lecture 6). If a 1% fall in the index raises implied volatility by a predictable amount, part of the option's vega exposure is really index exposure, and a hedge can neutralize it.
+
+**Hull and White's minimum-variance delta** does that. It is the right-hand side of their equation (2):
+
+$$
+\delta_{\mathrm{MV}}\approx\delta_{\mathrm{BS}}+\nu_{\mathrm{BS}}\frac{\partial E[\sigma_{\mathrm{imp}}]}{\partial S}.
+$$
+
+Here $S$ is the index level and $\sigma_{\mathrm{imp}}$ is implied volatility. To first order, Δf ≈ δ_BS·ΔS + ν·Δσ, so the h that minimizes the variance of Δf − h·ΔS is δ_BS plus ν times the regression slope of Δσ on ΔS: the correction hedges the *expected* volatility response to an index move. The part of the volatility move that is unrelated to the index stays unhedged, as it must for any delta.
+
+**The main rules,** simplest first:
+1. the Black–Scholes delta, the benchmark;
+2. the fixed 0.9/1.1 scaling: 0.9 times delta for calls, 1.1 times delta for puts;
+3. the fitted scaling, $a\delta$, with $a$ fitted monthly;
+4. the minimum-variance delta, with three coefficients fitted monthly.
+
+**The exploratory challengers** are a constant correction; polynomials in delta of degrees 0–8, and a separate rule whose degree is selected by validation; a relaxed Hull–White rule with a free delta multiplier; Ruf and Wang's delta–vega–vanna regression; and LightGBM corrections using delta alone or market features.
+
+The tables in `results/` and the other notebooks name the rules by code:
+
+| Rule in the story | Code | Hedge ratio | Coefficients fitted per option type |
+|---|---|---|---|
+| No hedge (reference for effectiveness) | R0 | 0 | — |
+| Black–Scholes delta | R1 | δ, at the option's own implied volatility | 0 |
+| Fixed 0.9/1.1 scaling (Ruf and Wang's rule of thumb) | R3 | 0.9·δ for calls, 1.1·δ for puts | 0 |
+| Fitted scaling | R4 | a·δ | 1 |
+| Constant correction | P0 | δ + c·ν/(S√T) | 1 |
+| Minimum-variance delta (Hull and White) | R2 | δ + ν/(S√T)·(a + bδ + cδ²) | 3 |
+| Polynomial of degree k in delta | P0–P8 | δ + ν/(S√T)·p_k(δ); P2 spans the same functions as R2 | k + 1 |
+| Degree chosen by validation | PCV | P_k, with k chosen inside each training window | — |
+| Relaxed Hull–White | R5 | a₀·δ + ν/(S√T)·(a + bδ + cδ²) | 4 |
+| Ruf and Wang's delta–vega–vanna regression | R6 | a·δ + b·ν/S + c·vanna | 3 |
+| LightGBM on delta alone | R9 (from scratch), R11 (boosted from R2) | δ + ν/(S√T)·h(δ) | tuned |
+| LightGBM on market features | R10 (from scratch), R8 (boosted from R2) | δ + ν/(S√T)·h(z) | tuned |
+
+The market features z are delta, log maturity, the option's position on its smile, the at-the-money implied volatility, 20-day realized volatility and the 5-day index return (`analysis_plan.md` §6). R7, a regression tree, was specified but withdrawn from the submission (`analysis_plan.md` §15, 2026-11-06), which is why the codes skip it.
+
+**Why it matters.** The question matters to dealers who hedge daily, and to the teams that validate their models. Black–Scholes leaves the volatility response unhedged. Why implied volatility rises when the index falls is debated: the *leverage* explanation (a falling stock price raises a firm's debt-to-equity ratio and so its volatility) against *volatility feedback* (higher volatility raises the returns investors require, which lowers prices). Hull and White read the evidence as favouring volatility feedback. For hedging, what matters is how large and how stable the response is, and that is what this study measures.
+"""),
+    md(r"""
+## 2. Data
+
+| Data | Source | Used for |
+|---|---|---|
+| SPX and SPY end-of-day option quotes, 2010–2023 | OptionsDX | One row per quote date, expiry and strike, with the call and the put side by side |
+| AAPL, NVDA, TSLA, QQQ and SLV option quotes, 2016–2023 | OptionsDX | The extension to stocks and ETFs (§4.5) |
+| S&P 500 closes | FRED (Cboe before 2016-10) | The index level for SPX |
+| SPY closes | Nasdaq (Stooq before 2016-11, with its dividend adjustment reversed) | SPY's level |
+| The five stocks' and ETFs' levels | the vendor's near-close snapshot | No official close was in hand |
+| Dividends | SSGA for SPY; Nasdaq for AAPL, NVDA and QQQ | TSLA and SLV pay none |
+| Rates and the S&P 500's dividend yield | none: each expiry's forward and discount factor are read from put–call parity on the SPX quotes (notebook 02) | Pricing, implied volatilities and Greeks |
+
+**The unit of observation is a pair:** one contract at one NYSE session's close (day one), and the same contract at the next session's close (day two). The hedge is set on day one and judged on day two, which is Lecture 7's discrete hedge cut to one period.
+
+**The sample** requires at least 14 days to expiry, an absolute delta of 0.05–0.95 (Hull and White's filters, which keep both in- and out-of-the-money options), and trading on day one (Ruf and Wang's filter, since an untraded quote may be stale).
+
+**The vendor's data needed care** (notebook 01; every rule is in `DATA.md`):
+- **Volume.** Through 2021 the vendor never records a volume above 999, and an empty volume can mean 1,000 or more contracts traded. An empty volume with a positive last-trade price is read as traded. A naive "volume > 0" filter would drop the busiest contracts.
+- **Timing.** The option quotes are synchronous with neither the official close nor the vendor's own index snapshot (their parity-implied index level sits a median 3.3 bp from the close in 2019–2020). Two sensitivities use the other levels (§4.1).
+- **Calendar.** Pairs are formed across NYSE sessions, not the vendor's dates: 35 SPX sessions are missing from the files, and 12 holiday rows are after-close snapshots of the previous session.
+- **April 2019.** On 2019-04-04 to 04-16 the vendor's expiry stamps shift by a day; pairs touching the window are excluded, without repair.
+"""),
+    code(r"""
+d20 = pd.read_csv(R / "2020/descriptives.csv").query("rule == 'R1'").set_index("cp").pairs
+print(f"SPX 2020 pairs: {d20.sum():,} ({d20['C']:,} calls, {d20['P']:,} puts)")
+print(f"SPX 2011-2023 pairs in the 12-month walk-forward: {wf('R2', 'R1').pairs.sum():,}")
+cols = ["ok", "one_sided_next", "vendor_missing_session"]
+st = pd.read_csv(R / "attrition/by_status.csv")  # its "2020" rows exclude the stress period, which has its own rows
+st["period"] = st.period.replace({"2020": "2020, outside the stress period", "stress": "2020, stress period"})
+whole = st[st.period.str.startswith("2020")].groupby("cp", as_index=False)[cols].sum().assign(period="2020, whole year")
+st = pd.concat([st, whole]).set_index(["period", "cp"])
+st["usable share"] = st.ok / st[cols].sum(axis=1)
+st.round(4)"""),
+    md(r"""
+**Reading.** In 2020, 98.7% of eligible pairs have a usable day-two quote (98.5% in 2019). Nearly all the rest fall on sessions the vendor lacks entirely, which are ordinary days; within the stress period no session is missing, and vanished bids (`one_sided_next`) are 0.3% of pairs. Results are conditional on a usable day-two quote, and the vanished quotes are stress-tested in §4.1. Detail: notebook 01.
+"""),
+    md(r"""
+## 3. Methodology
+
+**The fitted rule** is Hull and White's equation (5):
+
+$$
+\delta_{\mathrm{MV}}=\delta_{\mathrm{BS}}+\frac{\nu_{\mathrm{BS}}}{S\sqrt{T}}\left(a+b\delta_{\mathrm{BS}}+c\delta_{\mathrm{BS}}^2\right).
+$$
+
+Here $T$ is the time to expiry in years. The $1/S$ factor makes volatility respond to index *returns* rather than to point moves. The $1/\sqrt{T}$ factor is Hull and White's empirical maturity scaling: short-dated implied volatilities move more. The quadratic lets the correction vary across strikes. Least squares fits the coefficients separately for calls and puts.
+
+**Inputs.** Each expiry's forward and discount factor come from put–call parity at the mid quotes, so no rate or dividend yield is assumed. Implied volatilities come from the boot camp's Lecture 12 solver, and the Greeks are Black–Scholes at each option's own implied volatility (notebook 02).
+
+**The error and the Gain.** For a hedge ratio $h$, the error is $e=(\Delta f-h\Delta S)/S$, where $\Delta f$ is the option's price change and $S$ the day-one index level. The Gain of a rule is $1-\mathrm{SSE}(\mathrm{rule})/\mathrm{SSE}(\mathrm{Black\text{–}Scholes})$, using sums of squared errors on identical pairs. Since the root-mean-square (RMS) error scales as $\sqrt{1-\text{Gain}}$, a Gain of 0.10 means 10% less squared error, or about 5% lower RMS error (computed below).
+
+**The chronological protocol.** Monthly fits use trailing 12-month windows, with 36- and 60-month alternatives. Each fit hedges only the following month, and training pairs must end before the test month starts, so no fit sees its own outcomes.
+
+**Before 2020 was opened,** a rehearsal on 2018–2019 and a dry run of the test script on 2019 checked the code and the model's form (notebook 03). The analysis plan, `analysis_plan.md`, was committed (77b030e) before any test-year number was computed; it fixed the endpoints, the verdict table and the thresholds ("material" means a Gain of at least 0.05).
+
+**The walk-forward** repeats this chronological protocol over 2011–2023. Its untouched years, 2011–2013 and 2021–2023, are the clean held-out evidence; the other years had been used for fitting, rehearsal or the test before the walk-forward ran (the ledger below).
+
+**Inference by session, not by option.** Bootstrap intervals resample trading days rather than options, because all options on a day share that day's index move: a circular block bootstrap of sessions, blocks of 10, 10,000 draws (plan §9). Ordinary standard errors that treat options as independent are 4.5–34 times too small for the rehearsal's coefficients (notebook 03). Yearly and episode significance is pointwise and not adjusted for multiple comparisons.
+
+**The exploratory analyses** are all descriptive, and most were specified after 2020 had been seen. They cover the additional rules, an SPY replication, parameter stability, the polynomial degree and the maturity scaling, the correction's level and shape, the published benchmarks, books, 5- and 10-day held positions, reduced training data, short-dated options, and five stocks and ETFs. Stress episodes are defined from the S&P 500 close alone: 20-day realized volatility above 25%, or a peak-to-trough drawdown of at least 10%. Episode Gains use the walk-forward's fits, and stress and calm sessions are compared by year.
+"""),
+    code(r"""
+for g in (0.05, 0.10, 0.15, 0.25):
+    print(f"Gain {g:.2f}: RMS error lower by {1 - np.sqrt(1 - g):.1%}")
+with pd.option_context("display.max_colwidth", 140):
+    display(pd.read_csv(R / "year_ledger.csv").head(8)[["years", "actual_exposure", "date"]])  # the core runs; later rows log the extensions"""),
+    md(r"""
+## 4. Principal findings
+
+### 4.1 The confirmatory test (detail: notebooks 04 and 05)
+
+The pre-registered verdict for 2020 is **Inconclusive**: neither option type's 95% lower bound is above zero. The plan's hypothesis H1 needed both lower bounds of the Gain over Black–Scholes above zero. The minimum-variance delta is not distinguished from either scaling rule. The first row of the table is the primary analysis; the other 11 are the pre-specified robustness variants.
+"""),
+    code(r"""
+v = pd.read_csv(R / "2020/verdict.csv")
+iv = lambda g, l, h: [f"{a:+.3f} [{b:+.2f}, {c:+.2f}]" for a, b, c in zip(g, l, h)]
+t = pd.DataFrame({"variant": v.variant, "verdict": v.verdict,
+                  "calls: Gain [95%]": iv(v.G_C, v.G_C_lo, v.G_C_hi), "puts: Gain [95%]": iv(v.G_P, v.G_P_lo, v.G_P_hi),
+                  "calls against R3 / R4": v.C_vs_R3 + " / " + v.C_vs_R4, "puts against R3 / R4": v.P_vs_R3 + " / " + v.P_vs_R4})
+print(f"primary: {v.verdict[0]}; the {len(v) - 1} robustness variants: {v.verdict[1:].value_counts().to_dict()}")
+t"""),
+    md(r"""
+**The variants.** A: the index level implied by the options themselves (the parity forward of the nearest expiry). B: the vendor's 16:00 index snapshot. P-bid, P-ask: options marked at the bid or the ask instead of the mid. F: coefficients frozen at one 2019 fit. W36, W60: 36- and 60-month windows. S3: only quotes with a relative spread of at most 5%. Rest of 2020: leaving out the stress period, 24 February to 30 April. Endpoint low and high: the pairs whose day-two bid vanished, valued at the low and the high end of their no-arbitrage band. "R2 beats" in a comparison column means the minimum-variance delta beat that scaling rule in that variant; it happens three times, never in the primary.
+
+**The verdict is hard to move; the point Gains are not.** With intervals this wide, no plausible variant could have changed the verdict, so its robustness says little on its own. The point Gains move more: the spread screen gives 0.095 / −0.028, the options' own index level 0.147 / 0.219, and bid or ask marks about 0.15 / 0.10. **A pre-registered timing diagnostic** (plan §8): from the primary to sensitivity A, the call Gain falls by 0.038 and the put Gain rises by 0.099. Changes in opposite directions are consistent with the timing mismatch between the option quotes and the close, though they do not identify it.
+
+**The four main rules in 2020, and across years.** Gains are over the Black–Scholes delta. The constant correction was not a 2020 test-year rule; its 2020 values come from the walk-forward, which uses the same 12-month fits as the 2020 test.
+"""),
+    code(r"""
+g20 = pd.read_csv(R / "2020/gains.csv").query("variant == 'primary' and base == 'R1'")
+rows = []
+for name, rule, k in [("Fixed 0.9/1.1 scaling (Ruf and Wang's rule of thumb)", "R3", 0), ("Fitted scaling a·δ", "R4", 1),
+                      ("Constant correction", "P0", 1), ("Minimum-variance delta (Hull and White)", "R2", 3)]:
+    src = wf(rule, "R1").query("year == 2020") if rule == "P0" else g20[g20.rule == rule]
+    m = median_1523(rule, "R1")
+    rows.append({"hedge rule": name, "code": rule, "coefficients fitted": k,
+                 "SPX 2020, calls": fmt(src[src.cp == "C"].iloc[0]), "SPX 2020, puts": fmt(src[src.cp == "P"].iloc[0]),
+                 "median yearly Gain 2015-2023, calls / puts (12-month fits)": f"{m['C']:.3f} / {m['P']:.3f}"})
+pd.DataFrame(rows)"""),
+    md(r"""
+**Perspective.** The numbers below put the 2020 Gains in context: how much Black–Scholes already does, what the improvement is worth in dollars, and how concentrated the year's error is.
+"""),
+    code(r"""
+d = pd.read_csv(R / "2020/descriptives.csv").set_index(["cp", "rule"])
+for cp in "CP":
+    r1, r2 = d.loc[(cp, "R1")], d.loc[(cp, "R2")]
+    top10 = pd.read_csv(R / f"2020/top_sessions_{cp}.csv").share.sum()
+    p = g20[(g20.rule == "R2") & (g20.cp == cp)].iloc[0]
+    print(f"{CP[cp]}:")
+    print(f"  Black-Scholes removes {r1.effectiveness_vs_R0:.1%} of the unhedged squared error")
+    print(f"  RMS error per contract: ${r1.rms_dollars_per_contract:,.0f} (Black-Scholes) -> ${r2.rms_dollars_per_contract:,.0f} (minimum-variance)")
+    print(f"  share of the year's Black-Scholes squared error: stress period {r1.stress_share_R1:.0%}, ten largest sessions {top10:.0%}")
+    print(f"  the lower bound sits {p.gain - p.lo:.2f} below the point Gain")"""),
+    md(r"""
+**Reading.**
+- **Black–Scholes alone removes 92–95% of the unhedged squared error.** The minimum-variance correction works on what is left.
+- **In dollars,** the minimum-variance delta lowers the calls' RMS error per contract from \$825 to \$727 (SPX options are \$100 per index point). The dollar figure weights each pair by its index level squared, so the reduction it implies (22% of the squared error for calls, 19% for puts) is not the Gain.
+- **Concentration.** The stress period, 24 February to 30 April, contains 80–86% of the year's squared error, and ten sessions contain 65–73%. The single hedge set on 13 March 2020 and closed on 16 March, when the index fell 12%, holds 30% of the calls' squared error.
+- **What the design could resolve.** The lower bounds sit 0.54 and 0.57 below the point Gains. Given these interval widths, only a Gain above roughly 0.5 could have cleared zero: about twice the 0.23–0.26 Hull and White report. That is why the verdict is Inconclusive rather than negative, and why the walk-forward carries the stability evidence.
+
+The cumulative squared error through 2020 shows the concentration. (The figure is drawn by `scripts/make_figures.py` from the per-pair errors, which are regenerable but not committed.)
+"""),
+    code(r"""
+display(Image(filename=str(R / "figures/cumulative_sse_2020.png"), width=900))
+m = pd.concat([pd.read_csv(R / f"2020/monthly_{cp}.csv") for cp in "CP"]).pivot(index="month", columns="cp", values="G_R2_R1")
+print("Gain of the minimum-variance delta over Black-Scholes, month by month; mean of the monthly Gains:", m.mean().round(3).rename(CP).to_dict())
+m.rename(columns=CP).round(3).T"""),
+    md(r"""
+**Month by month** the Gain swings from about +0.4 to −0.8, and the average of the monthly Gains (Hull and White's aggregation) is about zero. The correction helped from January to March and hurt badly in April. April's fit was the first whose 12-month window contained March 2020, and its put coefficients jumped; but in April, as in August, September and November, even a fit to that month's own data removed almost nothing, so the spot–volatility relation the rule relies on had all but vanished, and any correction could only add error (notebook 04). The crash in the window is not the whole story: May and June, with the same crash in their windows, gained, and September and November lost without a new one.
+"""),
+    md(r"""
+### 4.2 Years and stress episodes (detail: notebooks 06, 09 and 07)
+
+Yearly Gains are mostly 0.10–0.25 through 2021, and about zero in 2022–2023. The table gives each year's Gain over Black–Scholes with its interval (12-month fits) and the point Gains with 36- and 60-month fits; the status column says whether the year was clean.
+"""),
+    code(r"""
+x = G[(G.rule == "R2") & (G.base == "R1")]
+t = pd.DataFrame(index=sorted(x.year.unique()))
+for cp in "CP":
+    for W in (12, 36, 60):
+        z = x[(x.cp == cp) & (x.window == W)].set_index("year")
+        t[f"{CP[cp]}, {W}-month"] = z.apply(fmt, axis=1) if W == 12 else z.gain.map(lambda v: f"{v:+.3f}")
+t = t.fillna("")
+t["status"] = x[(x.cp == "C") & (x.window == 12)].set_index("year").status
+x12 = x[x.window == 12]
+print(f"12-month fits: significantly positive in {(x12.lo > 0).sum()} of {len(x12)} call-or-put years, significantly negative in {(x12.hi < 0).sum()}")
+print("median yearly Gain, 2015-2023:", {f"{W}-month": median_1523("R2", "R1", W).round(3).rename(CP).to_dict() for W in (12, 36, 60)})
+t"""),
+    md(r"""
+**Reading.**
+- **With 12-month fits, the Gain is significantly positive in 7 of 26 call-or-put years and significantly negative in none.** It is positive in every year through 2021.
+- **The clean years agree.** 2011–2013 gain 0.03–0.24, and in 2021, a year nobody had looked at, both types gain significantly (0.15 and 0.16).
+- **The advantage disappears in 2022–2023.** With 12-month fits the Gain is about zero, with tight intervals in 2023. Longer windows, which remember more of the earlier, stronger relation, lose in 2022 (−0.16 to −0.23).
+- **Longer windows gain more in the typical year** (median 0.16 with 36- or 60-month fits, against 0.12 / 0.10), but pay more when the relation changes.
+
+**Stress episodes,** defined from the S&P 500 close alone (RV: 20-day realized volatility above 25%; DD: a peak-to-trough drawdown of at least 10%), scored with the walk-forward's 12-month fits:
+"""),
+    code(r"""
+S = pd.read_csv(R / "walkforward/stress_gains.csv")
+s = S[(S.window == 12) & (S.rule == "R2") & (S.base == "R1")].copy()
+s["episode"] = s.start + " to " + s.end + " (" + s.definition + ")"
+s["g"] = s.apply(fmt, axis=1)
+s.pivot_table(index=["episode", "sessions"], columns="cp", values="g", aggfunc="first").rename(columns=CP)"""),
+    md(r"""
+**Reading.**
+- **Sell-offs gain,** significantly in 2011, 2015–2016 and February 2018. Every drawdown gains for both types in its point estimate.
+- **Rebounds and post-crash periods lose.** September–December 2022 loses significantly: −0.52 for calls and −0.56 for puts. Late 2018 (the rebound from the December 2018 low) and March 2022 lose too, without significance. A three-session episode at the end of September 2020 is also significantly negative for puts, but three sessions are too few for its interval to mean much.
+- **Significance here is pointwise,** over 17 episodes and two types, with no adjustment for multiplicity; episode bootstraps shorten the block for short episodes.
+- **So the stable-relation assumption fails in one direction of stress more than the other** (§5, notebook 09).
+
+**SPY replicates the picture.** SPY options are American and settle into shares, and SPY pays quarterly dividends, so the replication reruns every applicable SPX procedure with Lecture 12's American tree (notebook 07). Its 2020 is also Inconclusive, as are all 10 of its robustness variants (SPX's set without A); that verdict is post hoc, because SPY's 2020 Gains were seen before the replication was specified. Puts typically gain 16–28% a year through 2021:
+"""),
+    code(r"""
+sv = pd.read_csv(R / "spy/2020/verdict.csv")
+print(f"SPY 2020: {sv.verdict[0]}; calls {sv.G_C[0]:+.3f} [{sv.G_C_lo[0]:+.2f}, {sv.G_C_hi[0]:+.2f}], puts {sv.G_P[0]:+.3f} [{sv.G_P_lo[0]:+.2f}, {sv.G_P_hi[0]:+.2f}]")
+print("robustness variants:", sv.verdict[1:].value_counts().to_dict())
+sg = pd.read_csv(R / "spy/walkforward/gains_by_year.csv")
+z = sg[(sg.rule == "R2") & (sg.base == "R1") & (sg.window == 12)]
+z.assign(g=z.apply(fmt, axis=1)).pivot(index="year", columns="cp", values="g").rename(columns=CP)"""),
+    md(r"""
+### 4.3 Complex against simple rules (detail: notebooks 06 and 08)
+
+**Against the scaling rules, year by year** (12-month fits, Gain of the minimum-variance delta over each scaling rule):
+"""),
+    code(r"""
+for base, name in (("R3", "the fixed 0.9/1.1 scaling"), ("R4", "the fitted scaling")):
+    z = wf("R2", base)
+    win, lose = z[z.lo > 0], z[z.hi < 0]
+    print(f"Against {name}: significantly better in {len(win)} of {len(z)} call-or-put years, significantly worse in {len(lose)}"
+          + (" (" + ", ".join(f"{y} {CP[c]}" for y, c in zip(lose.year, lose.cp)) + ")" if len(lose) else ""))
+print("median yearly Gain over Black-Scholes, 2015-2023 (calls / puts):",
+      {r: median_1523(r, "R1").round(3).tolist() for r in ("R2", "R3", "R4", "P0")})"""),
+    md(r"""
+**Reading.** The minimum-variance delta beats the fixed scaling significantly in 14 of 26 call-or-put years, and loses in two, both in 2018. The fitted scaling is significantly worse in 12 of 26, and never significantly better. Yet the fixed scaling's *median* Gain over Black–Scholes (0.125 / 0.099) matches the minimum-variance delta's: it is better in some years (2018) and much worse in others (−0.14 to −0.18 in 2022, −0.06 to −0.14 in 2023).
+
+**The challengers.** Each row is a rule's yearly Gain over the minimum-variance delta (12-month fits, SPX), and the last column is the largest gap, in any year, between the rule's Gain over Black–Scholes and the minimum-variance delta's.
+"""),
+    code(r"""
+names = {"P0": "constant correction", "P1": "linear in delta", "P2": "quadratic (spans R2: a check)", "P3": "cubic",
+         "P4": "degree 4", "P5": "degree 5", "P6": "degree 6", "P7": "degree 7", "P8": "degree 8", "PCV": "degree chosen by validation",
+         "R5": "relaxed Hull-White", "R6": "delta-vega-vanna regression", "R9": "LightGBM on delta, from scratch",
+         "R11": "LightGBM on delta, boosted from R2", "R10": "LightGBM on features, from scratch", "R8": "LightGBM on features, boosted from R2"}
+r2 = wf("R2", "R1").set_index(["year", "cp"]).gain
+rows = []
+for rule, name in names.items():
+    z, m = wf(rule, "R2"), median_1523(rule, "R2")
+    rows.append({"code": rule, "rule": name, "median over R2, 2015-2023 (calls / puts)": f"{m['C']:+.3f} / {m['P']:+.3f}",
+                 "lowest year": z.gain.min(), "highest year": z.gain.max(),
+                 "significantly better / worse (of 26)": f"{(z.lo > 0).sum()} / {(z.hi < 0).sum()}",
+                 "largest gap from R2 over Black-Scholes": (wf(rule, "R1").set_index(["year", "cp"]).gain - r2).abs().max()})
+pd.DataFrame(rows).round(3)"""),
+    md(r"""
+**Reading.**
+- **For SPX with 12-month fits, the constant correction, every polynomial degree and the delta-only LightGBM corrections all stay within about 0.015 a year of the minimum-variance delta.** That is under a third of the 0.05 the plan calls material, and in a typical year the gap is a few thousandths.
+- **Read the significance counts with care for these close rules.** P2 spans exactly the same functions as the minimum-variance delta (its gap is about 10⁻¹⁵), yet it shows "significant" differences in 6 of 26 call-or-put years: at gaps this small, the bootstrap's marks are rounding noise.
+- **The relaxed Hull–White rule equals the minimum-variance delta** to within 0.006 a year.
+- **Ruf and Wang's delta–vega–vanna regression is slightly worse:** median Gains of −0.011 / −0.004 relative to the minimum-variance delta, and −0.18 for 2020 puts.
+- **The LightGBM corrections that use market features fail in the crash** (below), and otherwise track the minimum-variance delta.
+"""),
+    code(r"""
+g = pd.read_csv(R / "2020/gains.csv").query("variant == 'learners (feature-complete)'").set_index(["rule", "base", "cp"]).gain
+r9 = pd.read_csv(R / "2020/r9_r11.csv").query("variant == 'primary' and base == 'R1'").set_index(["rule", "cp"]).gain
+for cp in "CP":
+    r8 = (1 - g[("R8", "R2", cp)]) * (1 - g[("R2", "R1", cp)])  # SSE(R8)/SSE(R1), via R2 on the same pairs
+    print(f"2020 {CP[cp]}: squared error relative to Black-Scholes: R8 {r8:.2f}, R10 {1 - r9[('R10', cp)]:.2f}, "
+          f"R9 {1 - r9[('R9', cp)]:.2f}, R11 {1 - r9[('R11', cp)]:.2f}")"""),
+    md(r"""
+**Reading.** In 2020 the market-feature corrections' squared error for puts was 9–11 times Black–Scholes', after the crash took their features outside the training range. The trees used in March were fitted on March 2019 to February 2020, whose 20-day realized volatility never exceeded 25% and whose worst 5-day index return was −12%; March 2020 brought 98% and −20%. Trees extrapolate a constant from the edge of their training data. Calls were unaffected, and the delta-only learners, with no such features, stayed with the minimum-variance delta. The 2×2 design (from scratch or boosted, on delta or on features) therefore points to the features, not the boosting, as what broke.
+"""),
+    md(r"""
+### 4.4 The level and the assumption checks (detail: notebooks 09, 08 and 03)
+
+**The level** replaces the quadratic with one constant: the hedge's assumed sensitivity of implied volatility to the index. With a constant correction c, the hedge is δ + c·ν/(S√T), so the assumed response is ∂σ/∂S = c/(S√T): a 1% index fall (ΔS = −0.01·S) raises implied volatility by −0.01·c/√T, or −c/√T volatility points. A level of −0.13 therefore means a 1% index fall raises implied volatility by 0.13 volatility points at one year to expiry, or 0.26 at three months:
+"""),
+    code(r"""
+c = -0.13
+for T, label in ((1.0, "one year"), (0.25, "three months")):
+    print(f"level {c}: a 1% index fall raises implied volatility by {-c / np.sqrt(T):.2f} vol points at {label} to expiry")
+L = pd.read_csv(R / "walkforward/level_shape_by_year.csv")
+print(f"\nlargest |R2's weighted mean correction - the constant's c|, over all years: {(L.R2_mean_correction - L.c_fit).abs().max():.1e}")
+print(f"the shape (R2 over the constant) adds {L.G_shape_R2_P0.min():+.3f} to {L.G_shape_R2_P0.max():+.3f} a year")
+cols = ["c_fit", "c_post", "G_level_P0_R1", "G_shape_R2_P0", "G_ceiling_P0post_R1"]
+L.pivot_table(index="year", columns="cp", values=cols)[cols].rename(columns=CP, level=1).round(3)"""),
+    md(r"""
+**Reading.** In the table, `c_fit` is the fitted level (the trailing 12-month constant, averaged over the year's refits), `c_post` the best constant for that year's own pairs, after the fact; `G_level_P0_R1` the constant correction's Gain over Black–Scholes, `G_shape_R2_P0` what the quadratic shape adds to it, and `G_ceiling_P0post_R1` the Gain the best constant would have given.
+- **The fitted quadratic, averaged over the training options with the regression's weights, equals the constant exactly.** That is the first normal equation of the least-squares fit (the regressor is ν/(S√T)·1, so the weighted residuals sum to zero). The match above is to rounding error.
+- **The level supplies the Gain; variation across strikes adds only −0.014 to +0.015 a year.**
+- **A mis-estimated level costs quadratically.** With y the Black–Scholes error and x the regressor ν·ΔS/(S²√T), the squared error of a constant c is Σy² − 2cΣxy + c²Σx², and the best constant is c* = Σxy/Σx². So the Gain of c over Black–Scholes is exactly G(c) = G*·[1 − ((c − c*)/c*)²], where G* is the ceiling. A level twice too large gives zero, and more than that loses to Black–Scholes. The identity holds for each monthly fit and its own test month, where c is a single number; the yearly columns above average twelve fits and do not satisfy it. The check, over every monthly fit of 2011–2023:
+"""),
+    code(r"""
+lm = pd.read_csv(R / "walkforward/level_shape_by_month.csv")  # one row per test month and type: the fitted c, the best c*, the sums of squares
+G_c = 1 - lm.sse_P0 / lm.sse_R1
+G_star = 1 - lm.sse_P0_post / lm.sse_R1
+ratio = lm.c_fit / lm.c_post
+print(f"{len(lm)} monthly fits; largest |G(c) - G*[1 - (1 - c/c*)^2]|: {(G_c - G_star * (1 - (1 - ratio) ** 2)).abs().max():.1e}")
+print(f"fits (month x type) whose fitted level overshot the best by more than 2x: {(ratio > 2).sum()}, of which lost to Black-Scholes: {((ratio > 2) & (G_c < 0)).sum()}")
+print(f"months that lost to Black-Scholes: {(G_c < 0).sum()}, of which the fitted level was more than 2x the best or of the wrong sign: {((G_c < 0) & ((ratio > 2) | (ratio < 0))).sum()}")"""),
+    md(r"""
+**Reading.** Every month in which the fitted level overshot the month's best level by more than a factor of two lost to Black–Scholes, and every losing month either overshot that much or had the wrong sign. In market terms, the rule loses whenever the spot–volatility relation weakens by more than half between the fitting window and the hedging month.
+
+**The individual coefficients are poorly identified, but the level is well identified, and it varies over time:**
+"""),
+    code(r"""
+P = pd.read_csv(R / "walkforward/parameter_stability_summary.csv")
+P[P.window == 12][["cp", "rule", "coef", "refits", "min", "median", "max", "median_se", "share_abs_z12_gt_2", "median_corr_bc"]].round(3)"""),
+    md(r"""
+**Reading.** Each row summarizes a coefficient over the 156 monthly refits of 2011–2023, with session-clustered standard errors. R2's b and c are nearly collinear (|correlation| about 0.9), so they trade off against each other; the constant's c (P0, the level) has a median standard error of about 0.03. **The level drifts:** from about −0.34 to near zero, and fits 12 months apart, on non-overlapping data, differ by more than two reported standard errors in 19% of call and 10% of put comparisons (`share_abs_z12_gt_2`). These standard errors are clustered by session but omit serial dependence across sessions, so the counts somewhat overstate the instability.
+
+**The shape and the maturity scaling.** With 12-month fits, degrees 0–8 give essentially the same Gain (§4.3). Maturity powers $T^{-\alpha}$ for $\alpha=0,0.25,0.75,1$ never consistently beat $1/\sqrt{T}$ (counts of significant years, against $1/\sqrt{T}$):
+"""),
+    code(r"""
+M = pd.read_csv(R / "walkforward/maturity_by_year.csv").query("regime == 'all'")
+M.assign(better=M.lo > 0, worse=M.hi < 0).groupby("rule").agg(
+    better=("better", "sum"), worse=("worse", "sum"), type_years=("gain", "size"), median_gain_over_sqrt_T=("gain", "median")).round(3)"""),
+    md(r"""
+These checks were first made before 2020 was opened, in the rehearsal (notebook 03). There $1/\sqrt{T}$ was not contradicted by any alternative power. The cubic did beat the quadratic in 2019 by the plan's pre-specified criterion, though by only about 0.2% of the squared error, and not in 2018; it was carried to 2020 as an exploratory rule and was no better there. So "not contradicted" in the table of §6 means not contradicted in any economically meaningful sense.
+
+### 4.5 Extensions and published benchmarks (detail: notebooks 10, 11, 08 and 09)
+
+**Books** (notebook 10). We score each day's average error across all calls, all puts, or long-volatility positions in out-of-the-money options; a risk reversal (long out-of-the-money calls, short out-of-the-money puts) is the control, because its volatility exposures cancel. Median yearly Gains over Black–Scholes, 2011–2023, on the book and per option, with each book's common share (the part of the per-option squared error that survives averaging):
+"""),
+    code(r"""
+B = pd.read_csv(R / "extensions/spx/books_median_yearly_gain.csv")
+t = B[(B.base == "R1") & B.rule.isin(["R2", "R3", "R4", "P0"])].pivot_table(index="book", columns=["rule", "measure"], values="median_yearly_gain")
+t[("common share", "")] = pd.read_csv(R / "extensions/spx/books_common_share.csv").groupby("book").common_share_R1.median()
+display(t.round(3))
+print("The fixed scaling (R3) over the minimum-variance delta, median yearly Gain:")
+B[(B.base == "R2") & (B.rule == "R3")].pivot_table(index="book", columns="measure", values="median_yearly_gain").round(3)"""),
+    md(r"""
+**Reading.** For SPX calls, the median yearly Gain over 2011–2023 is 0.22 on the book against 0.15 per option, about 1.4 times (puts: 0.17 against 0.12). Losses grow too: in 2022 the put book lost 0.14 against 0.06 per option (its interval, [−0.49, +0.13], includes zero). The control gains little (0.04). The common share is a median of about 0.7 across years, ranging from 0.32 to 0.82 by book and year. **Only a book's total correction matters,** because every option's error on a day is divided by the same index level, so a book's error depends only on the average of its hedge ratios. So on books the fixed scaling roughly ties the minimum-variance delta (+0.011 / +0.003), though it trails per option (−0.037 / −0.056).
+
+**Held positions** (notebook 10). These tests accumulate the error over 5 or 10 days, rehedging daily with each day's ratio; after the start the contract is followed whatever its delta, maturity or volume, because dropping it when it leaves the band would select on the outcome. Gains over Black–Scholes, on the path and one day at a time on the same pairs:
+"""),
+    code(r"""
+PG = pd.read_csv(R / "extensions/spx/paths_gains.csv")
+z = PG[(PG.subset == "all") & (PG.base == "R1") & PG.rule.isin(["R2", "P0", "R3", "R4"]) & PG.period.isin(["2011-2019", "2020", "2021-2023"])]
+z.pivot_table(index=["period", "rule"], columns=["H", "measure", "cp"], values="gain").round(3)"""),
+    md(r"""
+**Reading.** In 2011–2019 the Gain rises from 12–13% for one day to 19–20% over 5 days and 24–34% over 10 days (2020: 26–28% and 31–39%). Two reasons are likely: noise in the mid quotes cancels along a path, entering only at its two ends, and the spot–volatility move accumulates over a multi-day sell-off. Losses also grow, in 2021–2023 (puts −0.11 over 5 days). The fixed scaling gains less than the minimum-variance delta on paths.
+
+**Data starvation** (notebook 10). These tests keep fewer options per training day, or shorten the training window. Median yearly Gain of the minimum-variance delta, 2011–2023, over Black–Scholes and over the full-data fit (`R2full`) on the same pairs; `frac` keeps a random fraction of each training session's options and `k` a fixed number per session and type (medians over five seeds), and `W1`–`W6` are windows of 1–6 months:
+"""),
+    code(r"""
+sp = pd.read_csv(R / "extensions/spx/starve_seed_spread.csv").query("span == '2011-2023' and rule == 'R2'")
+order = ["W12", "frac0.25", "frac0.05", "frac0.01", "k10", "k3", "W6", "W3", "W2", "W1"]
+display(sp.pivot_table(index="config", columns=["base", "cp"], values="median").loc[order].round(3))
+SB = pd.read_csv(R / "extensions/spx/starve_by_year.csv")
+print("2022, Gain over Black-Scholes by training window:")
+SB[(SB.rule == "R2") & (SB.base == "R1") & (SB.year == 2022)].pivot_table(index="config", columns="cp", values="gain").loc[["W12", "W6", "W3", "W2", "W1"]].rename(columns=CP).round(3)"""),
+    md(r"""
+**Reading.** Three options of each type a day cost only about 0.01 in Gain: the information is in the number of sessions, not options, because all options on a day share its index move. Windows below three months lose 0.02–0.07 a year. Yet a three-month window would have adapted to 2022: puts go from −0.058 to +0.047. That is hindsight on one year: the same window does worse in 2021 (puts 0.104 against 0.161) and 2023 (−0.060 against −0.014). No window is best every year: a long one estimates the level precisely but goes stale, a short one tracks it but is noisy.
+
+**Stocks and ETFs** (notebook 11). The SPY protocol on AAPL, NVDA and TSLA (single stocks), QQQ (a Nasdaq-100 ETF) and SLV (a silver ETF). Median yearly Gains over Black–Scholes of the minimum-variance delta (R2) and the fixed scaling (R3); the 12-, 36- and 60-month medians cover 2017–2023, 2019–2023 and 2021–2023:
+"""),
+    code(r"""
+m = pd.concat([pd.read_csv(R / f"stocks/{u}/walkforward_median_yearly_gain.csv").assign(underlying=u.upper()) for u in ("aapl", "nvda", "tsla", "qqq", "slv")])
+m[(m.base == "R1") & m.rule.isin(["R2", "R3"])].pivot_table(index="underlying", columns=["rule", "window", "cp"], values="median_yearly_gain").round(3)"""),
+    md(r"""
+**Reading.** AAPL gains a little; NVDA, TSLA and SLV gain nothing or lose; and QQQ behaves like SPX on 12- and 36-month fits (its 60-month median, −0.09 for calls, rests on 2021–2023 alone, the years SPX's Gain faded too). The fixed 0.9/1.1 scaling, read off S&P 500 options, loses 0.05–0.37 for calls on the three stocks with 12-month fits. Hull and White also found much smaller Gains for single stocks (Dow stocks, 2004–2015: 10.3% for calls and 2.5% for puts).
+
+**Short-dated options** (notebook 08): options under 14 days, with the main study's coefficients.
+"""),
+    code(r"""
+sd = pd.read_csv(R / "short_dated/gains_by_year.csv")
+print("median yearly Gain over Black-Scholes, 2015-2023:",
+      sd[(sd.rule == "R2m") & (sd.base == "R1") & sd.year.between(2015, 2023)].groupby("cp").gain.median().round(3).rename(CP).to_dict())
+print("by days to expiry on day one, median over 2011-2023:")
+pd.read_csv(R / "short_dated/buckets.csv").groupby(["days", "cp"]).G_R2m_R1.median().unstack().rename(columns=CP).round(3)"""),
+    md(r"""
+**Reading.** Options under 14 days gain 0.06 / 0.005 for calls / puts, and about zero under three days; the 7–13-day calls do best (0.087). Why the Gain fades is not tested here. The correction itself does not vanish near expiry: ν/(S√T) is the normal density at d₁, so at the money it stays near 0.4. More likely, other parts of the error, gamma's above all, grow as expiry nears, and the coefficients come from options of 14 days or more.
+
+**The published benchmarks** (notebook 09). Our Gains on Hull and White's test months that we also have (2013–2015 with 36-month fits; 2011–2015 with 12-month fits), pooled and as a mean of monthly Gains, which is their aggregation:
+"""),
+    code(r"""
+P = pd.read_csv(R / "walkforward/published_comparison.csv")
+P[(P.rule == "R2") & (P.period == "HW overlap") & (P["sample"] == "analysis (E7)")].pivot_table(index="window", columns="cp", values=["pooled", "mean_of_monthly", "months"]).rename(columns=CP, level=1).round(3)"""),
+    md(r"""
+**Reading.** Our pooled 2013–2015 Gains with 36-month fits are 0.22 / 0.25, while Hull and White report mean monthly Gains of 0.26 / 0.23 over 2007–2015. On their aggregation ours are lower still (0.10 / 0.09), so pooling is not what lowers theirs relative to ours; the periods differ, and their 2007–2012 is not in our data. Our lower headline reflects:
+- **the period:** 2017, 2018 and 2022–2023 are weak years;
+- **the 12-month window:** pooled over mid-2012 to mid-2019 it gives about half the 36-month Gain (0.08 against 0.14–0.17), though over the 2015–2023 medians the ratio is 0.6–0.8;
+- **in-the-money calls,** about half of our call sample (55% in 2020; notebook 01): restricting to out-of-the-money options raises the pooled 2011–2019 Gain, but only modestly (calls 0.119 → 0.130, puts 0.112 → 0.132; notebook 09).
+"""),
+    md(r"""
+## 5. Financial interpretation
+
+**The correction hedges the expected volatility response.** About 70% of an option's squared error is shared by all options on the day and survives averaging across a book (the common share in §4.5), which explains the larger book Gain. The size of the response matters more than its shape across strikes (§4.4). The table puts the measured response beside the yearly Gain: for near-the-money options (|δ| 0.4–0.6) 20–60 days from expiry, the slope of the daily change in implied volatility on the index return, in volatility points per 1% index fall.
+"""),
+    code(r"""
+sv = pd.read_csv(R / "walkforward/spot_vol_slope.csv").set_index("year")[["vol_points_per_1pct_fall"]]
+gy = wf("R2", "R1").pivot(index="year", columns="cp", values="gain").rename(columns=lambda c: f"Gain, {CP[c]}")
+cp_ = L.pivot(index="year", columns="cp", values="c_post").rename(columns=lambda c: f"best level, {CP[c]}")
+t = sv.join(gy).join(cp_)
+print("correlation of the measured response with the yearly Gain:", t.corr().iloc[0, 1:3].round(2).to_dict(),
+      "; without 2022-2023:", t.drop([2022, 2023]).corr().iloc[0, 1:3].round(2).to_dict())
+print("correlation of the measured response with the best level:", t.corr().iloc[0, 3:].round(2).to_dict())
+fig, ax = plt.subplots(figsize=(6, 3.6))
+for cp, mk in (("C", "o"), ("P", "s")):
+    ax.scatter(t.vol_points_per_1pct_fall, t[f"Gain, {CP[cp]}"], marker=mk, label=CP[cp])
+for yr, r in t.iterrows():
+    ax.annotate(str(yr), (r.vol_points_per_1pct_fall, r["Gain, calls"]), fontsize=7, xytext=(3, -9 if yr == 2023 else 3), textcoords="offset points")
+ax.axhline(0, color="k", lw=0.8); ax.set_xlabel("vol points per 1% index fall (near the money)"); ax.set_ylabel("Gain over Black-Scholes (12-month fits)")
+ax.legend(); plt.tight_layout(); plt.show()
+t.round(3)"""),
+    md(r"""
+**Reading.** For near-the-money options 20–60 days from expiry, the measured response fell from 0.55 volatility points per 1% index fall in 2021 to 0.13 in 2022–2023, and the Gain fell with it. The best level after the fact tracks the measured response (correlation −0.61 for calls, −0.85 for puts); the fitted level, learned from the stronger years before, overshot it. This is a descriptive reading, consistent with the identity of §4.4 but not a test: across years the response and the Gain correlate at 0.56 / 0.64, and at only 0.21 / 0.27 without 2022–2023. 2017, the earlier low-response year (0.20), had the smallest put Gain before 2022 (0.05).
+
+The scatter also shows that a strong response is not enough: what matters is whether the *fitted* level matches the year's. 2018 had a strong response (0.44) but small Gains: after the February 2018 spike entered the training window, the fitted level (−0.22 for calls, −0.26 for puts, averaged over the year's refits) overshot the year's best (−0.06 and −0.11; the table in §4.4).
+
+**Drift.** For one-day hedges, we follow Hull and White's specification, with no intercept and no theta adjustment (theta is the option's time decay, Lecture 6). Subtracting one day's theta changes the 2020 Gains by at most 0.011:
+"""),
+    code(r"""
+g = pd.read_csv(R / "2020/gains.csv")
+z = g[g.variant.isin(["primary", "T"]) & (g.rule == "R2") & (g.base == "R1")].pivot(index="cp", columns="variant", values="gain").rename(index=CP)
+z["T - primary"] = z["T"] - z["primary"]
+display(z.round(3))
+ME = pd.read_csv(R / "extensions/spx/paths_mean_error.csv")
+q = ME[(ME.subset == "all") & (ME.rule == "R2") & (ME.period == "2011-2019")].set_index(["H", "cp"])[["diff_vs_R1", "diff_lo", "diff_hi"]]
+print("Mean held-position error, minimum-variance delta minus Black-Scholes, 2011-2019, in basis points of the start-day index level:")
+(q * 1e4).round(2)"""),
+    md(r"""
+**Reading.** For the long-option position that $e$ represents, the correction leaves the position slightly longer the index, because it under-hedges calls and over-hedges puts (the fitted level is negative). Its five-day mean error exceeds Black–Scholes' by about 0.9 basis points of the index level in 2011–2019. That is consistent with earning some of the index's upward drift, and the difference is not significant (the intervals include zero).
+
+**What a Gain is worth.** If the mean P&L is unchanged, and the reduction in squared error approximates the reduction in variance, a Gain $g$ multiplies the hedged position's Sharpe ratio (mean P&L over its standard deviation) by about $1/\sqrt{1-g}$:
+"""),
+    code(r"""
+for g in (0.10, 0.15, 0.25):
+    print(f"Gain {g:.2f}: Sharpe ratio multiplied by about {1 / np.sqrt(1 - g):.2f}")"""),
+    md(r"""
+**Where it works and fails.** Here the slope is the number of volatility points by which implied volatility rises per 1% fall in the index.
+- **Works:** index options (SPX, SPY, QQQ); sell-offs; years in which the slope stays close to the preceding year's; books and held positions.
+- **Fails:** after a crash enters the training window (April 2020); in rebounds and post-crash periods (late 2018, late 2022); when the slope weakens (2022–2023); on single stocks and silver; near expiry.
+
+## 6. Assumptions, limitations and failure modes
+
+| Assumption | Check | Result | Notebook |
+|---|---|---|---|
+| Volatility response is quadratic in delta | Degrees 0–8, a validated degree, LightGBM on delta | Not contradicted; shape barely matters | 03, 08 |
+| Response scales as $1/\sqrt{T}$ | $T^{-\alpha}$, $\alpha\in\{0,0.25,0.75,1\}$, by year | Not beaten consistently | 03, 09 |
+| Coefficients remain stable between windows | Coefficient paths; fits 12 months apart | Fails: the level drifts, badly in 2022 | 04, 09 |
+| No intercept or theta term is needed | Theta-adjusted 2020 variant; held-position mean error | 2020 Gains change by at most 0.011 with theta adjustment; five-day mean-error difference from Black–Scholes about +0.9 bp in 2011–2019, not significant | 05, 10 |
+| One day is the relevant horizon | 5- and 10-day held positions | Gain grows over longer horizons | 10 |
+| Mid quotes are synchronous with the index | Two index-level sensitivities; bid and ask marks | Verdict unchanged | 02, 04, 05 |
+| Frictionless index hedging | Turnover only | Not tested with costs; in 2020 the minimum-variance delta's daily change in hedge ratio was 3% smaller than Black–Scholes' | 05 |
+
+**Limitations.**
+- **There is one confirmatory year, and it contains a crash.** The other analyses are exploratory, and clean years are few.
+- **One data vendor,** whose quote timing is undocumented; no transaction or financing costs.
+- **The intervals omit the training window's estimation error,** and a crash strains the bootstrap's assumptions.
+- **SPY's held-position test follows a contract only through days on which it traded with at least 14 days to expiry,** because SPY's Greeks were computed only for day-one candidates; the five stocks and ETFs use the vendor's underlying levels.
+
+**The observed failure modes:**
+- a crash entering the training window, followed by over-correction: April 2020, and the stocks' 2020 (notebooks 04 and 11);
+- the LightGBM corrections with market features extrapolating outside their training range in March 2020 (notebooks 05 and 08);
+- a fixed scaling of delta applied outside the market and period it was read from. Ruf and Wang's 0.9/1.1 comes from S&P 500 options from 2010 to mid-2019. It fails on SPY calls and single stocks, and on SPX itself in 2022–2023, as the volatility response weakened (notebooks 06, 07 and 11).
+
+**What a validator would monitor** (a reading, not a tested rule): the realized Gain over Black–Scholes, monthly; the fitted level against the level recent hedges reward, since by §4.4's identity a month in which the fitted level is more than twice the rewarded one loses to Black–Scholes; and the near-the-money spot–volatility slope.
+
+**A note on "not contradicted"** in the first row: the rehearsal's pre-specified test did prefer a cubic to the quadratic in 2019, by about 0.2% of the squared error (notebook 03); every later check found the shape economically irrelevant.
+
+## 7. Reproducibility
+
+The repository is [github.com/biswajit-nag/hull-white-delta-spx](https://github.com/biswajit-nag/hull-white-delta-spx). `uv sync --locked`, `uv run pytest` and `uv run python -I scripts/make_notebooks.py` rebuild every notebook, this one included, from the committed tables, without the vendor data. With the vendor's archives, the scripts in `scripts/` rebuild those tables; `REPRODUCING.md` gives every step, and `results/runtime_log.csv` records each run's commit and wall time.
+
+This is an individual project. Claude (Anthropic) assisted with code, analysis and drafting. GPT-6 Astra (OpenAI) reviewed key steps and helped in wording the reports. The author directed the work and takes the responsibility for its correctness.
+
+**References.** Hull, J. and White, A. (2017), Optimal delta hedging for options, *Journal of Banking & Finance* 82, 180–190. Ruf, J. and Wang, W. (2022), Hedging with linear regressions and neural networks, *Journal of Business & Economic Statistics* 40(4), 1442–1454.
+"""),
+])
+
 NOTEBOOKS["01"] = ("01_audit_and_attrition", [
     md("""
 # 01 · Data audit and attrition
+
+**In the story** (notebook 00, §2): this is where the sample comes from. It yields 1.06 million SPX pairs in 2020 and 7.6 million over 2011–2023, with at least 14 days to expiry, an absolute delta of 0.05–0.95 and trading on day one; in 2020, 98.7% of eligible pairs have a usable next-session quote.
 
 **What this notebook establishes.** The data are OptionsDX's end-of-day SPX option quotes. Before any hedging number, it checks four things:
 - whether the quotes are fit for a one-day hedging study;
@@ -71,6 +628,8 @@ e7"""),
 A pair needs a two-sided quote (a bid and an ask) for the same contract on the next session.
 - **When the vendor lacks the whole session,** the pair is lost (`vendor_missing_session`); it never turns into a two-day hedge.
 - **When the bid vanishes** (`one_sided_next`), the value is unknown. The plan stress-tests those pairs with endpoint scenarios (§5).
+
+In the table, the `2020` rows exclude the stress period (2020-02-24 to 04-30), which has its own `stress` rows; together they give 98.7% usable pairs for 2020.
 """),
     code("""
 st = pd.read_csv(R / "attrition/by_status.csv")
@@ -94,7 +653,9 @@ ax.set_ylabel("share lost"); plt.xticks(rotation=60); plt.tight_layout()"""),
 Moneyness is measured by the Black–Scholes delta, which puts all maturities on one scale (Lecture 6).
 - **The band.** Hull and White's band keeps 0.05 ≤ |δ| ≤ 0.95: both in- and out-of-the-money options.
 - **SPX lists far more strikes below the index than above,** and the volatility skew stretches the band further down.
-- **So calls are about half in the money, and puts mostly out of the money.**
+- **So calls are about half in the money, and puts mostly out of the money** (55% and 29% in 2020; 48% and 20% in 2019).
+
+This matters for comparisons with published work: in-the-money calls are a large part of our call sample, and one reason our headline Gains are below Hull and White's (notebook 09).
 """),
     code("""
 itm = pd.read_csv(R / "attrition/itm_share.csv"); itm"""),
@@ -118,6 +679,8 @@ a[["month", "sessions", "expiries_per_session", "volume_max", "volume_empty", "e
 NOTEBOOKS["02"] = ("02_forwards_iv_greeks", [
     md("""
 # 02 · Forwards, implied volatilities, Greeks, and verification
+
+**In the story** (notebook 00, §§2–3): every hedge ratio in the study is built from the quantities made here, each expiry's forward and discount factor, each option's implied volatility, and its Black–Scholes delta, vega and vanna. It also sets up sensitivity A, which addresses the finding that the option quotes are synchronous with neither index series, and it runs the test suite.
 
 **Why not a rate and a dividend yield.** Lecture 9 prices with a continuous dividend yield q. The S&P 500's dividends come from 500 companies on scattered dates, so no single q is observable. Instead, every expiry is priced on its own *forward* F and discount factor D, both read from put–call parity at the mids (Lectures 6 and 9):
 
@@ -189,6 +752,8 @@ NOTEBOOKS["03"] = ("03_rehearsal_2019", [
     md("""
 # 03 · The rehearsal on training data (2019, and 2018)
 
+**In the story** (notebook 00, §3 and §4.4): before 2020 was opened, a rehearsal on 2018–2019 and a dry run of the test script on 2019 checked the code and the model's form. The checks of the form (the quadratic in delta, the 1/√T maturity scaling) were made here first, and the walk-forward repeated them later (notebooks 08 and 09). This notebook also shows why every interval in the project resamples sessions, not options.
+
 **Why a rehearsal.** The plan (`analysis_plan.md` §10) runs the whole pipeline on training years before the 2020 test year is opened, so that:
 - the code is checked end to end;
 - the width of the confidence intervals is previewed;
@@ -233,6 +798,8 @@ g[g.base == "deg:2"][["year", "cp", "rule", "gain", "lo", "hi"]].round(4)"""),
 - **In 2019 the cubic beats the quadratic,** for both types, by about 0.2% of the squared error: statistically detectable with hundreds of thousands of pairs, but economically negligible. In 2018 it does not.
 - **Under the plan's rule,** the cubic is carried to 2020 as a labelled exploratory rule; Hull and White's quadratic stays the rule under test.
 - **A constant adjustment (degree 0)** also beats the quadratic for calls in 2019, by 1.4%. The plan's criterion does not cover a lower degree winning, so this is reported, not acted on. It suggests the quadratic's extra coefficients add estimation noise on 6-month windows.
+
+This was the first sign of a central finding: in the 2011–2023 walk-forward, one fitted constant gives essentially the same Gain as Hull and White's three coefficients (notebooks 08 and 09).
 """),
     md("""
 ## Specification check 2: the 1/√T scaling
@@ -265,6 +832,17 @@ pd.concat([pd.read_csv(R / f"rehearsal/se_ratio_{y}.csv").assign(year=y) for y i
 **Reading.** The clustered standard errors are 4.5 to 34 times the naive ones.
 - **Why.** All options on a day share that day's index move and volatility shock, so the information accumulates with sessions (about 250 a year), not with option-days (about 300,000).
 - **The consequence.** Significance claims that treat options as independent, such as Hull and White's Appendix B, are far too optimistic.
+- **The same fact recurs later.** It is why a fit on three options per session and type loses only about 0.01 in Gain (notebook 10), and why a tuned learner's correction shrinks almost to a constant (notebook 08).
+"""),
+    md("""
+## The dry run of the test script (2019)
+
+After the rehearsal, the full test-year script (`scripts/run_test_year.py`) ran end to end with 2019 as the test year, on 12-month windows, excluding pairs whose day two is in 2020 (plan §15, 2026-11-04). It produces no 2020 number and is not evidence, since 2019 had already been used for the rehearsal. It tested the code, so that nothing would be debugged with 2020 results in view.
+"""),
+    code("""
+pd.read_csv(R / "dryrun_2019/verdict.csv").round(3)"""),
+    md("""
+**Reading.** The script ran every variant of the verdict table. Even in 2019, a calm year, the procedure returns Inconclusive: calls 0.114 [−0.05, 0.24], puts 0.099 [−0.26, 0.30]. Those intervals are narrower than 2020's turned out to be (widths 0.29 and 0.56, against 0.82 and 0.90), but still too wide to establish a Gain of this size in one year. That is why the stability question is answered by the walk-forward over many years (notebook 06).
 """),
 ])
 
@@ -272,6 +850,8 @@ pd.concat([pd.read_csv(R / f"rehearsal/se_ratio_{y}.csv").assign(year=y) for y i
 NOTEBOOKS["04"] = ("04_results_2020", [
     md("""
 # 04 · The 2020 test year
+
+**In the story** (notebook 00, §4.1): the pre-registered SPX 2020 test is inconclusive. The minimum-variance delta removed 18.5% of the squared error for calls and 12.0% for puts, but the March 2020 crash leaves 95% intervals spanning about −0.4 to +0.46, and all 11 pre-specified robustness variants agree. This notebook shows the verdict, why the intervals are so wide, and what went wrong after the crash.
 
 **The confirmatory question** (`analysis_plan.md` §1, §8): in 2020, does Hull and White's minimum-variance delta (R2) reduce next-session squared hedging error relative to the Black–Scholes delta (R1)? And does it beat Ruf and Wang's scaling rules: the fixed 0.9·δ for calls and 1.1·δ for puts (R3), and a fitted a·δ (R4)?
 
@@ -293,10 +873,11 @@ prim = g[(g.variant == "primary") & (g.rule == "R2") & g.base.isin(["R1", "R3", 
 prim[["cp", "rule", "base", "gain", "lo", "hi", "p_plus", "p_minus", "pairs"]].round(3)"""),
     md("""
 **The verdict is "Inconclusive".**
-- **Point estimates.** The Hull–White delta reduces squared hedging error by 18.5% for calls and 12.0% for puts.
+- **Point estimates.** The minimum-variance delta (R2) reduces squared hedging error by 18.5% for calls and 12.0% for puts, relative to the Black–Scholes delta (R1).
 - **Intervals.** The session-block bootstrap intervals are [−0.36, 0.46] and [−0.45, 0.46]. H1 is not supported, and nothing is rejected: the data cannot tell a 20% improvement from none.
-- **Against the scaling rules,** all four comparisons are "not distinguished".
-- **Every robustness variant gives the same verdict:** the options' own index level, the vendor's level, the frozen 2019 fit, 36- and 60-month windows, the spread screen, bid-only and ask-only marks, the vanished-quote scenarios and the rest of 2020.
+- **Against the scaling rules,** all four comparisons are "not distinguished": the fixed 0.9/1.1 scaling (R3) and the fitted scaling a·δ (R4), for calls and puts.
+- **All 11 pre-specified robustness variants give the same verdict:** the options' own index level (A), the vendor's level (B), bid-only and ask-only marks, the frozen 2019 fit (F), 36- and 60-month windows, the spread screen (S3), the rest of 2020 without the stress period, and the two vanished-quote scenarios. In three variant comparisons the minimum-variance delta does beat a scaling rule (F for puts against both; the rest of 2020 for calls against R4), never in the primary.
+- **What the design could resolve.** The lower bounds sit 0.54 and 0.57 below the point Gains. Given these interval widths, only a Gain above roughly 0.5 could have cleared zero: about twice the 0.23–0.26 that Hull and White report.
 
 **Why the intervals are so wide: concentration.** In March 2020 the index moved by up to 12% a day, so squared errors on those days are about 100 times those of a calm day.
 """),
@@ -310,9 +891,9 @@ for cp in "CP":
     print(t.assign(session=t.session.str[:10]).round(3).to_string(index=False))"""),
     md("""
 **Reading.**
-- **Black–Scholes already does most of the work.** It removes 92% (calls) and 95% (puts) of the unhedged variance; Hull and White's correction adds about one point.
-- **In dollars,** it cuts the RMS hedging error per contract from about $825 to $727 for calls, and from $894 to $804 for puts.
-- **The stress period** (2020-02-24 to 04-30) holds 80% (calls) and 86% (puts) of the year's Black–Scholes squared error, and ten sessions hold 65–73%.
+- **Black–Scholes already does most of the work.** It removes 92% (calls) and 95% (puts) of the unhedged squared error; the minimum-variance correction adds one to two points of effectiveness, by working on what is left.
+- **In dollars** (SPX options are $100 per index point), it cuts the RMS hedging error per contract from about $825 to $727 for calls, and from $894 to $804 for puts.
+- **The stress period** (2020-02-24 to 04-30) holds 80% (calls) and 86% (puts) of the year's Black–Scholes squared error, and ten sessions hold 65–73%. Sessions are dated by day one, so the largest, 2020-03-13 (30% of the calls' error), is the hedge from 13 to 16 March, when the index fell 12%.
 
 So the pooled Gain is essentially a statement about March 2020, and a few days decide it.
 """),
@@ -356,6 +937,7 @@ c.round(3)"""),
     md("""
 **The in-sample ceiling** refits R2 on each test month's own pairs: the best a quadratic correction could have done with hindsight.
 - **In the months where R2 failed** (April, August, September, November), even the ceiling is near zero. There was little linear relation between the index move and the volatility move left to exploit, so any correction learned earlier could only add error.
+- **The crash in the window is not the whole story.** May and June, with March 2020 also in their windows, gained (+0.17 and +0.42 for calls), while September and November lost without a new crash. What decides a month is whether the relation the fit expects is there.
 - **That is a model-risk finding.** The rule's value depends on the spot–volatility relation being stable, and in 2020 it was not.
 """),
     md("""
@@ -367,12 +949,19 @@ The stress period and the rest of 2020 are bootstrapped in separate strata, so n
 g[g.variant.isin(["stress", "rest of 2020"]) & (g.rule == "R2") & g.base.isin(["R1", "R3", "R4"])][["variant", "cp", "base", "gain", "lo", "hi"]].round(3)"""),
     md("""
 **Outside the crash the picture is calmer and clearer for calls.** R2 beats the fitted scaling rule for calls by 5.3%, with an interval of [0.032, 0.077]. The secondary tests use the full-year family, so this is descriptive.
+
+**What comes next in the story.** One crash year cannot settle the question, so the stability evidence comes from repeating the same protocol over 2011–2023 (notebook 06). There the correction usually helps, and its failure in April 2020, a crash entering the training window followed by over-correction, turns out to be one of three recurring failure modes (notebook 00, §6).
 """),
 ])
 
 NOTEBOOKS["05"] = ("05_breakdown_and_sensitivities", [
     md("""
 # 05 · Breakdown, sensitivities and extensions
+
+**In the story** (notebook 00): this notebook supports three parts of it.
+- **§4.1:** the robustness of the 2020 verdict, variant by variant.
+- **§5:** where the hedging error comes from. The minimum-variance correction works only on the part of the volatility move that comes with the index move. Subtracting one day's theta (sensitivity T) changes the 2020 Gains by at most 0.011.
+- **§4.3 and §6:** the first appearance of a failure mode. A LightGBM correction on market features, tuned on calm 2019, broke in March 2020.
 
 This notebook reports everything the plan declares beyond the confirmatory endpoints:
 - the bucket Gains;
@@ -389,10 +978,12 @@ g = pd.read_csv(R / "2020/gains.csv")
 show = lambda variants: g[g.variant.isin(variants) & (g.rule == "R2") & g.base.isin(["R1", "R3", "R4"])][["variant", "cp", "base", "gain", "lo", "hi"]].round(3)
 show(["primary", "A", "B", "F", "W36", "W60", "T"])"""),
     md("""
-**The index level and the window.** Neither moves the picture.
+**The index level and the window.** Neither moves the verdict.
 - **A and B** are the options' own level and the vendor's snapshot.
+- **The pre-registered timing diagnostic** (plan §8): from the primary to A, the call Gain falls by 0.038 (0.185 → 0.147) and the put Gain rises by 0.099 (0.120 → 0.219). Changes in opposite directions are consistent with the timing mismatch the audit found between the option quotes and the close, though they do not identify it uniquely.
 - **W36 and W60** are the longer windows. They give the same point Gains (about 0.18 for calls and 0.14 for puts) with somewhat narrower intervals.
 - **The frozen fit F**, fitted once on 2019, does about as well as monthly refitting (calls 0.178 against 0.185; puts 0.145 against 0.120). It is the one variant in which R2 beats both scaling rules for puts. In 2020, refitting monthly did not help: the refits learned March too late.
+- **Theta (T).** Hull and White's one-day error has no intercept and no theta term. Subtracting one day's theta (the option's time decay, Lecture 6) from the option's price change changes the Gains by at most 0.011 (calls 0.174 against 0.185, puts 0.112 against 0.120). The drift a hedge leaves is examined over longer horizons in notebook 10.
 """),
     code("""show(["P-bid", "P-ask", "P-WM", "P-SW", "S3", "V", "OTM", "OTM-refit"])"""),
     md("""
@@ -419,6 +1010,7 @@ a[a.group.isin(["all", "stress", "rest"])][["group", "cp", "pairs", "ms_vega", "
 **Reading.**
 - **The vega term is about 60% of the squared error, and the gamma term 27–34%.** The minimum-variance delta works on the vega term: the part of the volatility move that comes with the index move.
 - **That part is small, a delta correction of about −0.04** (`xmom_vega`). Most of the vega risk is volatility moving on its own, which no delta can hedge. That caps what any delta rule can gain.
+- **The gamma term** (the convexity of the option's value in the index, Lecture 6) is also beyond any delta, since it is quadratic in the index move.
 - **The remainder is about 1%,** so the second-order expansion holds even in March 2020: a check on the Greeks.
 """),
     md("""
@@ -452,16 +1044,18 @@ ax.legend()"""),
 """),
     md("""
 ## Exploratory challenger: gradient boosting (R8)
+
+R8 is a LightGBM correction boosted from the minimum-variance delta on six market features: delta, log maturity, the option's position on its smile, the at-the-money implied volatility, 20-day realized volatility and the 5-day index return. It was tuned with Optuna on 2019 before 2020 was opened.
 """),
     code("""
 g[g.variant.str.startswith("learners") & (g.rule == "R8")][["cp", "rule", "base", "gain", "lo", "hi"]].round(3)"""),
     code("""pd.read_csv(R / "2020/smoothness.csv").round(4)"""),
     md("""
 **Reading.**
-- **The boosted correction (R8) failed badly for puts.** It was tuned on 2019, when the trailing 20-day realized volatility never exceeded 31% and the worst 5-day return was −6%. In March 2020 those features reached 98% and −20%, far outside what the trees had seen, and their extreme leaves pushed the median put hedge ratio from −0.57 to −1.07. March's squared error was 13 times R2's; in every other month R8 tracked R2.
-- **It is also rougher.** It has more out-of-order hedge ratios across adjacent strikes (2.8% against 1.8%) and 48% more daily turnover.
+- **The boosted correction (R8) failed badly for puts.** Its Gain over R2 is −9.25: its squared error for puts was about 10 times R2's, and 9 times Black–Scholes'. Its hyperparameters were tuned on 2019, and the trees used in March were fitted on March 2019 to February 2020. Over that window the 20-day realized volatility never exceeded 25% and the worst 5-day index return was −12% (at the very end of February). In March 2020 those features reached 98% and −20%, far outside what the trees had seen, and their extreme leaves pushed the median put hedge ratio from −0.57 to −1.07. March's squared error for puts was 13 times R2's; in the other months it stayed within 0.8–1.6 times R2's.
+- **It is also rougher.** It has more out-of-order hedge ratios across adjacent strikes (2.8% against 1.8%) and 48% more daily turnover than R2. R2 itself trades 3% less than Black–Scholes (a mean daily change in hedge ratio of 0.0333 against 0.0344), so the correction would not raise proportional trading costs.
 
-That is the failure mode the non-smooth-hedge argument predicts: a flexible learner extrapolates arbitrarily outside its training data.
+That is the failure mode the non-smooth-hedge argument predicts: a flexible learner extrapolates arbitrarily outside its training data. Notebook 08 shows that the features, not the boosting, broke it: a LightGBM correction on delta alone stayed with R2 throughout 2020.
 """),
     md("""
 ## SPY (§16.1)
@@ -486,6 +1080,8 @@ NOTEBOOKS["06"] = ("06_walkforward_2011_2023", [
     md("""
 # 06 · Stability across years: the 2011–2023 walk-forward
 
+**In the story** (notebook 00, §§4.2–4.3 and Figure 1): repeated out of sample over 2011–2023, with monthly fits on the preceding 12 months, the correction usually helps. Its median yearly Gain over 2015–2023 is 0.12 for calls and 0.10 for puts, it is significantly positive in 7 of 26 call-or-put years and significantly negative in none, and its advantage disappears in 2022–2023 as implied volatility became less responsive to index moves. Against the scaling rules year by year, it beats the fixed 0.9/1.1 scaling significantly in 14 of 26 call-or-put years (losing in two, both in 2018) and the fitted scaling in 12 (never losing).
+
 **The project question asks** how stable the minimum-variance delta's advantage is across years. The pre-declared walk-forward (`analysis_plan.md` §14, item 2) answers it.
 - **The design.** Coefficients are refitted monthly on trailing 12-, 36- and 60-month windows. The windows are compared on their common test months, 2015-01 to 2023-12; the 12- and 36-month windows also start earlier.
 - **Intervals.** Each year gets its own session-block bootstrap.
@@ -503,23 +1099,38 @@ Image(filename=str(R / "figures/walkforward_by_year.png"))"""),
     code("""
 g[(g.rule == "R2") & g.base.isin(["R1", "R4"]) & (g.year >= 2021)][["window", "year", "cp", "base", "gain", "lo", "hi"]].round(3)"""),
     md("""
+## Significant years, and the scaling rules year by year
+
+Counts over the 26 call-or-put years of 2011–2023, 12-month window. Significance is pointwise (each year's own 95% interval), not adjusted for multiple comparisons.
+"""),
+    code("""
+w12 = g[g.window == 12]
+for base, name in (("R1", "Black–Scholes (R1)"), ("R3", "the fixed 0.9/1.1 scaling (R3)"), ("R4", "the fitted scaling (R4)")):
+    z = w12[(w12.rule == "R2") & (w12.base == base)]
+    win, lose = z[z.lo > 0], z[z.hi < 0]
+    print(f"R2 against {name}: significantly better in {len(win)} of {len(z)}, significantly worse in {len(lose)}",
+          list(zip(lose.year, lose.cp)) if len(lose) else "")
+med = w12[w12.base == "R1"].query("2015 <= year <= 2023").groupby(["rule", "cp"]).gain.median().unstack()
+print("median yearly Gain over Black–Scholes, 2015–2023:"); med.round(3)"""),
+    md("""
 **Reading.**
-- **Through 2021 the advantage is real and fairly steady.** With the 12-month window the Gain over Black–Scholes is positive every year, mostly 0.10–0.25. In 2021, a clean year, it is significant for both calls and puts, and R2 also beats the fitted scaling rule.
-- **In 2022–2023 it disappears.** With the 12-month window it is about 0, with tight intervals in 2023. With the longer windows it turns negative in 2022: for puts, R2 is significantly worse than the fitted scaling rule.
+- **Through 2021 the advantage is consistent.** With the 12-month window the Gain over Black–Scholes is positive every year, mostly 0.10–0.25, and significantly positive in 7 of 26 call-or-put years; it is significantly negative in none. In 2021, a clean year, it is significant for both calls and puts, and R2 also beats the fitted scaling rule.
+- **In 2022–2023 it disappears.** With the 12-month window it is about 0, with tight intervals in 2023. With the longer windows it turns negative in 2022 (−0.16 to −0.23): for puts, R2 is significantly worse than the fitted scaling rule.
+- **Against the scaling rules.** R2 beats the fixed 0.9/1.1 scaling significantly in 14 of 26 call-or-put years and loses in two, both in 2018; it beats the fitted scaling in 12 and never loses. Yet the fixed scaling's *median* Gain over Black–Scholes (0.125 / 0.099) matches R2's (0.124 / 0.100): it wins clearly in 2018 and fails in 2022 (−0.14 to −0.18) and 2023 (−0.06 to −0.14), when the volatility response it was read from had weakened. Notebook 08 compares R2 with the other challengers.
 """),
     code("""pd.read_csv(R / "walkforward/spot_vol_slope.csv").round(3)"""),
     md("""
-**Why.** The minimum-variance correction works through the co-movement of implied volatility and the index.
-- **The slope collapsed.** Near the money, that slope was 0.25–0.55 vol points per 1% fall in 2011–2021, and 0.13 in both 2022 and 2023.
-- **So the fitted coefficients were too large.** They had learned a stronger relation than the market then delivered. Longer windows remember more of it, and suffered more.
-- **The earlier analogue.** 2017, the earlier low-slope year, also had the smallest earlier Gains.
+**Why.** The minimum-variance correction works through the co-movement of implied volatility and the index. The table measures it each year: for near-the-money options (|δ| 0.4–0.6) 20–60 days from expiry, the slope of each session's median change in implied volatility on the index return, in volatility points per 1% index fall (`scripts/spot_vol_slope.py`).
+- **The slope collapsed.** It was 0.20–0.55 vol points per 1% fall in 2011–2021 (0.25–0.55 outside 2017; 0.55 in 2021), and 0.13 in both 2022 and 2023.
+- **So the fitted coefficients were too large.** They had learned a stronger relation than the market then delivered. Longer windows remember more of it, and suffered more. Notebook 09 gives an exact identity for each monthly fit: the Gain depends on the fitted level of the correction against the level that month rewarded, and a level more than twice too large loses to Black–Scholes.
+- **The earlier analogue.** 2017, the earlier low-slope year (0.20), had the smallest put Gain before 2022 (0.05).
 
 This is a descriptive reading. A model validator would take it as the case for monitoring the spot–volatility slope alongside the hedge.
 """),
     md("""
 ## The boosted challenger in the walk-forward
 
-R8 is retuned once on 2015–2016, with validation pairs ending before 2017, then refitted monthly on the 12-month window from 2017 on. Each row is its relative Gain over R2.
+R8, the LightGBM correction on market features boosted from R2, is retuned once on 2015–2016, with validation pairs ending before 2017, then refitted monthly on the 12-month window from 2017 on. Each row is its relative Gain over R2.
 """),
     code("""
 w = pd.read_csv(R / "walkforward/r8_by_year.csv")
@@ -528,7 +1139,7 @@ w[w.rule == "R8"][["year", "cp", "gain", "lo", "hi"]].round(3)"""),
 **Reading.**
 - **The tuning chose a minimal model:** 51 trees, a learning rate of 0.01, 4 leaves.
 - **In most years R8 is within a few percent of R2.**
-- **2020 puts are the exception.** The crash pushed the features far outside their training range, and even this small correction more than doubled R2's squared error (relative Gain −1.98). The same failure appears in the 2020 test (notebook 05).
+- **2020 puts are the exception.** The crash pushed the features far outside their training range, and even this small correction roughly tripled R2's squared error (relative Gain −1.98). The same failure appears in the 2020 test (notebook 05).
 """),
 ])
 
@@ -536,6 +1147,8 @@ w[w.rule == "R8"][["year", "cp", "gain", "lo", "hi"]].round(3)"""),
 NOTEBOOKS["07"] = ("07_spy_replication", [
     md("""
 # 07 · SPY: a full replication of the SPX protocol (plan §16.3)
+
+**In the story** (notebook 00, §4.2): SPY replicates the picture. 2020 is inconclusive, and puts typically gain 16–28% a year through 2021; the advantage fades in 2022–2023 as on SPX. SPY also shows a failure mode of §6: Ruf and Wang's fixed 0.9 scaling for calls, read off S&P 500 index options, is worse than Black–Scholes on SPY calls in most years.
 
 **What changes for SPY.**
 - **The options are American** and settle into shares. Puts are priced on Lecture 12's tree (150 steps, control variate), with δ, ν, vanna and theta from finite differences on the same tree. Calls are priced as European, as the lecture does.
@@ -598,7 +1211,7 @@ med[med.window == 12].pivot_table(index="rule", columns=["base", "cp"], values="
     code("""pd.read_csv(R / "spy/walkforward/exdate_by_year.csv").query("pairs == 'ex-date'").round(3)"""),
     md("""
 **Reading.**
-- **The same pattern as SPX, clearer for puts.** In the clean years 2011–2014 and 2021, R2's put Gain over Black–Scholes is 0.21–0.28, with intervals above 0. The advantage is gone in 2022–2023, and with the long windows puts go strongly negative in 2022.
+- **The same pattern as SPX, clearer for puts.** Through 2021, R2 and the scaling rules typically remove 16–28% of the Black–Scholes error for puts; 2017 and 2019 are lower. In the clean years 2011–2014 and 2021, R2's put Gain over Black–Scholes is 0.21–0.28, with intervals above 0. The advantage is gone in 2022–2023, and with the long windows puts go strongly negative in 2022.
 - **For SPY calls the fixed 0.9 scaling is worse than Black–Scholes** in most years; R2 and the fitted scaling stay positive.
 - **The δ-shape rules (R5, R9, R11, P3 and above) add +0.002 to +0.007 a year** over R2.
 - **Ex-date pairs** hold 0.3–9% of a year's squared error, with no systematic loss.
@@ -609,8 +1222,10 @@ NOTEBOOKS["08"] = ("08_more_rules_and_short_dated", [
     md("""
 # 08 · More rules: the learners decomposed, the polynomial degree, and short-dated options
 
+**In the story** (notebook 00, §4.3, and §4.5 for short-dated options): simpler rules do almost as well. For SPX with 12-month fits, the constant correction, every polynomial degree and the delta-only LightGBM corrections all stay within about 0.015 a year of the minimum-variance delta. Ruf and Wang's delta–vega–vanna regression (R6) is slightly worse: median Gains of −0.011 / −0.004 relative to it, and −0.18 for 2020 puts. The LightGBM corrections that use market features fail in the crash. And options under 14 days gain little: 0.06 / 0.005 for calls / puts, and about zero under three days.
+
 Three sets of rules were added on 2026-11-05, each specified and committed before its run:
-- **R5–R8 under every protocol** (plan §16.4).
+- **R5, R6 and R8 under every protocol** (plan §16.4): the relaxed Hull–White rule with a free delta multiplier, Ruf and Wang's delta–vega–vanna regression, and the LightGBM correction on market features. R7, a regression tree, was specified with them but withdrawn from the submission (plan §15, 2026-11-06).
 - **R9–R11** (§16.7). With R8 they form a 2×2 design: a LightGBM correction learned from scratch (R9, R10) or boosted from R2 (R11, R8), on δ alone (R9, R11) or on six features (R10, R8).
 - **P0–P8 and PCV** (§16.8): R2's quadratic replaced by a polynomial of degree 0–8, and a degree chosen by validation inside each training window.
 
@@ -623,7 +1238,7 @@ lv = pd.read_csv(R / "2020/learners_variants.csv"); r9 = pd.read_csv(R / "2020/r
 both = pd.concat([lv[lv.base == "R2"], r9[(r9.base == "R2") & r9.rule.isin(["R9", "R10", "R11"])]])
 both.pivot_table(index="variant", columns=["rule", "cp"], values="gain").round(3)"""),
     md("""
-**Reading.** Both learners that use the six features (R8, R10) collapse for puts in most variants: the March 2020 crash pushed volatility and returns far outside their calm training range. Both δ-only learners (R9, R11) stay within ±0.02 of R2 everywhere. The features broke R8, not the boosting.
+**Reading.** Both learners that use the six features (R8, R10) collapse for puts in most variants: the March 2020 crash pushed volatility and returns far outside their training range. Both δ-only learners (R9, R11) stay within ±0.02 of R2 everywhere. Since the failure appears with or without R2 underneath, and only with the features, the 2×2 design points to the features, not the boosting.
 """),
     md("## The walk-forward, 2011–2023: median yearly Gains over 2015–2023"),
     code("""
@@ -645,10 +1260,11 @@ c = pd.read_csv(R / "walkforward/degrees_pcv_choice.csv")
 c.groupby(["window", "cp"]).degree.value_counts().unstack(fill_value=0)"""),
     md("""
 **Reading.**
-- **Every rule built on Hull–White's form tracks R2 within a few thousandths a year.** On SPX, R5 equals R2; R9 gains about +0.001 to +0.002; P3–P8 add nothing.
-- **The constant P0 is about as good as R2,** and better in 2022–2023 for puts on the long windows.
-- **PCV mostly picks degree 0.** It is never significantly worse than R2.
-- **The more flexible learner does worse:** R10.
+- **Every rule built on Hull–White's form tracks R2 within a few thousandths a year.** On SPX, R5 equals R2; R9 gains about +0.001 to +0.002; P3–P8 add nothing. With 12-month fits the constant, every degree and the delta-only learners stay within about 0.015 a year of R2, in every year.
+- **The constant P0 is about as good as R2,** and better in 2022–2023 for puts on the long windows (+0.011 to +0.049). That is consistent with a quadratic fitted on 3–5 years of history extrapolating worse when the regime changed, though it is not a test of that.
+- **PCV picks degree 0 more often than any other** (in 38–50% of refits, depending on window and type). It is never significantly worse than R2.
+- **Ruf and Wang's delta–vega–vanna regression (R6) is slightly worse than R2:** −0.011 / −0.004 a year in the median, never significantly better, and −0.18 for puts in 2020.
+- **The more flexible learner does worse:** R10, which learns from scratch on the market features.
 """),
     md("""
 ## Why R9's tuned correction is nearly constant
@@ -669,7 +1285,10 @@ for ax, cp in zip(axes, "CP"):
     ax.set_title({"C": "calls", "P": "puts"}[cp] + ": correction g(δ), SPX 2019"); ax.set_xlabel("δ"); ax.legend()
 plt.tight_layout()"""),
     md("""
-**Reading.** R9 follows R2's shape where the weight lies and flattens toward the constant in the tails. R2's own curve is nearly flat there too. Out of sample on its 2019 tuning folds, the constant matched R2 (+0.014 for calls, +0.000 for puts). Validation therefore shrinks R9 toward a constant: with all options on a session sharing one index move, about 125 independent shocks per fold cannot support much δ-shape. Details: `notes/unified-results.md` §3.2.
+**Reading.** R9 follows R2's shape where the weight lies and flattens toward the constant in the tails.
+- **Where the weight is, R2's own curve is nearly flat too.** The loss weights are proportional to vega², which peaks at the money: options with |δ| above 0.85 carry about 2% of the weight. Over |δ| 0.2–0.7, about three-quarters of the weight, R2's call curve stays within about 0.015 of the constant fit (−0.13).
+- **Out of sample on R9's 2019 tuning folds,** the constant matched R2 (+0.014 for calls, +0.000 for puts), and a flexible version of R9 (300 trees, learning rate 0.1, 31 leaves) did worse than R2 (−0.010 / −0.005).
+- **So validation shrinks R9 toward a constant.** All options on a session share one index move, so a 6-month fold holds about 125 independent shocks, however many options are quoted, and that cannot support much δ-shape. The same fact explains why a fit on three options per session loses so little (notebook 10).
 """),
     md("## Short-dated options (under 14 days)"),
     code("""
@@ -679,13 +1298,21 @@ s[s.rule.isin(["R2m", "R2s"])].pivot_table(index="year", columns=["rule", "base"
 b = pd.read_csv(R / "short_dated/buckets.csv")
 b.groupby(["cp", "days"])[["G_R2m_R1", "G_R2s_R1", "pairs"]].median().round(3)"""),
     md("""
-**Reading.** Close to expiry, vega is small and the correction has little to work with. R2's coefficients from options of 14 days or more (R2m) gain a median 0.06 for calls and 0.005 for puts over Black–Scholes. That comes mainly from the 7–13-day options. Refitting on short-dated options (R2s) does not help.
+**Reading.** R2's coefficients from options of 14 days or more (R2m) gain a median 0.06 for calls and 0.005 for puts over Black–Scholes (2015–2023). That comes mainly from the 7–13-day options; under three days the median Gain is about zero (+0.003 / −0.016 over 2011–2023). Refitting on short-dated options (R2s) does not help. So the study's 14-day floor, Hull and White's, costs little.
+
+Why the Gain fades near expiry is not tested here. The correction itself does not vanish: ν/(S√τ) is the normal density at d₁, about 0.4 at the money at any maturity. More likely, the parts of the error no delta can hedge, gamma's above all, grow as expiry nears, and the coefficients were fitted on longer-dated options.
 """),
 ])
 
 NOTEBOOKS["09"] = ("09_stress_stability_and_interpretation", [
     md("""
 # 09 · Stress periods, parameter stability, the level of the correction, and the published Gains
+
+**In the story** (notebook 00): this notebook supports four parts of it.
+- **§4.2:** sell-offs gain significantly in 2011, 2015–2016 and February 2018, and September–December 2022 loses significantly (−0.52 for calls, −0.56 for puts).
+- **§4.4:** the level of the correction supplies the Gain, the shape across strikes adds only −0.014 to +0.015 a year, and the level drifts.
+- **§4.5:** our Gains beside Hull and White's published ones.
+- **§5:** why the Gain fell in 2022–2023, and what it would take for the rule to lose.
 
 The brief's model-validation direction asks to "stress-test assumptions" and "study parameter stability". This notebook collects the analyses of plan §16.9–§16.10, all descriptive and post hoc:
 - **stress episodes 2011–2023,** defined from the S&P 500 close alone;
@@ -709,14 +1336,18 @@ for cp, mk in (("C", "o"), ("P", "s")):
     ax.scatter(z.c_post - z.c_fit_mean, z.gain, marker=mk, label={"C": "calls", "P": "puts"}[cp])
 ax.axhline(0, color="k", lw=0.8); ax.axvline(0, color="k", lw=0.8)
 ax.set_xlabel("best level afterwards − fitted level (positive: the fit over-corrected)"); ax.set_ylabel("Gain of R2 over R1")
-ax.set_title("Stress episodes: the Gain falls when the fitted level overstates the realized one"); ax.legend()"""),
+ax.set_title("Stress episodes: Gain against the fitted level's overstatement"); ax.legend()"""),
     code("""
 Y = pd.read_csv(R / "walkforward/stress_by_year.csv")
 Y[(Y.window == 12) & (Y.rule == "R2") & (Y.base == "R1")].pivot_table(index="year", columns=["regime", "cp"], values="gain").round(3)"""),
     md("""
 **Reading.**
-- **R2 gains in sell-offs:** every peak-to-trough drawdown, significantly in 2011, 2015–2016 and the February 2018 drop.
-- **It loses in rebounds and post-trough volatility,** significantly in September–December 2022. There, implied volatility no longer rose as the index fell, and the fitted level over-corrected.
+- **R2 gains in sell-offs:** every peak-to-trough drawdown (DD), significantly in 2011, 2015–2016 and the February 2018 drop.
+- **It loses in rebounds and post-trough volatility,** significantly in September–December 2022 (−0.52 for calls, −0.56 for puts). There, implied volatility no longer rose as the index fell, and the fitted level over-corrected. Late 2018 and March 2022 lose too, without significance.
+- **One more significant loss is too thin to read:** puts in the three-session RV episode at the end of September 2020. The episode bootstrap shortens its blocks for short episodes (the `block` column), but three sessions are too few for an interval to mean much.
+- **Significance is pointwise,** over 17 episodes and two types, with no adjustment for multiplicity.
+- **The scatter is consistent with the level mechanism, one way round.** Every losing episode lies to the right of zero, where the best level afterwards was weaker than the fitted level; but many episodes to the right still gain, because a fitted level less than twice too large still helps (the identity below).
+- **By year,** 2022's stress sessions lost (−0.17 / −0.16) while its calm sessions gained (+0.13 / +0.05).
 - **The stable spot–volatility assumption** therefore fails in one direction of stress, not the other.
 
 SPY's episodes, in `results/spy/walkforward/stress_gains.csv`, show the same pattern.
@@ -737,37 +1368,53 @@ S = pd.read_csv(R / "walkforward/parameter_stability_summary.csv")
 S[S.window == 12][["cp", "rule", "coef", "min", "median", "max", "median_se", "median_abs_change_over_se", "share_abs_z12_gt_2", "median_corr_bc"]].round(3)"""),
     md("""
 **Reading.**
-- **R2's three coefficients are poorly identified one by one:** b and c are nearly collinear (|correlation| about 0.9). The level they imply is well identified.
-- **That level drifts beyond sampling error** between non-overlapping years (|z| > 2 in 10–19% of comparisons), from about −0.34 to near zero.
+- **R2's three coefficients are poorly identified one by one:** b and c are nearly collinear (|correlation| about 0.9), so they trade off against each other. The level they imply is well identified: P0's c, with a median standard error of about 0.03.
+- **That level varies over time,** from about −0.34 to near zero. Fits 12 months apart, on non-overlapping data, differ by more than two reported standard errors in 19% of call and 10% of put comparisons (`share_abs_z12_gt_2`). These standard errors are clustered by session but omit serial dependence across sessions, so the counts somewhat overstate the instability.
 - **Longer windows are smoother but staler.**
+- **The fitted scaling's â** runs 0.80–1.005 for calls and 0.97–1.19 for puts; Ruf and Wang's fixed 0.9 and 1.1 sit inside both ranges.
 """),
     md("## The maturity assumption (1/√τ), by year"),
     code("""
 M = pd.read_csv(R / "walkforward/maturity_by_year.csv")
 M[M.regime == "all"].pivot_table(index="year", columns=["rule", "cp"], values="gain").round(3)"""),
-    md("**Reading.** No alternative exponent beats 1/√τ consistently, in any year or regime; α = 0 and α = 1 are worse in most years."),
+    code("""
+M[M.regime == "all"].assign(better=lambda q: q.lo > 0, worse=lambda q: q.hi < 0).groupby("rule").agg(
+    better=("better", "sum"), worse=("worse", "sum"), type_years=("gain", "size"), median_gain=("gain", "median")).round(3)"""),
+    md("**Reading.** No alternative exponent beats 1/√τ consistently, in any year or regime. α = 0.25 is significantly better in 3 of 26 type-years and worse in 4; α = 0.75 and α = 1 are significantly worse in 8 and 11, and every alternative has a negative median Gain against 1/√τ."),
     md("## The level and the shape of the correction"),
     code("""
 L = pd.read_csv(R / "walkforward/level_shape_by_year.csv")
 L[["year", "cp", "c_fit", "c_post", "G_level_P0_R1", "G_shape_R2_P0", "G_R2_R1", "G_ceiling_P0post_R1", "vol_points_per_1pct_fall"]].round(3)"""),
     md("""
-**Reading.**
-- **The level of R2's correction equals P0's constant exactly:** the first normal equation of R2's least-squares fit.
-- **The level supplies the Gain;** the shape adds at most about ±0.015 a year on SPX.
-- **For a constant correction c, the Gain over R1 is G* · [1 − ((c − c*)/c*)²],** with c* the best constant afterwards and G* the ceiling it would give. An error in the level therefore costs quadratically, and overshooting by more than a factor of two loses to Black–Scholes. That is what happened in 2022.
+**What the level means.** The constant correction's hedge is δ + c·ν/(S√τ), so it assumes implied volatility responds to the index as ∂σ/∂S = c/(S√τ). A 1% index fall then raises implied volatility by −c/√τ volatility points: a level of −0.13 means 0.13 vol points at one year to expiry, or 0.26 at three months.
 
-Derivation: `notes/level-and-shape-of-the-correction.md`.
+**Reading.** In the table, `c_fit` is the fitted level (the trailing 12-month constant, averaged over the year's refits) and `c_post` the best constant for the year's own pairs, after the fact. `G_level_P0_R1` is the constant's Gain over Black–Scholes, `G_shape_R2_P0` what R2's quadratic shape adds, and `G_ceiling_P0post_R1` the Gain the best constant would have given.
+- **The level of R2's correction equals P0's constant exactly.** Averaged over the training pairs with the regression's weights, R2's fitted quadratic is c: that is the first normal equation of R2's least-squares fit, since its regressors include the constant term.
+- **The level supplies the Gain;** the shape adds only −0.014 to +0.015 a year on SPX.
+- **A mis-estimated level costs quadratically.** Write y for a pair's Black–Scholes error and x = ν·ΔS/(S²√τ) for the regressor. A constant c leaves squared error Σy² − 2cΣxy + c²Σx², minimized at c* = Σxy/Σx². Dividing by Σy² gives the Gain exactly:
+
+  G(c) = G* · [1 − ((c − c*)/c*)²],  where G* = (Σxy)²/(Σx²·Σy²) is the ceiling.
+
+  So a level twice too large gains nothing, and more than that loses to Black–Scholes. In market terms: the rule loses once the spot–volatility relation weakens by more than half between the fitting window and the hedging month. The identity holds for each monthly fit and its own test month, where c is a single number; the yearly columns above average twelve fits and do not satisfy it. The next cell checks it month by month.
+- **In 2023 even the ceiling was small** (0.04 for calls, 0.11 for puts, against 0.17–0.41 in 2011–2021): there was little relation left to hedge.
 """),
+    code("""
+lm = pd.read_csv(R / "walkforward/level_shape_by_month.csv")
+G_c, G_star, ratio = 1 - lm.sse_P0 / lm.sse_R1, 1 - lm.sse_P0_post / lm.sse_R1, lm.c_fit / lm.c_post
+print(f"{len(lm)} monthly fits; largest deviation from the identity: {(G_c - G_star * (1 - (1 - ratio) ** 2)).abs().max():.1e}")
+print(f"months with the fitted level more than 2x the best: {(ratio > 2).sum()}, all of which lost: {((ratio > 2) & (G_c < 0)).sum()}")
+print(f"losing months: {(G_c < 0).sum()}; of these, fitted level more than 2x the best or of the wrong sign: {((G_c < 0) & ((ratio > 2) | (ratio < 0))).sum()}")"""),
     md("## Our Gains under the published aggregations"),
     code("""
 P = pd.read_csv(R / "walkforward/published_comparison.csv")
 P[P.rule == "R2"].pivot_table(index=["window", "period", "sample"], columns="cp", values=["pooled", "mean_of_monthly"]).round(3)"""),
     md("""
 **Reading.**
-- **On the same years and a comparable window, our pooled Gains match Hull and White's:** 0.22 / 0.25 on their 2013–2015 overlap with 36 months, against their 0.26 / 0.23 for 2007–2015.
-- **Against Ruf and Wang** (their period, out of the money), our puts match theirs and our calls fall short.
-- **Our headline numbers are lower** because of the later years, the 12-month primary window, and in-the-money calls.
-- **Hull and White's monthly averaging** makes our Gains look lower still.
+- **On Hull and White's own years.** Our pooled 2013–2015 Gains with 36-month fits are 0.22 / 0.25, while Hull and White report mean monthly Gains of 0.26 / 0.23 over 2007–2015.
+- **Their monthly averaging makes our Gains look lower, not higher.** Our mean of monthly Gains on 2013–2015 is 0.10 / 0.09. Their 2007–2012 is not in our data, so the comparison is of different periods.
+- **Against Ruf and Wang** (their period, mid-2012 to mid-2019, out of the money, 36-month fits), our puts gain 0.20 against their 0.17, and our calls fall short (0.15 against 0.23).
+- **Our lower headline** reflects the period (2017, 2018 and 2022–2023 are weak years), the 12-month window (pooled over mid-2012 to mid-2019, about half the 36-month Gain: 0.08 against 0.14–0.17), and in-the-money calls (about half our call sample; notebook 01). The last is the smallest of the three: restricting to out-of-the-money options raises the pooled 2011–2019 Gain only from 0.119 to 0.130 (calls) and 0.112 to 0.132 (puts). These are readings of the table, not a decomposition.
+- **The volume rule is not the main cause:** dropping it (`no volume rule`) moves our pooled Gains by 0.01–0.06, in opposite directions for calls and puts.
 """),
 ])
 
@@ -775,6 +1422,11 @@ P[P.rule == "R2"].pivot_table(index=["window", "period", "sample"], columns="cp"
 NOTEBOOKS["10"] = ("10_books_starvation_held_positions", [
     md("""
 # 10 · Books, data starvation and held positions
+
+**In the story** (notebook 00, §4.5 and §5):
+- **Books.** For SPX calls, the median yearly Gain over 2011–2023 is 0.22 on the book against 0.15 per option, about 1.4 times, because about 70% of an option's squared error is shared by all options on the day. Losses grow too, and the control gains little. Only a book's total correction matters, so on books the fixed scaling roughly ties the minimum-variance delta.
+- **Held positions.** In 2011–2019 the Gain rises from 12–13% for one day to 19–20% over 5 days and 24–34% over 10 days. Losses also grow, in 2021–2023. The five-day mean error exceeds Black–Scholes' by about 0.9 basis points of the index level, not significantly.
+- **Data starvation.** Three options of each type a day cost only about 0.01 in Gain. Windows below three months lose 0.02–0.07 a year, yet a three-month window would have adapted to 2022 (puts −0.058 → +0.047).
 
 Plan §16.11, §16.13 and §16.14, specified 2026-11-05 and revised 2026-11-06 before any of them ran. All are descriptive and exploratory; only SPX 2020's verdict is a pre-registered test. The rules are those of the preamble to §16.11:
 R1 (Black–Scholes), R2 (Hull–White), R3 (Ruf–Wang fixed), R4 (Ruf–Wang fitted), R6 (delta–vega–vanna), R9 (LightGBM on δ) and P0 (a constant correction).
@@ -804,6 +1456,11 @@ for u in U:
     display(s.groupby("book").common_share_R1.median().round(3))"""),
     code("""
 for u in U:
+    m = pd.read_csv(R / "extensions" / u / "books_median_yearly_gain.csv")
+    print(u.upper(), "the fixed scaling (R3) and the fitted scaling (R4) over the minimum-variance delta (R2), median yearly Gain")
+    display(m[(m.base == "R2") & m.rule.isin(["R3", "R4"])].pivot_table(index="book", columns=["rule", "measure"], values="median_yearly_gain").round(3))"""),
+    code("""
+for u in U:
     b = pd.read_csv(R / "extensions" / u / "books_by_year.csv")
     x = b[(b.rule == "R2") & (b.base == "R1") & b.year.isin([2020, 2022])]
     print(u.upper(), "R2 over R1 in 2020 and 2022")
@@ -812,8 +1469,10 @@ for u in U:
 **Reading (SPX; SPY is the same in direction).**
 - **A dealer hedging a book sees more of the Gain than the per-option numbers suggest.** SPX's median yearly Gain of R2 over Black–Scholes is 0.22 on the call book against 0.15 per option, and 0.17 against 0.12 for puts.
 - **The reason:** about 70% of an option's squared error survives averaging across a book. That is the day's shared move, which the correction targets; option-specific noise diversifies away.
-- **The amplification works both ways:** in 2022 the SPX put book lost 0.14, against 0.06 per option.
+- **The amplification works both ways:** in 2022 the SPX put book lost 0.14, against 0.06 per option (the book's interval, [−0.49, +0.13], includes zero).
+- **The common share varies:** a median of about 0.7, but from 0.32 to 0.82 across books and years.
 - **The risk reversal is the control.** Its volatility exposures cancel, so it keeps 12% of the error, and the corrections gain 0.04.
+- **On a book, the fixed scaling roughly ties the minimum-variance delta.** Per option, R3 trails R2 on SPX by a median −0.037 (calls) and −0.056 (puts); on the call and put books it is +0.011 and +0.003. The reason is arithmetic: every option's error on a session is divided by the same index level, so a book's error depends only on the average of its options' hedge ratios. A rule that gets the total correction about right but spreads it wrongly across strikes loses one option at a time, not on the book. R3 still fails when the level changes: SPX's call book under R3 lost 0.11 in 2022 and 0.33 in 2023.
 """),
     md("""
 ## 2. Data starvation (§16.13)
@@ -829,6 +1488,9 @@ for u in U:
     x = sp[(sp.base == "R1") & sp.rule.isin(["R2", "P0", "R9"]) & (sp.span == first)]
     print(u.upper(), "median yearly Gain over R1,", first, "(median over seeds; min and max for thinning)")
     display(x.pivot_table(index="config", columns=["rule", "cp"], values="median").round(3))
+    f = sp[(sp.base == "R2full") & (sp.rule == "R2") & (sp.span == first)]
+    print(u.upper(), "R2 on reduced data over R2 on the full 12 months, same pairs (median yearly Gain)")
+    display(f.pivot_table(index="config", columns="cp", values="median").round(3))
     display(x[x.config.str.startswith(("frac", "k"))].pivot_table(index=["config", "rule"], columns="cp", values=["min", "max"]).round(3))"""),
     code("""
 for u in U:
@@ -843,9 +1505,9 @@ for u in U:
     md("""
 **Reading.**
 - **The plan's expectation holds: the information is in the number of sessions, not options.**
-  - On SPX, three options per session and type keep a median yearly Gain of 0.138 (calls) and 0.124 (puts), against 0.151 and 0.120 with every option. Over five seeds the range is 0.130–0.140 and 0.120–0.131.
-  - Windows of one or two months cut the Gain to about 0.09 and 0.03–0.05.
-- **Short windows adapt faster to a regime change.** In 2022 a 3-month window gave +0.071 and +0.047, against +0.002 and −0.058 on 12 months. In 2020 the 12-month window was best.
+  - On SPX, three options per session and type keep a median yearly Gain of 0.138 (calls) and 0.124 (puts), against 0.151 and 0.120 with every option. Over five seeds the range is 0.130–0.140 and 0.120–0.131. Against the full-data fit on the same pairs, that costs only about 0.01 a year (−0.010 / −0.007).
+  - Windows below three months lose 0.02–0.07 a year against the full 12 months (2 months −0.025 / −0.051; 1 month −0.036 / −0.071), cutting the Gain to about 0.09 for calls and 0.03–0.05 for puts.
+- **Short windows adapt faster to a regime change.** In 2022 a 3-month window gave +0.071 and +0.047, against +0.002 and −0.058 on 12 months. That is hindsight on one year, without an interval: the same window did worse in 2021 (0.082 / 0.104 against 0.154 / 0.161) and 2023 (−0.024 / −0.060 against +0.002 / −0.014), and in 2020 the 12-month window was best.
 - **No window is best every year:** a long window estimates the level precisely but goes stale; a short one tracks it but is noisy.
 - **SPY shows the same.** R9, a tree learner, loses more than R2 when thinned: it needs more data than three linear coefficients.
 """),
@@ -892,15 +1554,17 @@ for u in U:
     md("""
 **Reading (SPX).**
 - **Checks.**
-  - On 2,271,477 first days the path code's error equals the walk-forward's exactly.
+  - On 2,271,477 path starts (5- and 10-session paths together), the path code's first-day error equals the walk-forward's exactly.
   - 94% (5 sessions) and 89% (10 sessions) of eligible paths complete.
   - 15% and 25% of completed paths leave the band at least once. They would have been lost had positions been dropped there, and on the in-band-only subset the Gain is smaller.
 - **On real SPX quotes the Gain grows with the holding period.** In 2011–2019, R2 removes 0.185 / 0.200 of a 5-session position's squared error and 0.241 / 0.338 of a 10-session one's, against 0.133 / 0.118 one session at a time.
   - In 2020: 0.256 / 0.277 (5 sessions) and 0.313 / 0.385 (10).
   - Two reasons: quote noise in the mids telescopes away in a path's sum, and the spot–volatility move accumulates over a multi-day sell-off.
-- **Losses grow too:** 2021–2023 puts −0.108 over 5 sessions.
-- **The expected-P&L cost of the correction is about 1 bp of the index over 5 sessions, and not significant,** so the Sharpe-ratio argument's assumption roughly holds.
-- **SPY** shows the same growth in 2011–2019. But its Greeks exist only for first-day candidates, so its paths are restricted to traded days with at least 14 days to expiry (§15).
+- **Losses grow too:** 2021–2023 puts −0.108 over 5 sessions, against +0.012 one session at a time.
+- **The fixed scaling falls behind on paths.** In 2011–2019 it beats R2 one session at a time on these pairs (0.146 / 0.128), but over 5 sessions it gains less (0.155 / 0.148 against 0.185 / 0.200).
+- **The drift.** For the long-option position that the error represents, the correction leaves the position slightly longer the index (it under-hedges calls and over-hedges puts). R2's five-session mean error exceeds Black–Scholes' by 0.88 bp of the start-day index level for calls [−0.17, +1.83] and 0.96 bp for puts [−0.29, +2.05] in 2011–2019. That is consistent with earning some of the index's upward drift, and it is not significant.
+- **What a Gain is worth.** With the mean P&L unchanged, as here to within about 1 bp, and the reduction in squared error approximating the reduction in variance, a Gain g multiplies the hedged position's Sharpe ratio by about 1/√(1 − g): 1.05 at g = 0.10, 1.08 at 0.15 and 1.15 at 0.25.
+- **SPY** shows the same growth in 2011–2019. But its Greeks exist only for first-day candidates, so its paths are restricted to traded days with at least 14 days to expiry (§15). Only 53% (5 sessions) and 35% (10 sessions) of eligible SPY starts complete, against 94% and 89% for SPX.
 """),
 ])
 
@@ -908,6 +1572,8 @@ for u in U:
 NOTEBOOKS["11"] = ("11_single_stocks_and_etfs", [
     md("""
 # 11 · Single stocks and ETFs: AAPL, NVDA, TSLA, QQQ and SLV, 2016–2023
+
+**In the story** (notebook 00, §4.5 and §6): among the stocks and ETFs, AAPL gains a little; NVDA, TSLA and SLV gain nothing or lose; and QQQ, a Nasdaq-100 index ETF, behaves like SPX. Two of the failure modes appear here too: a crash entering the training window, followed by over-correction (the stocks' 2020), and a fixed scaling of delta applied outside the market it was read from (Ruf and Wang's 0.9/1.1 on single stocks).
 
 Plan §16.15: the SPY protocol on five more underlyings, specified before any of their outcomes was computed. Exploratory; no verdict.
 
@@ -945,7 +1611,7 @@ pd.concat(rows)[["underlying", "variant", "verdict", "G_C", "G_C_lo", "G_C_hi", 
 - **AAPL, TSLA and QQQ are Inconclusive.**
 - **NVDA is Reject (b):** both upper bounds are below the 0.05 the plan calls material.
 - **SLV is Reject (a):** its put interval lies below zero, so R2 is significantly worse than Black–Scholes.
-- **Outside the stress period, AAPL's, NVDA's and QQQ's calls lose significantly.** It is SPX's April 2020 lesson again: the crash entered the training window and the fits over-corrected.
+- **Outside the stress period, AAPL's, NVDA's and QQQ's calls lose significantly.** That is consistent with SPX's April 2020 failure, the crash entering the training window and the fits over-correcting afterwards, though no monthly evidence is shown here, and on SPX itself the rest of 2020 gained (calls +0.126).
 """),
     md("## The walk-forward: Gain over Black–Scholes by year"),
     code("""
