@@ -17,3 +17,10 @@ __pycache__/
 
 # Per-pair outputs: regenerable and large
 results/**/*.parquet
+
+# Withdrawn from the submission on 2026-11-06 (kept locally; see analysis_plan.md §15)
+withdrawn/
+results/heston/
+results/heston2/
+results/simulation/
+summary/

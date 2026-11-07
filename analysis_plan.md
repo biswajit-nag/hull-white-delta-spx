@@ -1,8 +1,8 @@
 # Analysis plan
 
-*Version 1.0, 2026-11-04. Binding from its commit: it governs the endpoints and procedures, and every later change is logged, dated, in §15. Items marked **[confirmed]** are the author's decisions of 2026-11-04.*
+*Version 1.0, 2026-11-04. Binding from its commit: it governs the endpoints and procedures, and every later change is logged, dated, in §15.*
 
-**Draft history.** v0.1 (2026-11-02) was the first draft. v0.2 (2026-11-04) added the author's confirmations and the items below. v1.0 (2026-11-04) is v0.2 after a joint review by two models, Claude and GPT-6 Astra, which tightened definitions and corrected formulas and claims without changing any [confirmed] decision. All of it was decided before any hedging outcome was computed. v0.2's additions:
+**Draft history.** v0.1 (2026-11-02) was the first draft. v0.2 (2026-11-04) added the author's confirmations and the items below. v1.0 (2026-11-04) is v0.2 after a joint review by two models, Claude and GPT-6 Astra, which tightened definitions and corrected formulas and claims without changing any of the author's decisions. All of it was decided before any hedging outcome was computed. v0.2's additions:
 - mark sensitivities: bid, ask, the imbalance-weighted mid and Lecture 12's size-weighted price (§3);
 - the spread screen S3 reported beside the primary and added to the robustness of the verdict (§3, §8);
 - a 36-month training window, sensitivity W36 (§7);
@@ -13,7 +13,7 @@
 - at-the-money options in both halves of the out-of-the-money subsample (§8);
 - the boot camp's final option-pricing library (Lecture 12) as the reference implementation (§4, §11);
 - a rule that every item in §§1–13 is run, and any incomplete at submission is reported as pending (§12);
-- a revision of E7, after the finding that the vendor leaves volume empty when 1,000 or more contracts trade (§5) **[confirmed]**;
+- a revision of E7, after the finding that the vendor leaves volume empty when 1,000 or more contracts trade (§5);
 - a 60-month window W60, and the 2010–2023 walk-forward design (§7, §14).
 
 **What had been examined when this was written.** The published results of Hull and White (2017; S&P 500, 2004–2015) and of Ruf and Wang (2022; S&P 500, 2010 to June 2019). Also the 2019–2020 data audit: calendar coverage, next-session attrition of rough candidates, quote quality, volume completeness, put–call parity, the timing of the index level, and the vendor's Greeks. The audit used 2020 data, including March 2020, but only for data quality. A check of volume coding, quote sizes and quote staleness on 2019–2020 followed on 2026-11-04, again for data quality only. **No hedging error, Gain or fitted hedge coefficient had been computed for any year.**
@@ -42,16 +42,16 @@ The run that unblinds 2020 records two commits in the `notes` column of the runt
 | The confirmatory core: rehearsal, dry run, the 2020 verdict (§§5–13) | v1.0, 2026-11-04 | 2026-11-04 (plan 77b030e) | `run_rehearsal.py`, `run_test_year.py` | `results/rehearsal/`, `results/2020/` | 01–05 |
 | Walk-forward 2010–2023 (§14 item 2) | v1.0 | 2026-11-04 | `run_walkforward.py` | `results/walkforward/` | 06 |
 | SPY (§16.1; a full replication from §16.3) | 2026-11-04; 11-05 | 2026-11-04; 11-05 | `build_greeks_spy.py`, `build_pairs_spy.py`, `run_spy.py`, `run_walkforward.py --spy` | `results/spy/` | 07 |
-| Heston (§16.2; rewritten in §16.5) | 2026-11-04; 11-05 | 2026-11-04; 11-05 | `heston2_calibrate.py`, `heston2_hedge.py` | `results/heston/`, `results/heston2/` | 05, 09 |
+| Heston (§16.2; rewritten in §16.5) | 2026-11-04; 11-05 | 2026-11-04; 11-05 | `heston2_calibrate.py`, `heston2_hedge.py` | kept locally; withdrawn from the submission (§15, 2026-11-06) | — |
 | R5–R8 under every protocol (§16.4) | 2026-11-05 | 2026-11-05 | `run_learners_variants.py`, `run_walkforward_r5_r8.py` | `results/2020/`, `results/walkforward/` | 08 |
 | Short-dated options (§16.6) | 2026-11-05 | 2026-11-05 | `run_short_dated.py` | `results/short_dated/` | 08 |
 | R9–R11 (§16.7) | 2026-11-05 | 2026-11-05 | `run_r9_r11.py` | `results/2020/`, `results/walkforward/` | 08 |
 | R2's degree, P0–P8 and PCV (§16.8) | 2026-11-05 | 2026-11-05 | `run_degrees.py` | `results/walkforward/` | 08 |
-| Published aggregations; level and shape (§16.9) | 2026-11-05 | 2026-11-05 | `compare_published.py`, `level_shape.py` | `results/walkforward/` | 10 |
-| Stress, parameter stability, maturity (§16.10) | 2026-11-05 | 2026-11-05 | `stress_episodes.py`, `parameter_stability.py` | `results/walkforward/` | 10 |
-| Held positions, data starvation, books (§16.11, §16.13, §16.14) | 2026-11-05; revised 11-06 | 2026-11-06 | `run_extensions.py`, `build_pairs_any.py`, `ruleset.py` | `results/extensions/<u>/` (SPX, SPY and the five) | 11, 12 |
-| The coverage simulation (§16.12) | 2026-11-05; revised 11-06 | 2026-11-06 | `run_coverage_sim.py` | `results/simulation/` | 11 |
-| Single stocks and ETFs (§16.15) | 2026-11-05; revised 11-06 | 2026-11-06 | `build_greeks_stocks.py`, `build_pairs_stocks.py`, `audit_stocks.py`, `run_protocol_stocks.py`, `run_extensions.py` | `results/stocks/<u>/`, `results/extensions/<u>/` | 12 |
+| Published aggregations; level and shape (§16.9) | 2026-11-05 | 2026-11-05 | `compare_published.py`, `level_shape.py` | `results/walkforward/` | 09 |
+| Stress, parameter stability, maturity (§16.10) | 2026-11-05 | 2026-11-05 | `stress_episodes.py`, `parameter_stability.py` | `results/walkforward/` | 09 |
+| Held positions, data starvation, books (§16.11, §16.13, §16.14) | 2026-11-05; revised 11-06 | 2026-11-06 | `run_extensions.py`, `build_pairs_any.py`, `ruleset.py` | `results/extensions/<u>/` (SPX, SPY and the five) | 10, 11 |
+| The coverage simulation (§16.12) | 2026-11-05; revised 11-06 | 2026-11-06 | `run_coverage_sim.py` | kept locally; withdrawn from the submission (§15, 2026-11-06) | — |
+| Single stocks and ETFs (§16.15) | 2026-11-05; revised 11-06 | 2026-11-06 | `build_greeks_stocks.py`, `build_pairs_stocks.py`, `audit_stocks.py`, `run_protocol_stocks.py`, `run_extensions.py` | `results/stocks/<u>/`, `results/extensions/<u>/` | 11 |
 
 **The extensions of §14:**
 1. Pending items of §§1–13: none known.
@@ -64,6 +64,10 @@ The run that unblinds 2020 records two commits in the `notes` column of the runt
 8. Simulations with a known truth: §16.12 (run 2026-11-06).
 9. SPY: run (§16.1, §16.3).
 10. The jump term: not run.
+
+**Open items** (added 2026-11-06, after a check of this plan against the results; §15):
+- **SPY's held positions** are the restricted version logged in §15 (2026-11-06): its Greeks cover only day-one candidates. The fix, recomputing SPY's Greeks for every quote, is left for after submission.
+- **Heston on fits with no bound hit.** The 2026-11-04 entry in §15 repeats the Heston hedging comparison on the fits with no parameter within 0.1% of a bound. That repetition ran for §16.2's calibration B (2020; `results/heston/gains.csv`, 57 sessions). §16.5, which replaced it, doesn't list it, and it has not been run for B2.
 
 ## 1. Question and scope
 
@@ -87,7 +91,7 @@ The run that unblinds 2020 records two commits in the `notes` column of the runt
   - Sessions come from the NYSE calendar. A session missing from the vendor's files is attrition, never a two-session hedge.
 - **The index level S.**
   - **Primary:** the official close, `S_close`: FRED's series, and Cboe's file before 2016-10, where FRED has none.
-  - **Sensitivity A:** the index level implied by the options themselves. On each session, fit the put–call parity line of the nearest P.M. expiry 0.5–5 days out, by weighted least squares across strikes within 1.5% of the close; the forward it gives is the level. If no such expiry fits, use the nearest P.M. expiry up to 10 days out; if that fails too, the session drops out of sensitivity A and is counted. **[confirmed]**
+  - **Sensitivity A:** the index level implied by the options themselves. On each session, fit the put–call parity line of the nearest P.M. expiry 0.5–5 days out, by weighted least squares across strikes within 1.5% of the close; the forward it gives is the level. If no such expiry fits, use the nearest P.M. expiry up to 10 days out; if that fails too, the session drops out of sensitivity A and is counted.
     - **What "fits" means:** the weights and candidate-strike conditions of §4's stage 1 (both legs two-sided), at least 6 strikes within 1.5% of the close, and a fitted discount factor in [0.95, 1.01]. The nearest *successful* expiry in 0.5–5 days is used before falling back to 10 days.
   - **Sensitivity A takes no carry adjustment.** At 0.5–10 days, carry moves the forward from spot by about 1 bp or less, against a 3.3 bp median mismatch. Most of it cancels in ΔS, but not all: the expiry used can change between the two days. A is an option-implied proxy, with its own estimation error and these expiry-roll effects.
   - **Quote overlap under A.** The 14-day eligibility cut guarantees that the day-one level excludes the hedged option's quotes. After a long calendar gap, the contract can have 10 days or less remaining on day two and can enter that day's fallback fit. Count and report these overlaps.
@@ -113,7 +117,7 @@ The run that unblinds 2020 records two commits in the `notes` column of the runt
   - **Mark-sensitivity diagnostics.** They are descriptive; they do not establish which mark is closer to value, and they are not accounting decompositions of a Gain.
     - Spreads widen when the index falls, so bids fall faster than mids and asks slower. A fitted rule can learn that co-movement, which is not hedging value. A gap between G(P-bid) and G(P-ask) is consistent with it.
     - WM and SW mirror each other about the mid. So under R0 or R1, whose hedges don't depend on the marks, the SSE under WM minus the SSE under SW is 4·Σ e·u. Here e is the mid-marked error and u = Δ(WM − mid)/S_t, the normalized change in the imbalance term. This is an uncentered cross-product: Σe·u/n = Cov_n(e,u) + mean(e)·mean(u), using covariance with divisor n.
-- **Spread screen S3** (pre-specified): the analysis restricted to pairs whose day-one relative spread, (ask − bid)/mid, is at most 5% **[confirmed]**. The unscreened primary and S3 are both reported, and S3 enters the robustness of the verdict (§8). The screen uses day-one information only.
+- **Spread screen S3** (pre-specified): the analysis restricted to pairs whose day-one relative spread, (ask − bid)/mid, is at most 5%. The unscreened primary and S3 are both reported, and S3 enters the robustness of the verdict (§8). The screen uses day-one information only.
   - **For it:** a mid can sit anywhere within the half-spread of the value, so wider spreads permit greater mark uncertainty, in Δf and, through the implied volatility, in δ and ν. S3 examines a narrower-spread population.
   - **Against it:** relative spreads are largest for cheap options, because of the minimum tick, and in stress, when spreads widen. So S3 mostly removes cheap far-out-of-the-money options, Ruf and Wang's home domain, and crash-period pairs. It changes the population as well as the noise, which is why it is a sensitivity, not the primary.
 
@@ -306,7 +310,7 @@ Do not divide through by ΔS: that changes the weighting.
 
 **A retrospective stress comparison** (a case study, with no predicted direction): the Gains over 2020-02-24 to 04-30 against the rest of 2020, each with its own interval. The "rest of 2020" Gain is also the leave-stress-out result. The 10 sessions contributing most to 2020's Σe²_R1 are listed with their share.
 
-**Wording thresholds [confirmed].**
+**Wording thresholds.**
 - **The thresholds are substantive.** They are fixed before the rehearsal (§10), whose interval widths are reported only to show what the design can resolve.
 - **"Material":** a Gain of at least m = 0.05, about 2.5% lower RMS error. This is the smallest improvement taken to justify replacing the Black–Scholes delta. A point Gain ≥ m is "material in the point estimate"; a lower bound ≥ m would make it statistically established.
 - **"No material benefit"** requires the upper end of the 95% interval to be below m.
@@ -535,6 +539,11 @@ They may run once the confirmatory core is complete, before or after submission,
 | 2026-11-06 | §16.15 item 4 | Each underlying's own RV episodes use a threshold of twice its own 2016–2023 median 20-session realized volatility, in place of 25%. Split sessions are not returns. The S&P 500's episodes are unchanged. | SPX's 25% threshold is exactly twice its median (12.5%, 2010–2023); for TSLA and NVDA a fixed 25% is below their ordinary volatility, so most sessions would be stress | No: no outcome on the five underlyings had been computed |
 | 2026-11-06 | §16.11–§16.14 | On SPX every rule, not only Heston's, is scored on the pairs with Heston Greeks, so that all rules share one sample. | One sample for all comparisons. The Heston Greeks cover the analysis sample (every B2 session converged): the books run reproduces the W12 walk-forward Gains of R2 over R1 to four decimals in every year | Yes: the SPX books results |
 | 2026-11-06 | §16.11 | SPY's held positions can follow a contract only through days with a SPY implied volatility, and `build_greeks_spy.py` solves only day-one candidates (at least 14 days, two-sided, E7). So every SPY path day is traded and has at least 14 days to expiry, which reimposes the volume and maturity selection §16.11 avoids. SPY's held-position results are reported as this restricted version. SPX's Greeks cover every quoted contract-day, and so do the five underlyings'. Recomputing SPY's Greeks for every quote is the fix (1–2 hours), left for after submission. | Found 2026-11-06 from the Greeks files' status counts (SPY 2020: 987,138 of 2,328,802 rows `not_candidate`) | No result seen: the SPY held-position run had finished at 02:32, but its output was not opened before this entry (corrected 03:05; the entry first said none had been computed) |
+| 2026-11-06 | §16.15 (data) | No rule change. A correction to §16.15's statement that volume never exceeds 998, so that E7's reading of empty volume applies. That holds for AAPL, TSLA, QQQ and SLV through 2021, and for NVDA in 2020–2021. In 2016–2019, NVDA's files record volumes of 1,000 or more, as SPX's and SPY's do from 2022 (yearly maxima 19,085–45,768 in the light audit). There, E7's empty-volume branch admits no pair: E7 and its strict reading agree on all 397,613 NVDA pairs of 2016–2019, so the sample is the strict reading's. In AAPL and QQQ 2016–2021, by contrast, the branch admits 5–10% and 2–10% of each year's pairs. | The light audit recorded the maxima before any outcome (`results/stocks/audit_a.log`); the branch counts were checked on 2026-11-06 | Yes: the NVDA results had been computed when the branch counts were checked |
+| 2026-11-06 | §16.11, §16.15 | Reporting: the five underlyings' held-position Gains are also pooled over 2017–2019, 2020 and 2021–2023. These are the counterpart of the pooled periods that §16.11 names for SPX and SPY. | §16.11 names pooled periods for SPX and SPY only, and the five's test years start in 2017 | No: set in the code before the five's held-position runs |
+| 2026-11-06 | Status | Open items added to the status section: SPY's restricted held positions, and the Heston comparison on fits with no bound hit, not run for B2. No specification changes. | A check of this plan against the results, 2026-11-06 | — |
+| 2026-11-06 | §6, §16.2, §16.5, §16.11–§16.14, Status | Withdrawn from the submission's deliverables (README, executive summary, notebooks and committed results): the regression tree R7, every Heston result, and the coverage simulation (§16.12). Their specifications stay here as the record. Their code stays in `scripts/` and `src/`, their results stay on the author's machine, and git history keeps the earlier versions. In the committed results, the R7 and Heston rows are dropped and `results/heston*/` and `results/simulation/` are untracked. The held positions' "heston" subset, the paths whose every day is in the analysis sample, is relabelled `in_band`. Notebook 09 (Heston) is removed, and 10–12 become 09–11. No other result changes. | The author's decision of 2026-11-06: these are kept for the author's own later study, and only results the author has checked are claimed | Yes: all of them had been seen |
+| 2026-11-06 | Version note, §§3, 5, 8 | Editorial: the six "[confirmed]" markers removed. They flagged the author's decisions of 2026-11-04 during drafting, and v1.0 (77b030e) keeps them. No specification changes. | The author's request of 2026-11-06, for the public repository | — |
 
 ## 16. Extension specifications (appended under §14's rule)
 

@@ -1,12 +1,8 @@
 window,sample,cp,rule,base,median_yearly_gain
 12,"learners, feature-complete pairs",C,R2,R1,0.06900209798884938
-12,"learners, feature-complete pairs",C,R7,R1,4.519173942474364e-05
-12,"learners, feature-complete pairs",C,R7,R2,-0.07368315424509753
 12,"learners, feature-complete pairs",C,R8,R1,0.03461543729767602
 12,"learners, feature-complete pairs",C,R8,R2,-0.006913392834088761
 12,"learners, feature-complete pairs",P,R2,R1,0.17232531697240971
-12,"learners, feature-complete pairs",P,R7,R1,0.11355696716691344
-12,"learners, feature-complete pairs",P,R7,R2,-0.1101248387209639
 12,"learners, feature-complete pairs",P,R8,R1,0.13325934491990443
 12,"learners, feature-complete pairs",P,R8,R2,-0.015962732780643085
 12,"least squares, all pairs",C,R2,R1,0.06883517488117841
@@ -20,13 +16,9 @@ window,sample,cp,rule,base,median_yearly_gain
 12,"least squares, all pairs",P,R6,R1,0.20286537244201475
 12,"least squares, all pairs",P,R6,R2,-0.00021093875922439942
 36,"learners, feature-complete pairs",C,R2,R1,0.08132217015104304
-36,"learners, feature-complete pairs",C,R7,R1,0.00012851481109554808
-36,"learners, feature-complete pairs",C,R7,R2,-0.03742717711683752
 36,"learners, feature-complete pairs",C,R8,R1,0.08971980428810111
 36,"learners, feature-complete pairs",C,R8,R2,-0.0008265289034061762
 36,"learners, feature-complete pairs",P,R2,R1,0.2134364677210181
-36,"learners, feature-complete pairs",P,R7,R1,0.1559649155460736
-36,"learners, feature-complete pairs",P,R7,R2,-0.06278837257853875
 36,"learners, feature-complete pairs",P,R8,R1,0.21372903890434392
 36,"learners, feature-complete pairs",P,R8,R2,0.0015053907121096444
 36,"least squares, all pairs",C,R2,R1,0.08118541219474629
@@ -40,13 +32,9 @@ window,sample,cp,rule,base,median_yearly_gain
 36,"least squares, all pairs",P,R6,R1,0.20370632450626003
 36,"least squares, all pairs",P,R6,R2,-0.0057738322764511185
 60,"learners, feature-complete pairs",C,R2,R1,0.07688149588850923
-60,"learners, feature-complete pairs",C,R7,R1,0.05357097179872661
-60,"learners, feature-complete pairs",C,R7,R2,-0.018906086807538136
 60,"learners, feature-complete pairs",C,R8,R1,0.07073551687256463
 60,"learners, feature-complete pairs",C,R8,R2,-0.0016373039513155607
 60,"learners, feature-complete pairs",P,R2,R1,0.21321266341769096
-60,"learners, feature-complete pairs",P,R7,R1,0.10417078871816743
-60,"learners, feature-complete pairs",P,R7,R2,-0.023156554095455473
 60,"learners, feature-complete pairs",P,R8,R1,0.21236181448314717
 60,"learners, feature-complete pairs",P,R8,R2,0.0003297404772069079
 60,"least squares, all pairs",C,R2,R1,0.07682676369981456

@@ -378,8 +378,8 @@ This notebook reports everything the plan declares beyond the confirmatory endpo
 - the bucket Gains;
 - the measurement variants of Table 8.1 (`analysis_plan.md` §8);
 - the attribution of the hedging error;
-- the exploratory challengers;
-- the SPY and Heston extensions (§16).
+- the exploratory challenger;
+- the first SPY extension (§16.1).
 
 None of these changes the verdict of notebook 04.
 """),
@@ -451,14 +451,13 @@ ax.legend()"""),
 **The monitoring illustration** shows what a desk would have seen: the trailing 20-session Gain, computed only from completed hedges. It first turns negative on 9 April (puts) and 14 April (calls), about four weeks after the worst days of mid-March, so it would have flagged the problem only partway through April. Per the plan, no switching rule is evaluated.
 """),
     md("""
-## Exploratory challengers: a regression tree (R7) and gradient boosting (R8)
+## Exploratory challenger: gradient boosting (R8)
 """),
     code("""
-g[g.variant.str.startswith("learners")][["cp", "rule", "base", "gain", "lo", "hi"]].round(3)"""),
+g[g.variant.str.startswith("learners") & (g.rule == "R8")][["cp", "rule", "base", "gain", "lo", "hi"]].round(3)"""),
     code("""pd.read_csv(R / "2020/smoothness.csv").round(4)"""),
     md("""
 **Reading.**
-- **The depth-3 tree (R7)** is not distinguished from Hull–White.
 - **The boosted correction (R8) failed badly for puts.** It was tuned on 2019, when the trailing 20-day realized volatility never exceeded 31% and the worst 5-day return was −6%. In March 2020 those features reached 98% and −20%, far outside what the trees had seen, and their extreme leaves pushed the median put hedge ratio from −0.57 to −1.07. March's squared error was 13 times R2's; in every other month R8 tracked R2.
 - **It is also rougher.** It has more out-of-order hedge ratios across adjacent strikes (2.8% against 1.8%) and 48% more daily turnover.
 
@@ -479,37 +478,6 @@ s[(s.rule == "R2") & s.base.isin(["R1", "R3", "R4"])][["variant", "cp", "base", 
 - **SPY tells the same story.** The point Gains are positive (0.10 for calls, 0.25 for puts), the intervals span zero, and the scaling rules are not distinguished.
 - **The ex-date-only rows are too thin to read.** 2020 has three ex-dates with pairs, so most bootstrap draws contain none and the interval is undefined.
 - **On ex-date pairs, adding the distribution to the hedge leg helps puts but not calls.** That is the limitation stated in advance: calls are priced as European. A deep in-the-money American call carries an early-exercise premium before the ex-date, which vanishes on it.
-"""),
-    md("""
-## Heston (§16.2), in the style of Lecture 12
-
-*Superseded on 2026-11-05 by the project's own pricer and calibration of plan §16.5, run on 2010–2023: see notebook 09. The numbers below are the 2026-11-04 library-based run, kept as the record.*
-
-Heston's model makes the variance v a second random factor, correlated (ρ) with the index (Lecture 12).
-- **Calibration.** Each session is calibrated with `scipy.optimize.least_squares`, as in the lecture. **L** fits the lecture's own sample (calls 50–100 days, sizes above 10, the size-weighted price), to price errors and to implied-volatility errors. **B** is a broader fit to out-of-the-money calls and puts, 14 days to a year.
-- **Hedging.** The Heston minimum-variance delta, C_S + (ρξ/S)·C_v, is the model's own version of Hull and White's correction. It is compared with the Black–Scholes and Hull–White deltas on the 2020 pairs.
-"""),
-    code("""
-p = pd.read_csv(R / "heston/params.csv", parse_dates=["session"])
-p.groupby("fit").agg(sessions=("session", "size"), ok=("ok", "mean"), iv_rmse_median=("iv_rmse", "median"),
-                     rho_median=("rho", "median"), xi_median=("xi", "median"), kappa_median=("kappa", "median")).round(4)"""),
-    code("""
-b = p[(p.fit == "B-iv") & p.ok.fillna(False).astype(bool)].set_index("session")
-fig, axes = plt.subplots(1, 3, figsize=(14, 3.5))
-for ax, c in zip(axes, ["v0", "rho", "xi"]):
-    b[c].plot(ax=ax, title=f"calibration B: {c}")
-plt.tight_layout()"""),
-    code("""pd.read_csv(R / "heston/gains.csv").round(3)"""),
-    md("""
-**Reading** (`H_model`: the Heston model delta C_S; `H_mv`: the Heston minimum-variance delta):
-- **The calibrations.**
-  - The lecture's fit (L, 50–100-day calls) converges on 99.8% of sessions, with errors of 0.35–0.41 vol points.
-  - The broad fit (B, out-of-the-money calls and puts, 14 days to a year) converges on 90%, with a median error of 1.9 vol points. Three-quarters of its fits put κ at the bound of 10: Heston strains to fit SPX's skew across maturities.
-  - Through March 2020, v₀ rises to 0.3–0.9 (55–95% volatility) and ρ stays near −0.8.
-- **The Heston model delta is far worse than Black–Scholes,** roughly doubling the squared error (Gains −1.30 and −1.11). As calibrated, Heston implies a smile that moves with the index (close to sticky delta), so its delta over-hedges calls and under-hedges puts.
-- **Heston's minimum-variance delta repairs most of that,** through its ρξ·C_v/S term, and ends level with Black–Scholes (Gains +0.04 and +0.02, intervals spanning zero).
-- **It is significantly worse than Hull and White's empirical rule:** −0.20 [−0.46, −0.13] for calls and −0.12 [−0.39, −0.01] for puts. This matches Hull and White's comparison with SABR: a correction estimated from historical co-movement beats one read off each day's smile.
-- **The 57 sessions whose fits hit no bound.** For calls the ordering is the same: the Heston minimum-variance delta is worse than R2, −0.05 [−0.35, −0.01]. For puts, the model delta, the minimum-variance delta and R2 cannot be told apart, and all are below Black–Scholes on those days. Those sessions are not a random subset: a fit without bound hits is a day on which Heston happens to fit well.
 """),
 ])
 
@@ -680,7 +648,7 @@ c.groupby(["window", "cp"]).degree.value_counts().unstack(fill_value=0)"""),
 - **Every rule built on Hull–White's form tracks R2 within a few thousandths a year.** On SPX, R5 equals R2; R9 gains about +0.001 to +0.002; P3–P8 add nothing.
 - **The constant P0 is about as good as R2,** and better in 2022–2023 for puts on the long windows.
 - **PCV mostly picks degree 0.** It is never significantly worse than R2.
-- **More flexible learners do worse:** R7 and R10.
+- **The more flexible learner does worse:** R10.
 """),
     md("""
 ## Why R9's tuned correction is nearly constant
@@ -718,79 +686,9 @@ b.groupby(["cp", "days"])[["G_R2m_R1", "G_R2s_R1", "pairs"]].median().round(3)""
 """),
 ])
 
-NOTEBOOKS["09"] = ("09_heston_rewritten", [
+NOTEBOOKS["09"] = ("09_stress_stability_and_interpretation", [
     md("""
-# 09 · Heston, rewritten: pricer, calibration, timing and hedges (plan §16.5)
-
-**The course library's pricer.** Its integration uses 256 nodes whatever the range. At typical parameters it is accurate, but at corners of the lecture's bounds it is off by 6–46 vol points: large ξ, short τ, ρ near −1, slow κ.
-- **The project's `heston.py`** uses the same formula, Lewis's with the Black–Scholes control variate, with node counts tied to the range. It precomputes the strike terms per session and returns C_S and C_v in closed form.
-- **Its accuracy:** within 0.0086 vol points of an adaptive-quadrature reference everywhere tested (`tests/test_heston.py`).
-
-**Calibration B2** keeps calibration B's sample and bounds and changes the solver:
-- vega-weighted price errors in place of IV errors;
-- two starts per session (yesterday's solution and an at-the-money start);
-- a coarse-grid search, then a polish on the accurate grid.
-
-**Hedges, 2010–2023:**
-- H_model = C_S, Heston's own delta;
-- H_mv = C_S + (ρξ/S)·C_v, the model's minimum-variance delta;
-- H_fit = C_S + β̂·C_v/S, with β̂ fitted on the trailing 12 months.
-"""),
-    code(SETUP),
-    md("## The integration defect, live: a 14-day put at K/S = 0.6 with ξ = 5"),
-    code("""
-from erdos_quant_finance_project.lecture import option_pricing
-from erdos_quant_finance_project import heston as H
-op = option_pricing(); S, K, r, q, t = 3000.0, 1800.0, 0.02, 0.018, 14 / 365
-p = np.array([0.03, 10.0, 0.04, 5.0, -0.7])
-fwd = K * np.exp(-r * t) - S * np.exp(-q * t)
-rows = [{"pricer": f"library, {n} nodes", "put": op.heston_call(S, K, *p[[0]], r, t, *p[1:], q, n_phi=n, check_bounds=False) + fwd} for n in (256, 512, 4096)]
-ch = H.Chain(S, [K], [t], [r], [q], [-1.0], [p])
-rows.append({"pricer": "heston.py", "put": ch.prices(p)[0]})
-pd.DataFrame(rows)"""),
-    md("## Timing: the old calibration against B2, the same 21 sessions, run alone"),
-    code("""
-bm = pd.read_csv(R / "heston2/benchmark.csv")
-bm.groupby("method")[["wall_s", "cpu_s", "iv_rmse"]].agg(["median", "sum", "max"]).round(2)"""),
-    code("""
-P2 = pd.concat([pd.read_csv(f, parse_dates=["session"]) for f in sorted((R / "heston2").glob("params_*.csv"))])
-P2.groupby(P2.session.dt.year).agg(sessions=("n", "size"), converged=("ok", "sum"), cpu_median_s=("cpu_s", "median"),
-    iv_rmse_median=("iv_rmse", "median"), at_bound=("at_bound", "sum"), accuracy_check_max_vp=("accuracy_check_vp", "max")).round(4)"""),
-    md("""
-**Reading.**
-- **Every one of the 3,479 sessions of 2010–2023 converged.** The old calibration failed on 49 of 497 sessions, all at scipy's 500-evaluation cap.
-- **Speed:** on the benchmark, B2 is 3× faster at the median and 20× faster in total.
-- **Accuracy:** at most 0.007 vol points.
-- **κ still hits its bound of 10 on 37% of sessions,** which is Heston's misfit to the SPX skew, not a solver failure.
-"""),
-    md("## Hedging, 2010–2023"),
-    code("""
-hg = pd.read_csv(R / "heston2/gains_by_year.csv")
-hg.pivot_table(index="year", columns=["rule", "base", "cp"], values="gain").round(2)"""),
-    code("""
-fig, axes = plt.subplots(1, 2, figsize=(11, 4), sharey=True)
-for ax, cp, nm in zip(axes, "CP", ("calls", "puts")):
-    for rule in ("R2", "H_mv", "H_fit", "H_model"):
-        x = hg[(hg.rule == rule) & (hg.base == "R1") & (hg.cp == cp)].sort_values("year")
-        ax.plot(x.year, x.gain.clip(lower=-1.5), marker="o", label=rule)
-    ax.axhline(0, color="k", lw=0.8); ax.set_title(f"SPX {nm}: Gain over Black–Scholes (H_model clipped at −1.5)"); ax.legend()
-plt.tight_layout()"""),
-    code("""
-bt = pd.read_csv(R / "heston2/beta.csv")
-bt.groupby(["year", "cp"])[["beta", "rho_xi_median_month"]].median().unstack().round(3)"""),
-    md("""
-**Reading.**
-- **Heston's own delta has 1.7–3.2 times Black–Scholes' squared error, every year.**
-- **The minimum-variance correction recovers much of that.** It ends near Black–Scholes and never beats R2.
-- **Fitting the scale β̂ to data instead of the calibrated ρξ** helps against H_mv in most years but still loses to R2. β̂ is typically 40–100% of ρξ.
-- **So the fault is in the shape of Heston's sensitivities across strikes and maturities,** not in their scale. That extends Hull and White's finding for SABR.
-"""),
-])
-
-
-NOTEBOOKS["10"] = ("10_stress_stability_and_interpretation", [
-    md("""
-# 10 · Stress periods, parameter stability, the level of the correction, and the published Gains
+# 09 · Stress periods, parameter stability, the level of the correction, and the published Gains
 
 The brief's model-validation direction asks to "stress-test assumptions" and "study parameter stability". This notebook collects the analyses of plan §16.9–§16.10, all descriptive and post hoc:
 - **stress episodes 2011–2023,** defined from the S&P 500 close alone;
@@ -840,14 +738,11 @@ plt.tight_layout()"""),
     code("""
 S = pd.read_csv(R / "walkforward/parameter_stability_summary.csv")
 S[S.window == 12][["cp", "rule", "coef", "min", "median", "max", "median_se", "median_abs_change_over_se", "share_abs_z12_gt_2", "median_corr_bc"]].round(3)"""),
-    code("""
-pd.read_csv(R / "heston2/parameter_stability.csv").pivot_table(index="year", columns="parameter", values=["median", "share_at_bound"]).round(3)"""),
     md("""
 **Reading.**
 - **R2's three coefficients are poorly identified one by one:** b and c are nearly collinear (|correlation| about 0.9). The level they imply is well identified.
 - **That level drifts beyond sampling error** between non-overlapping years (|z| > 2 in 10–19% of comparisons), from about −0.34 to near zero.
 - **Longer windows are smoother but staler.**
-- **In Heston,** ρ is stable while κ often sits on its bound: a sign of model misfit, not of a solver problem.
 """),
     md("## The maturity assumption (1/√τ), by year"),
     code("""
@@ -880,13 +775,12 @@ P[P.rule == "R2"].pivot_table(index=["window", "period", "sample"], columns="cp"
 ])
 
 
-NOTEBOOKS["11"] = ("11_books_starvation_held_positions_simulation", [
+NOTEBOOKS["10"] = ("10_books_starvation_held_positions", [
     md("""
-# 11 · Books, data starvation, held positions, and a simulation of the intervals
+# 10 · Books, data starvation and held positions
 
-Plan §16.11–§16.14, specified 2026-11-05 and revised 2026-11-06 before any of them ran. All are descriptive and exploratory; only SPX 2020's verdict is a pre-registered test. The rules are those of the preamble to §16.11:
-- R1 (Black–Scholes), R2 (Hull–White), R3 (Ruf–Wang fixed), R4 (Ruf–Wang fitted), R6 (delta–vega–vanna), R9 (LightGBM on δ), P0 (a constant correction);
-- on SPX, Heston's H_model, H_mv and H_fit.
+Plan §16.11, §16.13 and §16.14, specified 2026-11-05 and revised 2026-11-06 before any of them ran. All are descriptive and exploratory; only SPX 2020's verdict is a pre-registered test. The rules are those of the preamble to §16.11:
+R1 (Black–Scholes), R2 (Hull–White), R3 (Ruf–Wang fixed), R4 (Ruf–Wang fitted), R6 (delta–vega–vanna), R9 (LightGBM on δ) and P0 (a constant correction).
 
 Each is refitted monthly on the trailing 12 months unless stated. The intervals are session-block bootstraps, as everywhere in the project.
 """),
@@ -903,7 +797,7 @@ Four books are formed each session from day-one information: all calls; all puts
     code("""
 for u in U:
     m = pd.read_csv(R / "extensions" / u / "books_median_yearly_gain.csv")
-    m = m[(m.base == "R1") & m.rule.isin(["R2", "P0", "R3", "R4", "R9", "H_mv"])]
+    m = m[(m.base == "R1") & m.rule.isin(["R2", "P0", "R3", "R4", "R9"])]
     print(u.upper(), "median yearly Gain over Black-Scholes, 2011-2023")
     display(m.pivot_table(index=["book", "rule"], columns="measure", values="median_yearly_gain").round(3))"""),
     code("""
@@ -923,7 +817,6 @@ for u in U:
 - **The reason:** about 70% of an option's squared error survives averaging across a book. That is the day's shared move, which the correction targets; option-specific noise diversifies away.
 - **The amplification works both ways:** in 2022 the SPX put book lost 0.14, against 0.06 per option.
 - **The risk reversal is the control.** Its volatility exposures cancel, so it keeps 12% of the error, and the corrections gain 0.04.
-- **Heston's H_mv loses on books too.**
 """),
     md("""
 ## 2. Data starvation (§16.13)
@@ -1012,40 +905,12 @@ for u in U:
 - **The expected-P&L cost of the correction is about 1 bp of the index over 5 sessions, and not significant,** so the Sharpe-ratio argument's assumption roughly holds.
 - **SPY** shows the same growth in 2011–2019. But its Greeks exist only for first-day candidates, so its paths are restricted to traded days with at least 14 days to expiry (§15).
 """),
-    md("""
-## 4. Do the intervals cover the truth? A simulation (§16.12)
-
-A regression-level market with a known true Gain is calibrated to 2019; the whole test is repeated 1,000 times per effect size κ (κ = 1 is 2019's effect). Three scenarios are run: stationary GARCH years; a calm path (2018 → 2019); and 2020's own volatility path (2019 → 2020).
-
-Coverage is the share of 95% intervals that contain the true conditional Gain. The H1 pass rate is the share of replications in which both lower bounds are above 0. Design and caveats: `notes/background/coverage-simulation.md`.
-"""),
-    code("""
-C = pd.read_csv(R / "simulation/coverage.csv")
-a = C[C.subset == "all"]
-display(a[a.cp.isin(["C", "P"])].pivot_table(index=["scenario", "kappa"], columns="cp",
-        values=["coverage_cond", "bias_cond", "median_width", "mean_G_cond"]).round(3))
-display(a[a.h1_pass_rate.notna()].pivot_table(index="kappa", columns="scenario", values="h1_pass_rate").round(3))
-display(a.groupby("scenario").median_top10_share.median().round(3))"""),
-    md("""
-**Reading.**
-- **The 95% intervals undercover everywhere, and worst in a year like 2020.**
-  - On 2020's own volatility path, at 2019's effect size, they contain the true conditional Gain 78–79% of the time; at twice that effect, 57–62%.
-  - In stationary years at 2019's effect, coverage is 86–87%.
-- **H1 would pass only 25% of the time on 2020's path at 2019's effect size,** against 72% in stationary years. With no effect it passes 1–2% of the time.
-- **On 2020's path the true conditional Gain of 2019's effect is only about 0.02–0.03:** the crash days' gamma and volatility noise swamp the signal.
-- **So "Inconclusive" was the likely outcome of a crash test year** even if the rule worked as it did in 2019, and the real 2020 intervals, wide as they are, probably understate the uncertainty.
-- **Caveats:**
-  - the calibration uses a gamma scale (0.46) and a noise rescale, both fitted to 2019;
-  - the spot–volatility relation is stationary in the simulation.
-
-Details: `notes/background/coverage-simulation.md` (private notes).
-"""),
 ])
 
 
-NOTEBOOKS["12"] = ("12_single_stocks_and_etfs", [
+NOTEBOOKS["11"] = ("11_single_stocks_and_etfs", [
     md("""
-# 12 · Single stocks and ETFs: AAPL, NVDA, TSLA, QQQ and SLV, 2016–2023
+# 11 · Single stocks and ETFs: AAPL, NVDA, TSLA, QQQ and SLV, 2016–2023
 
 Plan §16.15: the SPY protocol on five more underlyings, specified before any of their outcomes was computed. Exploratory; no verdict.
 
@@ -1056,7 +921,7 @@ Plan §16.15: the SPY protocol on five more underlyings, specified before any of
   - rates from SPX's parity curve;
   - dividends from Nasdaq's history (TSLA and SLV pay none).
 - The level is the vendor's snapshot. Pairs straddling a stock split are excluded.
-- The rules are the preamble's without Heston: R1–R4, R6, R9 and P0.
+- The rules are R1–R4, R6, R9 and P0.
 
 **Context.** Hull and White's Table 3 (2004–2015, 36-month window) gives an average Gain over the 30 Dow stocks of 10.3% for calls and 2.5% for puts, and 7.7% and 2.5% for three commodity ETFs, one of them SLV.
 """),

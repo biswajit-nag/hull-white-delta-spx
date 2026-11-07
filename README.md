@@ -48,7 +48,7 @@ The full specification is [`analysis_plan.md`](analysis_plan.md). It was reviewe
   - R2, Hull–White;
   - R3, Ruf–Wang fixed;
   - R4, Ruf–Wang fitted;
-  - plus exploratory R5–R8, including a regression tree and LightGBM.
+  - plus exploratory challengers, including LightGBM corrections.
 - **Chronological fitting.** Each 2020 month is hedged with coefficients fitted on the 12 months before it, and a training pair must end before the test month starts.
 - **The measure.** Gain = 1 − Σe²(rule)/Σe²(Black–Scholes) on identical pairs.
 - **Inference by session, not by option.** Every option on a day shares that day's index move, so naive OLS standard errors are 4.5–34 times too small here. Intervals come from a circular block bootstrap of sessions (B = 10,000).
@@ -67,7 +67,7 @@ The full specification is [`analysis_plan.md`](analysis_plan.md). It was reviewe
 **Reading the table:**
 - **Black–Scholes does most of the work,** removing 92–95% of the unhedged variance. The minimum-variance correction works on what is left.
 - **In dollars,** it cut the RMS hedging error per contract from about $825 to $727 for calls in 2020.
-- **The details** are in [`notebooks/04_results_2020.ipynb`](notebooks/04_results_2020.ipynb) (the verdict, its robustness, the monthly path and the coefficient paths) and [`notebooks/05_breakdown_and_sensitivities.ipynb`](notebooks/05_breakdown_and_sensitivities.ipynb) (buckets, sensitivities, the attribution, the challengers, SPY and Heston).
+- **The details** are in [`notebooks/04_results_2020.ipynb`](notebooks/04_results_2020.ipynb) (the verdict, its robustness, the monthly path and the coefficient paths) and [`notebooks/05_breakdown_and_sensitivities.ipynb`](notebooks/05_breakdown_and_sensitivities.ipynb) (buckets, sensitivities, the attribution, the gradient-boosted challenger and SPY).
 
 ## Stability across years
 
@@ -85,8 +85,7 @@ The years' status matters: 2015–2020 had been used for fitting or evaluation b
 ## Extensions
 
 - **SPY** (American options, quarterly dividends; Lecture 12's American pricer). The same picture: point Gains of 0.10 (calls) and 0.25 (puts), intervals spanning zero.
-- **Heston,** calibrated daily in the style of Lecture 12, on the lecture's sample and on a broad out-of-the-money one. Heston's own delta roughly doubles the Black–Scholes squared error, because its implied smile dynamics are wrong for SPX. Its minimum-variance delta is only level with Black–Scholes, and significantly worse than Hull and White's empirical rule (−0.20 for calls, −0.12 for puts). That matches Hull and White's comparison with SABR.
-- **Machine-learning challengers.** A depth-3 regression tree is not distinguished from Hull–White. Gradient boosting tuned on 2019 failed for puts in March 2020, when its features left the range it was trained on.
+- **A machine-learning challenger.** Gradient boosting tuned on 2019 failed for puts in March 2020, when its features left the range it was trained on.
 
 ## What this does not establish
 
@@ -123,8 +122,9 @@ uv run python scripts/make_notebooks.py
 | `DATA.md` | Data sources and every processing rule |
 | `src/erdos_quant_finance_project/` | The package: parsing, parity, Black–Scholes, pairs, hedging, diagnostics, learners, verdict |
 | `scripts/` | Pipeline steps and experiments, each with usage in its header |
-| `tests/` | 38 pytest checks: Greeks against finite differences and the lecture library, parity recovery, known coefficients, no look-ahead, the bootstrap, the verdict table |
-| `notebooks/` | 01 audit and attrition · 02 forwards, IVs, Greeks · 03 rehearsal · 04 the 2020 results · 05 breakdown and extensions |
+| `tests/` | pytest checks: Greeks against finite differences and the lecture library, parity recovery, known coefficients, no look-ahead, the bootstrap, the verdict table |
+| `notebooks/` | 01 audit and attrition · 02 forwards, IVs, Greeks · 03 rehearsal · 04 the 2020 results · 05 breakdown and sensitivities · 06 the 2011–2023 walk-forward · 07 SPY · 08 more rules and short-dated options · 09 stress, stability and interpretation · 10 books, data starvation, held positions · 11 single stocks and ETFs |
+| `EXECUTIVE_SUMMARY.md` | The executive summary |
 | `results/` | Derived tables and figures; per-pair files are regenerable and not committed |
 
 ## References

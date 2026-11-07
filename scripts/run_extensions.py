@@ -250,21 +250,22 @@ def paths() -> None:
                 Q = gp[[c for c in D.columns if c.startswith("q_")]].sum()
                 Q.columns = [c[2:] for c in Q.columns]
                 info = pd.DataFrame({"start": S0, "cp": st.set_index("path").loc[comp.index, "cp"], "complete": comp,
-                                     "heston_complete": comp & heston_ok, "left_band": ~gp.in_band.all()})
-                for sub, m in (("all", info.complete), ("heston", info.heston_complete)):
-                    if sub == "heston" and U != "spx":
+                                     "in_band_complete": comp & heston_ok, "left_band": ~gp.in_band.all()})
+                # "in_band": paths whose every day is in the analysis sample (on SPX, the days with Heston Greeks)
+                for sub, m in (("all", info.complete), ("in_band", info.in_band_complete)):
+                    if sub == "in_band" and U != "spx":
                         continue
                     sel = m[m].index
                     results.append(dict(H=Hn, year=year, subset=sub, R=R.loc[sel], Q=Q.loc[sel], info=info.loc[sel], grid=g_year))
                 attr[-1].update(complete=int(comp.sum()), left_band=int((comp & info.left_band).sum()),
-                                heston_complete=int((comp & heston_ok).sum()) if U == "spx" else None)
+                                in_band_complete=int((comp & heston_ok).sum()) if U == "spx" else None)
                 day_rows = []
                 print(U, "H", Hn, year, "eligible", len(st), "complete", int(comp.sum()), flush=True)
         # gains per year and pooled, over start sessions in blocks of max(1, round(10/H))
         rows = []
         groups = [(r["H"], r["subset"], str(r["year"]), [r]) for r in results]
         for Hn in (5, 10):
-            for sub in ("all", "heston"):
+            for sub in ("all", "in_band"):
                 for pname, yrs in POOLS.items():
                     sel = [r for r in results if r["H"] == Hn and r["subset"] == sub and r["year"] in yrs]
                     if sel and (len(yrs) > 1):

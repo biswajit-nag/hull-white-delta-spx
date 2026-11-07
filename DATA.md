@@ -13,7 +13,7 @@ This file says where the data come from and exactly how the code turns them into
 | SPY daily closes, 2016-11 on | Nasdaq historical quotes: https://api.nasdaq.com/api/quote/SPY/historical?assetclass=etf | SPY's index level (`S_close` for SPY) |
 | SPY daily closes, dividend-adjusted, 2010 on | Stooq: https://stooq.com/q/d/l/?s=spy.us&i=d (supplied by the author, 2026-11-05) | SPY's index level before 2016-11-03, with the dividend adjustment reversed (below) |
 | SPY distributions, 1993 on | State Street (the sponsor), SPDR distributions workbook: https://www.ssga.com/library-content/products/fund-data/etfs/us/spdr-etf-historical-distributions.xlsx (SPY rows) | SPY ex-dates and cash amounts |
-| Boot-camp option-pricing library | `option_pricing.py`, version 2026.11.02.1, in Lecture 12 of github.com/TheErdosInstitute/quant-finance (commit b2709e9). Imported from a local clone; set `ERDOS_LECTURE12` to its folder | Implied-volatility solver; Black–Scholes and American pricers; the Heston pricer of §16.2 (the project's own replaces it in §16.5, `heston.py`) |
+| Boot-camp option-pricing library | `option_pricing.py`, version 2026.11.02.1, in Lecture 12 of github.com/TheErdosInstitute/quant-finance (commit b2709e9). Imported from a local clone; set `ERDOS_LECTURE12` to its folder | Implied-volatility solver; Black–Scholes and American pricers |
 
 `data/external/SOURCES.csv` records the download time of each external file. FRED serves only the most recent ten years of `SP500`. Where both closes exist (2016-10 to 2023), Cboe's file matches FRED to the cent on 99.5% of 1,804 dates. One Cboe value is stale (2019-02-28 repeats 2019-02-27), which is why FRED takes precedence.
 
