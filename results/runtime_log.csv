@@ -473,3 +473,12 @@ started_at,step,status,wall_seconds,peak_mem_gb,rows_in,rows_out,inputs,git_hash
 2026-11-06T03:37:28-05:00,ext_starve,ok,828.8,2.55,,7140,tsla §16.13,2527127,True,3.14.10,Windows-11,
 2026-11-06T03:51:25-05:00,ext_starve,ok,724.6,2.18,,7140,qqq §16.13,2527127,True,3.14.10,Windows-11,
 2026-11-06T04:03:32-05:00,ext_starve,ok,277.8,0.73,,7140,slv §16.13,2527127,True,3.14.10,Windows-11,
+2026-11-07T15:16:54-05:00,build_pairs,ok,2.2,0.78,,207377,spx 2010,e385f1f,False,3.14.10,Windows-11,E7 82598; ok 81533
+2026-11-07T15:16:57-05:00,build_pairs,ok,3.2,1.04,,236076,spx 2011,e385f1f,True,3.14.10,Windows-11,E7 92245; ok 91001
+2026-11-07T15:17:00-05:00,build_pairs,ok,3.8,1.25,,287382,spx 2012,e385f1f,True,3.14.10,Windows-11,E7 104326; ok 103379
+2026-11-07T15:17:04-05:00,build_pairs,ok,5.5,1.46,,340191,spx 2013,e385f1f,True,3.14.10,Windows-11,E7 120972; ok 120484
+2026-11-07T15:17:10-05:00,build_pairs,ok,26.6,3.96,,2259455,spx 2022,e385f1f,True,3.14.10,Windows-11,E7 1417453; ok 1387221
+2026-11-07T15:17:37-05:00,build_pairs,ok,28.0,4.80,,2053771,spx 2023,e385f1f,True,3.14.10,Windows-11,E7 1441270; ok 1435152
+2026-11-07T15:18:22-05:00,tune_r8,ok,29.8,0.49,,,spx 2010 C,e385f1f,True,3.14.10,Windows-11,"60 trials, TPE seed 2026; best 0.0163066"
+2026-11-07T15:18:53-05:00,tune_r8,ok,37.8,0.49,,,spx 2010 P,e385f1f,True,3.14.10,Windows-11,"60 trials, TPE seed 2026; best 0.0196849"
+2026-11-07T15:19:33-05:00,spy_2020,ok,6.1,2.29,,1030757,"spy 2019-2020, W12, R0-R5",e385f1f,True,3.14.10,Windows-11,

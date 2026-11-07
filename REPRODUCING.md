@@ -5,7 +5,9 @@ There are two levels:
 - **Without the vendor data** (anyone, a few minutes). Install the locked environment, run the tests, and re-execute every notebook from the committed tables in `results/`: the story in `00_the_story` and the detail in 01–11.
 - **From the raw data.** This needs the OptionsDX files. Rebuild the tables in `results/` from the vendor archives, then compare them with the committed ones. The SPX test of 2020, the confirmatory result, takes under an hour; everything takes about 18 hours.
 
-Run every command from the repository root. Each script's header gives its usage and its outputs. Times come from `results/runtime_log.csv`, on the author's machine (Windows 11, 6 cores; peak memory about 5 GB).
+Run every command from the repository root. Each script's header gives its usage and its outputs. Times come from `results/runtime_log.csv`, on the author's machine (Windows 11, 6 cores), with one command at a time.
+
+**Memory.** The heaviest analysis steps (`stress_episodes.py`, `level_shape.py`, `parameter_stability.py`, `compare_published.py`, `run_walkforward_r5_r8.py` and the held-position paths of `run_extensions.py`) peak at 6.5–7.5 GB. On a 16 GB machine, run them one at a time. In the test run of 2026-11-07, running other stages alongside stretched `stress_episodes.py` from 3 minutes to 7.5 hours. The implied-volatility builds and the Heston calibration need under 2 GB per process and can run alongside.
 
 ## What you need
 
@@ -265,3 +267,15 @@ These differences are expected:
   - the Optuna timestamps in `r8_trials_2019_*.csv`;
   - six bytes of `summary_yearly_gain.pdf`, its creation date. Since then, `make_figures.py` writes the PDF without a creation date, so it reproduces exactly.
 - **Run times:** Stage 1 took 10.5 minutes and Stage 2 20 minutes.
+
+**2026-11-07, the same clone, Stages 3–6.** The rest of the pipeline ran in that clone, with the 75 archives of the five underlyings added. About 120 commands ran, every one as written above, and every one exited 0. After `drop_withdrawn.py`, every table for SPY's replication, the five underlyings, SPY's and the five underlyings' extensions, the stress episodes, parameter stability, level and shape, the polynomial degrees, the short-dated options and the published comparison came out byte-identical to the committed one.
+
+Twenty-two tables did not. The rebuild was right and the committed tables were stale:
+- **SPX pairs for 2010–2013 and 2022–2023.** These pair files had been built on 2026-11-04 by code from before the first commit, which computed the R8 features `rv20` and `ret5` on a shorter close history. The rebuilt pairs differ from them only in those two columns. The features enter R8 and R10, and through the feature-complete sample, the R8–R11 comparisons. That affected:
+  - the 2010 tuning of R8–R11;
+  - the R8–R11 rows of the walk-forward tables (`r5_r8_*`, `r8_by_year`, `r9_r11_*`);
+  - R9's rows in SPX's books, starvation and held-position tables, because R9 uses its 2010 tuning until 2016-12;
+  - `rehearsal/learners_2010.csv`.
+- **SPY's first exploratory run** (`run_spy.py`: `results/spy/gains.csv`, `coefficients_*.csv`, `monthly_*.csv`). It ran on 2026-11-04, before SPY's closes and Greeks were revised on 2026-11-05, and had not been rerun.
+
+The committed tables were replaced by the rebuilt ones (`analysis_plan.md` §15, 2026-11-07). Rerunning the R8 tuning on 2010 and `run_spy.py` on the author's machine, after its 2010–2013 and 2022–2023 pairs were rebuilt, reproduced the clone's tables byte for byte. Every other result is unchanged: the 2020 verdict, the walk-forward of R2 against R1, R3 and R4, and every rule other than R8–R11 in every table. The run took 16.5 hours, because steps ran in parallel and competed for memory (see "Memory" above).

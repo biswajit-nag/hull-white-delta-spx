@@ -1,16 +1,16 @@
 {
   "C": {
     "num_leaves": 4,
-    "learning_rate": 0.010580576187559991,
-    "n_estimators": 57,
-    "lambda_l2": 3.1443972619613416,
-    "min_hess_frac": 0.001910686300058908
+    "learning_rate": 0.014386399535235867,
+    "n_estimators": 99,
+    "lambda_l2": 1.6386445159765668,
+    "min_hess_frac": 0.00029639249427436805
   },
   "P": {
     "num_leaves": 4,
-    "learning_rate": 0.014435025404425945,
-    "n_estimators": 56,
-    "lambda_l2": 42.13259562299167,
-    "min_hess_frac": 0.0016850339806630994
+    "learning_rate": 0.01597224815345755,
+    "n_estimators": 97,
+    "lambda_l2": 0.08473242366726928,
+    "min_hess_frac": 0.0005446731920500619
   }
 }

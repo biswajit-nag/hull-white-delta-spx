@@ -1119,7 +1119,7 @@ The same protocol is applied to SPY: American options (Lecture 12's tree for put
 s = pd.read_csv(R / "spy/gains.csv")
 s[(s.rule == "R2") & s.base.isin(["R1", "R3", "R4"])][["variant", "cp", "base", "gain", "lo", "hi", "pairs"]].round(3)"""),
     md(r"""
-**Reading.** SPY tells the same story. The point Gains are positive (0.10 for calls, 0.25 for puts), the intervals span zero, and the scaling rules are not distinguished.
+**Reading.** SPY tells the same story. The point Gains are positive (0.10 for calls, 0.24 for puts), the intervals span zero, and the scaling rules are not distinguished.
 
 The ex-date-only rows are too thin to interpret. 2020 has three ex-dates with pairs, so some bootstrap draws (about 4%) contain none, and any such draw leaves the interval undefined.
 
@@ -1585,7 +1585,7 @@ Windows below three months lose 0.02–0.07 a year against the full 12 months (2
 
 Short windows adapt faster to a regime change. In 2022 a 3-month window gave +0.071 and +0.047, against +0.002 and −0.058 on 12 months. That is hindsight on one year, without an interval: the same window did worse in 2021 (0.082 / 0.104 against 0.154 / 0.161) and 2023 (−0.024 / −0.060 against +0.002 / −0.014), and in 2020 the 12-month window was best.
 
-No window is best every year. A long window estimates the level precisely but goes stale; a short one tracks it but is noisy. SPY shows the same. R9, a tree learner, loses more than R2 when thinned: it needs more data than three linear coefficients.
+No window is best every year. A long window estimates the level precisely but goes stale; a short one tracks it but is noisy. SPY shows the same. R9, a tree learner, loses more than R2 when thinned on SPY and on SPX calls (three options a session: 0.053 against 0.070 for SPY calls, 0.156 against 0.207 for SPY puts, 0.128 against 0.138 for SPX calls). That is consistent with a learner needing more data than three linear coefficients. SPX puts are the exception: there R9 does slightly better than R2 (0.135 against 0.124).
 """),
     md(r"""
 ## 3. Held positions (§16.11)
