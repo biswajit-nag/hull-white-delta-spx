@@ -37,7 +37,7 @@ The external files are not in the repository, because their providers' terms do 
 
 ## Reproducing
 
-[`REPRODUCING.md`](REPRODUCING.md) gives every step: what you need, the stages from raw archives to the committed tables, their run times, and what to compare.
+[`REPRODUCING.md`](REPRODUCING.md) gives every step: what you need, the stages from raw archives to the committed tables, their run times, and what to compare. Its stages are numbered separately from this file's Steps 1–5: Stage 1 runs Steps 2–5 for SPX (and Step 2 for SPY), Stage 4 runs Steps 3–5 for SPY, and Stage 5 runs Steps 2–5 for the five underlyings.
 
 ## Step 1: raw archives
 

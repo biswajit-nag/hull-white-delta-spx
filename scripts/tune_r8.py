@@ -1,9 +1,12 @@
-"""Tune R8 on 2019 only (analysis_plan.md §7), and evaluate R7 and R8 in the rehearsal design.
+"""Tune R8, or R9-R11 with --rule (analysis_plan.md §7, §16.4, §16.7), on the given rehearsal years.
 
 One Optuna study per option type: TPE sampler (seed 2026), 60 serial trials, no pruning. The objective
 is the pooled normalized hedging SSE over the rehearsal folds: trailing 6-month windows, test months
-2019-07 to 12, pairs with x = 0 included. Writes results/rehearsal/r8_params.json, r8_trials_{C,P}.csv,
-and learners_2019.csv (R7, R8 and R2 on the feature-complete test pairs).
+from July of the first year to December of the last, pairs with x = 0 included. Writes, in results/rehearsal/
+(results/spy/rehearsal/ with --spy), {rule}_params_{years}.json and {rule}_trials_{years}_{C,P}.csv, with
+{rule} r8, r9, r10 or r11 and {years} joined by underscores (e.g. r8_params_2015_2016.json). For R8 it also
+evaluates R7 and R8 against R2 on the same folds and writes learners_{years}.csv; R7 was withdrawn from the
+submission, and scripts/drop_withdrawn.py removes its columns.
 
 Usage: uv run python -I scripts/tune_r8.py [--spy] [YEAR ...]   (2019 for the plan; 2015 2016 and 2010 for the
 walk-forward, §16.4; --spy for SPY, §16.3, writing to results/spy/rehearsal/). --rule R9|R10|R11 tunes those rules

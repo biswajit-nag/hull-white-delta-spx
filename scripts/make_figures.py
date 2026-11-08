@@ -1,4 +1,5 @@
-"""Figures for the README and the write-up (analysis_plan.md §12). Writes results/figures/*.png.
+"""Figures for the README and the write-up (analysis_plan.md §12). Writes results/figures/*.png, and
+summary_yearly_gain.pdf for the executive summary.
 
 Usage: uv run python -I scripts/make_figures.py
 """

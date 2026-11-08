@@ -2,7 +2,7 @@
 
 Data quality only, no hedging outcome: sessions and rows, expiries per session, flag rates, the
 next-session status of eligible pairs, the volume coding of §5, implied-volatility failures, and
-sensitivity A's coverage. Writes results/audit_light.csv.
+sensitivity A's coverage. Writes results/audit_light.csv (SPX) or results/audit_light_<u>.csv (e.g. SPY).
 
 Usage: uv run python -I scripts/audit_light.py 2015 2019 [spx|spy]
 """

@@ -1,10 +1,13 @@
-"""Step 2: convert every OptionsDX archive in data/raw/optionsdx to monthly Parquet files.
+"""Step 2: convert every OptionsDX archive in data/raw/optionsdx (or --raw) to monthly Parquet files.
 
 Each archive is extracted into its own fresh temporary directory, its month files
 are converted, and the directory is deleted. Writes the data manifest to
 results/data_manifest.csv.
 
-Run from the repository root:  uv run python -I scripts/build_interim.py
+Run from the repository root:
+  uv run python -I scripts/build_interim.py [--raw DIR] [--out DIR] [--manifest CSV] [--workers N]
+Defaults: data/raw/optionsdx, data/interim/optionsdx, results/data_manifest.csv, 4 workers. For the five
+underlyings (REPRODUCING.md, Stage 5): --raw data/raw/optionsdx_stocks --manifest results/stocks/data_manifest_stocks.csv
 """
 
 import argparse

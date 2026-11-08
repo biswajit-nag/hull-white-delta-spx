@@ -1,12 +1,14 @@
 """Pairs at every maturity and delta, for the later days of a held position (analysis_plan.md §16.11).
 
-The SPX (or SPY) pair rules of build_pairs.py / build_pairs_spy.py with build_year(maturity="any"): every
+The SPX, SPY or stock pair rules of build_pairs.py / build_pairs_spy.py / build_pairs_stocks.py with
+build_year(maturity="any"): every
 two-sided contract-day with a converged IV and τ > 0, ending before settlement; E7 and `in_band` (E5 and E6
 of the main sample) kept as columns. A path's first day still comes from the analysis sample.
 
 Writes data/processed/pairs_any/underlying=<u>/year=YYYY/pairs_YYYY.parquet.
 
-Usage: uv run python -I scripts/build_pairs_any.py 2010 2023 [--spy]
+Usage: uv run python -I scripts/build_pairs_any.py FIRST LAST [--spy | --underlying U]
+  (U one of aapl nvda tsla qqq slv; e.g. 2016 2023 --underlying aapl)
 """
 
 from __future__ import annotations

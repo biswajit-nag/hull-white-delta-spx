@@ -47,7 +47,7 @@ git status --short
 
 ## Level 2: from the raw data
 
-The stages run in order, because each stage reads what the earlier ones wrote. You can stop after any stage and compare only its outputs (see "Comparing" below). In PowerShell, write `Copy-Item` for `cp`.
+The stages run in order, because each stage reads what the earlier ones wrote. Stage 0 checks only the inputs: what earlier stages wrote to `data/` is read without a check. So after changing the code, or with a `data/` built by another version, rerun the stages that build it. You can stop after any stage and compare only its outputs (see "Comparing" below). In PowerShell, write `Copy-Item` for `cp`.
 
 ### Stage 0: check the inputs (seconds)
 
@@ -205,7 +205,7 @@ uv run python -I scripts/run_protocol_stocks.py u
 
 ### Stage 6: books, data starvation and held positions (about 5 hours)
 
-On SPX, every rule in these experiments is scored on the pairs that have Heston Greeks, so that all rules share one sample (`analysis_plan.md` §15, 2026-11-06). Heston's results were withdrawn from the submission, but its calibration still defines that sample, so it runs first. It takes about 100 minutes on 6 processes, and its outputs (`results/heston2/`, `data/processed/heston2/`) are not committed.
+On SPX, every rule in these experiments is scored on the pairs that have Heston Greeks, so that all rules share one sample (`analysis_plan.md` §15, 2026-11-06). Heston's results were withdrawn from the submission, but its calibration still defines that sample, so it runs first. It takes about 100 minutes on 6 processes (the calibration's last argument is its number of worker processes), and its outputs (`results/heston2/`, `data/processed/heston2/`) are not committed. `heston2_hedge.py` reuses the Greeks it cached in `data/processed/heston2/greeks_YYYY.parquet` whenever they exist, even after a new calibration; delete those files to recompute them.
 
 ```
 uv run python -I scripts/heston2_calibrate.py 2010 2023 6
@@ -242,6 +242,7 @@ git diff --stat
 
 - **`drop_withdrawn.py`** is needed because the regression tree R7 and every Heston rule were withdrawn from the submission on 2026-11-06 (`analysis_plan.md` §15). Their code stays, so the scripts above write their rows again, and this script removes them as was done for the committed tables. Applied to the tables as they stood before the withdrawal, it reproduces the committed tables byte for byte.
 - **`make_figures.py`** reads `results/2020/` and `results/walkforward/`, so it needs Stages 2 and 3.
+- **`git status` and `git diff`** succeed whatever they show. The reproduction is judged by the comparison below, not by their exit codes.
 
 ## Comparing
 
@@ -269,7 +270,7 @@ These differences are expected:
   - six bytes of `summary_yearly_gain.pdf`, its creation date. Since then, `make_figures.py` writes the PDF without a creation date, so it reproduces exactly.
 - **Run times:** Stage 1 took 10.5 minutes and Stage 2 20 minutes.
 
-**2026-11-07, the same clone, Stages 3–6.** The rest of the pipeline ran in that clone, with the 75 archives of the five underlyings added. This half was run by the author's own Claude session, with a script that executes the commands above in order; unlike Stages 0–2, it was not an independent reading of the instructions. About 120 commands ran, every one as written above, and every one exited 0. After `drop_withdrawn.py`, every table for SPY's replication, the five underlyings, SPY's and the five underlyings' extensions, the stress episodes, parameter stability, level and shape, the polynomial degrees, the short-dated options and the published comparison came out byte-identical to the committed one.
+**2026-11-07, the same clone, Stages 3–6.** The rest of the pipeline ran in that clone, with the 75 archives of the five underlyings added. This half was run by the author's own Claude session, with a script that executes the commands above in order; unlike Stages 0–2, it was not an independent reading of the instructions. Its 105 commands ran as written above, and every one exited 0. After `drop_withdrawn.py`, every table for SPY's replication, the five underlyings, SPY's and the five underlyings' extensions, the stress episodes, parameter stability, level and shape, the polynomial degrees, the short-dated options and the published comparison came out byte-identical to the committed one.
 
 Twenty-two tables did not. The rebuild was right and the committed tables were stale:
 - **SPX pairs for 2010–2013 and 2022–2023.** These pair files had been built on 2026-11-04 by code from before the first commit, which computed the R8 features `rv20` and `ret5` on a shorter close history. The rebuilt pairs differ from them only in those two columns. The features enter R8 and R10, and through the feature-complete sample, the R8–R11 comparisons. That affected:
