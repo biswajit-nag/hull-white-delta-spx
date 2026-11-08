@@ -147,7 +147,7 @@ Per session and expiry, `data/processed/greeks/underlying=spx/year=YYYY/` holds 
 
 ## From the panel to the analysis sample
 
-The panel above removes nothing. The eligibility rules of `analysis_plan.md` §5 define the sample, using day-one information only:
+The processed long panel removes nothing. The eligibility rules of `analysis_plan.md` §5 define the sample; apart from E2's pre-declared calendar exclusion, they use day-one information only:
 
 - E1–E4, data validity: day one is an NYSE session and not a vendor non-session row; neither end of the pair touches the April 2019 stamp window; the contract is neither settled nor ambiguous; and the day-one quote is two-sided.
 - E5 and E6, Hull and White's filters: at least 14 calendar days to expiry, and 0.05 ≤ |δ| ≤ 0.95 with the recomputed day-one delta. Both in- and out-of-the-money options enter: in 2020, 55% of the calls and 29% of the puts are in the money.

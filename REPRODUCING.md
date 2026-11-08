@@ -7,11 +7,11 @@ There are two levels:
 
 Run every command from the repository root. Each script's header gives its usage and its outputs. Times come from `results/runtime_log.csv`, on the author's machine (Windows 11, 6 cores), with one command at a time.
 
-**Memory.** The heaviest analysis steps (`stress_episodes.py`, `level_shape.py`, `parameter_stability.py`, `compare_published.py`, `run_walkforward_r5_r8.py` and the held-position paths of `run_extensions.py`) peak at 6.5–7.5 GB. On a 16 GB machine, run them one at a time. In the test run of 2026-11-07, running other stages alongside stretched `stress_episodes.py` from 3 minutes to 7.5 hours. The implied-volatility builds and the Heston calibration need under 2 GB per process and can run alongside.
+**Memory.** The heaviest analysis steps (`stress_episodes.py`, `level_shape.py`, `parameter_stability.py`, `compare_published.py`, `run_walkforward_r5_r8.py` and the held-position paths of `run_extensions.py`) peak at 6.5–7.5 GB. On a 16 GB machine, run them one at a time. In the test run of 2026-11-07, running other stages alongside stretched `stress_episodes.py` from 3 minutes to 7.5 hours. The implied-volatility builds and the Heston calibration need under 2 GB per process; run them alongside other steps only if their combined memory use, including all calibration workers, fits available RAM.
 
 ## What you need
 
-- **uv** (https://docs.astral.sh/uv/). It installs Python 3.14.10 (pinned in `.python-version`) and the locked dependencies (`uv.lock`).
+- **uv** (https://docs.astral.sh/uv/). It selects Python 3.14 as specified in `.python-version` and installs the locked dependencies (`uv.lock`).
 - **The boot camp's lecture repository at commit b2709e9**, for `option_pricing.py` version 2026.11.02.1: its implied-volatility solver and American pricers. It has no licence file, so it is imported from a clone rather than copied here:
   ```
   git clone https://github.com/TheErdosInstitute/quant-finance.git
@@ -23,6 +23,7 @@ Run every command from the repository root. Each script's header gives its usage
 
   The code checks the library's version when it loads it. Without the clone, the tests that need it are skipped and the pipeline stops at its first IV solve.
 - **For the rebuild only:**
+  - **Windows,** for the raw-data pipeline as written: `build_interim.py` calls `C:\Windows\System32\tar.exe` to extract the archives.
   - **The OptionsDX end-of-day archives**, unrenamed. The 42 SPX and SPY archives go in `data/raw/optionsdx/` (1.2 GB). The 75 archives for AAPL, NVDA, TSLA, QQQ and SLV go in `data/raw/optionsdx_stocks/` (0.6 GB). `results/data_manifest.csv` and `results/stocks/data_manifest_stocks.csv` list every archive with its SHA-256 checksum. The vendor's terms do not allow redistribution, so the archives are not in this repository.
   - **The external files**, in `data/external/`: the S&P 500 closes, SPY's closes and distributions, and the dividend histories. `DATA.md` lists their URLs and says what a later download changes, and `results/external_manifest.csv` gives the checksum of each file the study used. Their providers' terms do not allow redistribution either.
   - **About 25 GB of free disk** for `data/interim/` and `data/processed/`.
@@ -41,8 +42,8 @@ git status --short
 **What to expect:**
 - **Tests:** all 44 pass with the lecture clone; without it, 38 pass and 6 are skipped.
 - **Notebooks:** `make_notebooks.py` builds the 12 notebooks, 00–11, from the cell definitions in `scripts/make_notebooks.py` and executes them against `results/`. `00_the_story` recomputes the principal results from the committed tables, and points to the detail notebooks or sources for the other numbers. The fresh-clone test on the author's machine (2026-11-06) covered commit 3cfc09c, when the builder made only notebooks 01–11, before notebook 00 existed. In that test, every printed number came out the same and every figure was byte-identical. On another platform, font rendering may change the figures' bytes, but not what they show.
-- **Two figures.** Notebooks 00 and 04 show `results/figures/cumulative_sse_2020.png`, and 06 shows `walkforward_by_year.png`, as images rather than drawing them in code. `scripts/make_figures.py` draws them in Stage 7; the cumulative figure needs the per-pair errors of Stage 2, which are not committed. Every other figure is drawn in the notebook from the committed tables.
-- **`git status`:** shows the notebooks as modified. That comes from matplotlib's object addresses (`<matplotlib.legend.Legend at 0x…>`), pytest's elapsed time in notebook 02, and how the kernel splits printed output into chunks, not from any result.
+- **Two figures.** Notebook 00 shows `results/figures/cumulative_sse_2020.png`, and 06 shows `walkforward_by_year.png`, as images rather than drawing them in code. `scripts/make_figures.py` draws them in Stage 7; the cumulative figure needs the per-pair errors of Stage 2, which are not committed. Every other figure is drawn in the notebook from the committed tables.
+- **`git status`:** shows the notebooks as modified. Cell IDs, execution timestamps, matplotlib's object addresses (`<matplotlib.legend.Legend at 0x…>`), pytest's elapsed time in notebook 02 and the chunking of printed output can change without any analysis result changing.
 
 ## Level 2: from the raw data
 
@@ -250,7 +251,7 @@ These differences are expected:
 - **`results/runtime_log.csv`** gains a row for every run.
 - **The `.log` files** record local paths and warnings.
 - **The tuning logs** (`results/**/r*_trials_*.csv`) differ in Optuna's `datetime_start`, `datetime_complete` and `duration` columns. Each trial's parameters and value are the same.
-- **Notebooks** differ in matplotlib's object addresses, pytest's elapsed time and the chunking of printed output, after Level 1 or Stage 7.
+- **Notebooks** can differ in cell IDs, execution timestamps, matplotlib's object addresses, pytest's elapsed time and the chunking of printed output, after Level 1 or Stage 7.
 - **External files downloaded later** can change the tables that use them. `check_inputs.py` reports which files differ, and `DATA.md` says what each difference changes. For example, FRED serves ten years of S&P 500 closes, so a later download falls back to Cboe's closes for the earliest dates.
 - **Partial runs.** A tracked table that a stage you didn't run would have written stays as committed.
 
@@ -278,4 +279,4 @@ Twenty-two tables did not. The rebuild was right and the committed tables were s
   - `rehearsal/learners_2010.csv`.
 - **SPY's first exploratory run** (`run_spy.py`: `results/spy/gains.csv`, `coefficients_*.csv`, `monthly_*.csv`). It ran on 2026-11-04, before SPY's closes and Greeks were revised on 2026-11-05, and had not been rerun.
 
-The committed tables were replaced by the rebuilt ones (`analysis_plan.md` §15, 2026-11-07). Rerunning the R8 tuning on 2010 and `run_spy.py` on the author's machine, after its 2010–2013 and 2022–2023 pairs were rebuilt, reproduced the clone's tables byte for byte. Every other result is unchanged: the 2020 verdict, the walk-forward of R2 against R1, R3 and R4, and every rule other than R8–R11 in every table. The run took 16.5 hours, because steps ran in parallel and competed for memory (see "Memory" above).
+The committed tables were replaced by the rebuilt ones (`analysis_plan.md` §15, 2026-11-07). Rerunning the R8 tuning on 2010 and `run_spy.py` on the author's machine, after its 2010–2013 and 2022–2023 pairs were rebuilt, reproduced the clone's tables byte for byte. The SPX 2020 verdict and the walk-forward of R2 against R1, R3 and R4 are unchanged. Outside SPY's first exploratory run, all changed results concern R8–R11. The run took 16.5 hours, because steps ran in parallel and competed for memory (see "Memory" above).
