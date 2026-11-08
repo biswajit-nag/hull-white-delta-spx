@@ -4,7 +4,7 @@
 
 Does adjusting the Black–Scholes delta for changing volatility improve daily SPX option hedges? A dealer hedges each option by holding delta units of the index. The Black–Scholes delta treats volatility as fixed, although implied volatility—the volatility consistent with an option’s price—tends to rise when the index falls. Hull and White’s minimum-variance delta corrects for this response, using monthly regressions on past prices. Its Gain is the fraction of the Black–Scholes delta’s squared one-day hedging error that it removes.
 
-**The pre-registered SPX 2020 test is inconclusive.** The minimum-variance delta removed 18.5% of the squared error for calls and 12.0% for puts. But the March 2020 crash leaves 95% intervals spanning about −0.4 to +0.46, so neither an improvement nor a loss is established. The verdict rule was committed before any test-year number was computed. All 11 pre-specified robustness variants preserve the verdict.
+**The pre-registered SPX 2020 test is inconclusive.** The minimum-variance delta removed 18.5% of the squared error for calls and 12.0% for puts. But the March 2020 crash leaves 95% intervals spanning about −0.4 to +0.46, so neither an improvement nor a loss is established. The verdict rule was committed before any 2020 hedging outcome was computed. All 11 pre-specified robustness variants preserve the verdict, though wide intervals limit what that agreement establishes.
 
 Repeated out of sample over 2011–2023, with monthly fits on the preceding 12 months, the correction usually helps. Its median yearly Gain over 2015–2023, the span common to all fitting windows, is 0.12 for calls and 0.10 for puts. In no year is it significantly worse than Black–Scholes. Its advantage disappears in 2022–2023, as implied volatility became less responsive to index moves.
 
@@ -98,7 +98,7 @@ The level replaces the quadratic with one constant: the hedge’s assumed sensit
 
 The level supplies the Gain; variation across strikes adds only −0.014 to +0.015 a year. The individual coefficients are poorly identified, but the level is well identified.
 
-The level varies over time. Fits 12 months apart differ by more than two reported standard errors in 19% of call and 10% of put comparisons. These standard errors omit serial dependence across sessions, so the counts somewhat overstate the instability.
+The level varies over time. Fits 12 months apart differ by more than two reported standard errors in 19% of call and 10% of put comparisons. These standard errors omit serial dependence across sessions, so the counts may overstate the instability; the effect is not quantified.
 
 With 12-month fits, degrees 0–8 give essentially the same Gain. Maturity powers $T^{-\alpha}$ for $\alpha=0,0.25,0.75,1$ never consistently beat $1/\sqrt{T}$.
 
@@ -106,11 +106,11 @@ With 12-month fits, degrees 0–8 give essentially the same Gain. Maturity power
 
 **Books.** We score each day’s average error across all calls, all puts, or long-volatility positions in out-of-the-money options; a risk reversal is the control. For SPX calls, the median yearly Gain over 2011–2023 is 0.22 on the book against 0.15 per option, about 1.4 times. Losses grow too, and the control gains little. Only a book’s total correction matters, so on books the fixed scaling roughly ties the minimum-variance delta.
 
-**Held positions.** These tests accumulate the error over 5 or 10 days, rehedging daily. In 2011–2019 the Gain rises from 12–13% for one day to 19–20% over 5 days and 24–34% over 10 days. Losses also grow, in 2021–2023.
+**Held positions.** These tests accumulate the error over 5 or 10 days, rehedging daily. In 2011–2019 the Gain rises from 12–13% one day at a time to 19–20% over 5 days on the same pairs; on the 10-day paths it rises from 12–15% to 24–34%. Losses also grow, in 2021–2023.
 
 **Data starvation.** These tests keep fewer options per training day, or shorten the training window. Three options of each type a day cost only about 0.01 in Gain. Windows below three months lose 0.02–0.07 a year. Yet a three-month window would have adapted to 2022: puts go from −0.058 to +0.047.
 
-Among the stocks and ETFs, AAPL gains a little; NVDA, TSLA and SLV gain nothing or lose; and QQQ behaves like SPX. Options under 14 days gain 0.06 / 0.005 for calls / puts, and about zero under three days. Our pooled 2013–2015 Gains with 36-month fits are 0.22 / 0.25, while Hull and White report mean monthly Gains of 0.26 / 0.23 over 2007–2015. Our lower headline reflects the period, the 12-month window and in-the-money calls.
+Among the stocks and ETFs, AAPL gains a little; NVDA, TSLA and SLV gain nothing or lose; and QQQ behaves like SPX. Options under 14 days gain 0.06 / 0.005 for calls / puts, and about zero under three days. Our pooled 2013–2015 Gains with 36-month fits are 0.22 / 0.25, while Hull and White report mean monthly Gains of 0.26 / 0.23 over 2007–2015. Our lower headline reflects the period, the 12-month window and in-the-money calls, the last of these the least.
 
 ## 5. Financial interpretation
 
@@ -124,17 +124,17 @@ If the mean P&L is unchanged, and the reduction in squared error approximates th
 
 **Where it works and fails.** Here the slope is the number of volatility points by which implied volatility rises per 1% fall in the index.
 - **Works:** index options; sell-offs; years in which the slope stays close to the preceding year’s; books and held positions.
-- **Fails:** after a crash enters the training window (April 2020); in rebounds and post-crash periods (late 2018, late 2022); when the slope weakens (2022–2023); on single stocks and silver; near expiry.
+- **Fails:** after a crash enters the training window (April 2020); in rebounds and post-crash periods (late 2018, losses not significant; late 2022, significant); when the slope weakens (2022–2023); on single stocks and silver; near expiry.
 
 ## 6. Assumptions, limitations and failure modes
 
 | Assumption | Check | Result |
 |---|---|---|
-| Volatility response is quadratic in delta | Degrees 0–8, a validated degree, LightGBM on delta | Not contradicted; shape barely matters |
+| Volatility response is quadratic in delta | Degrees 0–8, a validated degree, LightGBM on delta | Small economic differences; some pointwise significant improvements |
 | Response scales as $1/\sqrt{T}$ | $T^{-\alpha}$, $\alpha\in\{0,0.25,0.75,1\}$, by year | Not beaten consistently |
 | Coefficients remain stable between windows | Coefficient paths; fits 12 months apart | Fails: the level drifts, badly in 2022 |
 | No intercept or theta term is needed | Theta-adjusted 2020 variant; held-position mean error | 2020 Gains change by at most 0.011 with theta adjustment; five-day mean-error difference from Black–Scholes about +0.9 bp in 2011–2019, not significant |
-| One day is the relevant horizon | 5- and 10-day held positions | Gain grows over longer horizons |
+| One day is the relevant horizon | 5- and 10-day held positions | Gain grows in 2011–2019 and 2020; losses can grow too |
 | Mid quotes are synchronous with the index | Two index-level sensitivities; bid and ask marks | Verdict unchanged |
 | Frictionless index hedging | Turnover only | Not tested with costs |
 
