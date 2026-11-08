@@ -2,6 +2,14 @@
 
 *Version 1.0, 2026-11-04. Binding from its commit: it governs the endpoints and procedures, and every later change is logged, dated, in §15.*
 
+**How to read this plan.** The plan is cumulative: the registered text, and a dated log of every change since.
+- **§§1–13** are the confirmatory core, registered as v1.0 (commit 77b030e) before any 2020 hedging outcome was computed. They give the question, the data, the eligibility rules (§5), the hedge rules (§6), the verdict for SPX 2020 (§8), inference (§9) and the rehearsal (§10).
+- **§15, the deviation log,** records every later change, dated, with whether any result had been seen before it. Where a §15 entry changes a rule, it supersedes the text above. Editorial changes to the text are logged there too.
+- **§16** holds the extension specifications, added under §14's rule. All are exploratory, and most were written after 2020 had been seen.
+- **The Status section** below maps each item to its scripts, results and notebook.
+- **Withdrawn from the submission** (§15, 2026-11-06): the regression tree R7, every Heston result and the coverage simulation (§16.12). Their specifications stay as the record.
+- **The results** are told in the notebooks, starting with `notebooks/00_the_story.ipynb`. `EXECUTIVE_SUMMARY.md` is the short account, and `REPRODUCING.md` gives every step of the rebuild.
+
 **Draft history.** v0.1 (2026-11-02) was the first draft. v0.2 (2026-11-04) added the author's confirmations and the items below. v1.0 (2026-11-04) is v0.2 after a joint review by two models, Claude and GPT-6 Astra, which tightened definitions and corrected formulas and claims without changing any of the author's decisions. All of it was decided before any hedging outcome was computed. v0.2's additions:
 - mark sensitivities: bid, ask, the imbalance-weighted mid and Lecture 12's size-weighted price (§3);
 - the spread screen S3 reported beside the primary and added to the robustness of the verdict (§3, §8);
@@ -33,9 +41,9 @@
 
 The run that unblinds 2020 records two commits in the `notes` column of the runtime log: the plan's (v1.0) and the implementation's.
 
-## Status (updated 2026-11-06)
+## Status (updated 2026-11-08)
 
-*Added 2026-11-06 at the author's request. It maps what has run, and where its results are. It changes no specification. Which years each run saw is in `results/year_ledger.csv`; every run's commit and wall time is in `results/runtime_log.csv`.*
+*Added 2026-11-06 at the author's request, and updated 2026-11-08 for the reruns of 2026-11-07 and the withdrawals (§15). It maps what has run, and where its results are. It changes no specification. Which years each run saw is in `results/year_ledger.csv`; every run's commit and wall time is in `results/runtime_log.csv`.*
 
 **The story** across all the items below is told in `notebooks/00_the_story.ipynb`, which follows `EXECUTIVE_SUMMARY.md` and recomputes its principal results from `results/`; the notebooks in the last column hold the detail.
 
@@ -43,15 +51,15 @@ The run that unblinds 2020 records two commits in the `notes` column of the runt
 |---|---|---|---|---|---|
 | The confirmatory core: rehearsal, dry run, the 2020 verdict (§§5–13) | v1.0, 2026-11-04 | 2026-11-04 (plan 77b030e) | `run_rehearsal.py`, `run_test_year.py` | `results/rehearsal/`, `results/2020/` | 01–05 |
 | Walk-forward 2010–2023 (§14 item 2) | v1.0 | 2026-11-04 | `run_walkforward.py` | `results/walkforward/` | 06 |
-| SPY (§16.1; a full replication from §16.3) | 2026-11-04; 11-05 | 2026-11-04; 11-05 | `build_greeks_spy.py`, `build_pairs_spy.py`, `run_spy.py`, `run_walkforward.py --spy` | `results/spy/` | 07 |
+| SPY (§16.1; a full replication from §16.3) | 2026-11-04; 11-05 | 2026-11-04; 11-05; §16.1's first run rerun 2026-11-07 (§15) | `build_greeks_spy.py`, `build_pairs_spy.py`, `run_spy.py`, `run_walkforward.py --spy` | `results/spy/` | 07 |
 | Heston (§16.2; rewritten in §16.5) | 2026-11-04; 11-05 | 2026-11-04; 11-05 | `heston2_calibrate.py`, `heston2_hedge.py` | kept locally; withdrawn from the submission (§15, 2026-11-06) | — |
-| R5–R8 under every protocol (§16.4) | 2026-11-05 | 2026-11-05 | `run_learners_variants.py`, `run_walkforward_r5_r8.py` | `results/2020/`, `results/walkforward/` | 08 |
+| R5–R8 under every protocol (§16.4; R7 withdrawn, §15) | 2026-11-05 | 2026-11-05; R8's 2010 tuning and walk-forward rows rerun 2026-11-07 (§15) | `run_learners_variants.py`, `run_walkforward_r5_r8.py` | `results/2020/`, `results/walkforward/` | 08 |
 | Short-dated options (§16.6) | 2026-11-05 | 2026-11-05 | `run_short_dated.py` | `results/short_dated/` | 08 |
-| R9–R11 (§16.7) | 2026-11-05 | 2026-11-05 | `run_r9_r11.py` | `results/2020/`, `results/walkforward/` | 08 |
+| R9–R11 (§16.7) | 2026-11-05 | 2026-11-05; 2010 tuning and walk-forward rows rerun 2026-11-07 (§15) | `run_r9_r11.py` | `results/2020/`, `results/walkforward/` | 08 |
 | R2's degree, P0–P8 and PCV (§16.8) | 2026-11-05 | 2026-11-05 | `run_degrees.py` | `results/walkforward/` | 08 |
 | Published aggregations; level and shape (§16.9) | 2026-11-05 | 2026-11-05 | `compare_published.py`, `level_shape.py` | `results/walkforward/` | 09 |
 | Stress, parameter stability, maturity (§16.10) | 2026-11-05 | 2026-11-05 | `stress_episodes.py`, `parameter_stability.py` | `results/walkforward/` | 09 |
-| Held positions, data starvation, books (§16.11, §16.13, §16.14) | 2026-11-05; revised 11-06 | 2026-11-06 | `run_extensions.py`, `build_pairs_any.py`, `ruleset.py` | `results/extensions/<u>/` (SPX, SPY and the five) | 10, 11 |
+| Held positions, data starvation, books (§16.11, §16.13, §16.14) | 2026-11-05; revised 11-06 | 2026-11-06; SPX's R9 rows rerun 2026-11-07 (§15) | `run_extensions.py`, `build_pairs_any.py`, `ruleset.py` | `results/extensions/<u>/` (SPX, SPY and the five) | 10, 11 |
 | The coverage simulation (§16.12) | 2026-11-05; revised 11-06 | 2026-11-06 | `run_coverage_sim.py` | kept locally; withdrawn from the submission (§15, 2026-11-06) | — |
 | Single stocks and ETFs (§16.15) | 2026-11-05; revised 11-06 | 2026-11-06 | `build_greeks_stocks.py`, `build_pairs_stocks.py`, `audit_stocks.py`, `run_protocol_stocks.py`, `run_extensions.py` | `results/stocks/<u>/`, `results/extensions/<u>/` | 11 |
 
@@ -62,8 +70,8 @@ The run that unblinds 2020 records two commits in the `notes` column of the runt
 4. A spline or varying-coefficient adjustment: not run. The polynomial degrees P0–P8 (§16.8) address the same question.
 5. Smile-based and regime-dependent deltas: not run.
 6. Further machine-learning challengers: LightGBM decomposed (§16.7). GAM, EBM and HedgeNet: not run.
-7. Stochastic-volatility deltas: Heston run (§16.2, §16.5); SABR not run.
-8. Simulations with a known truth: §16.12 (run 2026-11-06).
+7. Stochastic-volatility deltas: Heston run (§16.2, §16.5), then withdrawn from the submission (§15, 2026-11-06); SABR not run.
+8. Simulations with a known truth: §16.12 (run 2026-11-06), then withdrawn from the submission (§15, 2026-11-06).
 9. SPY: run (§16.1, §16.3).
 10. The jump term: not run.
 
@@ -552,6 +560,7 @@ They may run once the confirmatory core is complete, before or after submission,
 | 2026-11-07 | §15, §16.4, §16.7, §16.11, §16.13, §16.14, §16.1 | Stale inputs corrected; no rule or specification changes. A rebuild of every stage from a fresh clone (`REPRODUCING.md`, record of 2026-11-07) reproduced every committed table except 22, and in each of those the committed table was stale. (1) The SPX pair files for 2010–2013 and 2022–2023 dated from 2026-11-04, before the first commit. Their R8 features `rv20` and `ret5` came from a shorter close history than the committed code uses. They were rebuilt. The corrected tables are: the 2010 tuning of R8–R11; the R8–R11 rows of the walk-forward tables; R9's rows in SPX's books, starvation and held-position tables (R9 uses its 2010 tuning until 2016-12); and `rehearsal/learners_2010.csv`. (2) SPY's first exploratory run (§16.1, `results/spy/gains.csv` and its siblings) predated the revision of SPY's closes and Greeks on 2026-11-05. It was rerun. The largest changes: R8's 12-month median yearly Gain over Black–Scholes for calls, 0.122 → 0.089, and over R2 for puts, 0.001 → −0.020; R10's over R2 for puts, −0.003 → −0.015; SPY's exploratory 2020 Gain for puts, 0.246 → 0.238. Notebook 10's statement that R9 loses more than R2 under thinning now holds for SPY and SPX calls, not for SPX puts, and is reworded. The SPX 2020 verdict and the walk-forward of R2 against R1, R3 and R4 are unchanged; outside SPY's first exploratory run, every rule other than R8–R11 is unchanged. | Found by the reproduction test | Yes: all of these results had been seen; the corrections are mechanical, from rerunning the committed code on correctly built inputs |
 | 2026-11-07 | §12, Status, §15 | Reporting; no result or specification changes. The joint review of the wording pass above (interim entry) is complete. Claude and GPT-6 Astra (xhigh for the README and notebook 00, high for notebooks 01–11) approved every public text: the README, `DATA.md`, `REPRODUCING.md` and the narratives of notebooks 00–11. Further corrections, each checked against the outputs, the tables, the code or the plan: (1) the plan was committed before any 2020 hedging outcome, not before "any test-year number", since the 2019–2020 data audit came first (§1); (2) "not contradicted" for the quadratic is replaced, because the rehearsal's diagnostic (2019) and some walk-forward years show small, pointwise significant improvements for higher degrees; (3) the held-position baselines are attached to their samples (12–13% on the 5-day pairs, 12–15% on the 10-day pairs); (4) yearly medians are named as medians, ceilings as monthly, and the standard errors' omission of serial dependence "may overstate" the instability; (5) scopes, windows and pointwise significance are stated where they were missing; (6) notebook 00's monitoring paragraph is cut, in line with the author's exclusion of monitoring advice from the summary, and an untracked tuning-fold figure in notebook 08 is cut at the author's direction; (7) `REPRODUCING.md` adds the Windows requirement of the raw-data pipeline and the fields that change on a rebuild. Editorial: the entry above is narrowed to exclude SPY's first exploratory run, whose R2 Gains also changed, and the Status note's "recomputes its numbers" becomes "recomputes its principal results". Every notebook output is unchanged by these edits. | The author's request of 2026-11-07: the final wording, reviewed jointly with Astra | — |
 | 2026-11-07 | §12 | Reporting; no result or specification changes. `EXECUTIVE_SUMMARY.md` (and its PDF) brought into line with the reviewed README and notebooks, in eight places: the plan preceded any 2020 hedging outcome; the robustness variants' agreement is qualified by the interval widths; "may overstate" for the stability counts; the held-position baselines tied to their samples; in-the-money calls the least of the three reasons; late 2018's losses not significant; the quadratic's row in §6 ("small economic differences; some pointwise significant improvements"); and losses can grow over longer horizons. `REPRODUCING.md`: the Stages 3–6 record says it was run by the author's own Claude session, not an independent reader, and puts its 16.5 hours beside the 18 of running every step in turn. | The author's request of 2026-11-07 | — |
+| 2026-11-08 | Preamble, Status, §14's list; `REPRODUCING.md`, `DATA.md`, script headers | Editorial and documentation; no specification or result changes. (1) A "How to read this plan" note at the top. (2) The Status section records the reruns of 2026-11-07, and §14's list marks the withdrawn items. (3) From an independent reading of `REPRODUCING.md` (GPT-6.1 Sol, 2026-11-08, preparing a rerun of Stages 3–7), `REPRODUCING.md` now says three things: later stages read earlier outputs in `data/` without a check; `heston2_hedge.py` reuses its cached Greeks; and Stage 7's `git` commands succeed whatever they show. It also corrects the Stages 3–6 record's command count to 105. (4) `DATA.md` maps its Steps to the Stages. (5) The headers of `tune_r8.py`, `build_interim.py`, `build_pairs_any.py`, `audit_light.py` and `make_figures.py` list their real options and outputs. | The author's request of 2026-11-08 | — |
 
 ## 16. Extension specifications (appended under §14's rule)
 
