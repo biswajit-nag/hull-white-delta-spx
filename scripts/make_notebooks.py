@@ -779,7 +779,7 @@ The pytest suite checks:
 """),
     code("""
 import subprocess
-r = subprocess.run([sys.executable, "-m", "pytest", "-q", str(ROOT / "tests")], capture_output=True, text=True, cwd=ROOT)
+r = subprocess.run([sys.executable, "-m", "pytest", "-q", "--color=no", str(ROOT / "tests")], capture_output=True, text=True, cwd=ROOT)
 print(r.stdout[-1500:])"""),
 ])
 

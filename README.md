@@ -61,7 +61,7 @@ The story sections are those of the executive summary and notebook 00: 2 data, 3
   uv run python -I scripts/make_notebooks.py
   ```
   The notebooks are generated from the cell definitions in [`scripts/make_notebooks.py`](scripts/make_notebooks.py), so their narrative and the code that reads `results/` are versioned together. They also open in VS Code or Jupyter on the project's `.venv` kernel.
-- **From the raw data.** The rebuild needs the OptionsDX archives and the external files, which are not redistributed here. With them, the pipeline rebuilds every table in `results/`. The 2020 test takes under an hour, and everything about 18 hours. `scripts/check_inputs.py` checks your inputs against the checksums of the files the study used.
+- **From the raw data.** The rebuild needs the OptionsDX archives and the external files, which are not redistributed here. With them, the pipeline rebuilds every table in `results/`. The 2020 test takes under an hour, and everything about 13 hours. `scripts/check_inputs.py` checks your inputs against the checksums of the files the study used.
 
 `results/runtime_log.csv` records every run, with its commit and wall time. `results/year_ledger.csv` records which years' outcomes were seen, and when. Both keep their rows for the regression tree, the Heston deltas and the coverage simulation, which ran but were withdrawn from the submission (`analysis_plan.md` §15); they are records, not results.
 

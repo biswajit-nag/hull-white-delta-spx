@@ -3,9 +3,9 @@
 There are two levels:
 
 - **Without the vendor data** (anyone, a few minutes). Install the locked environment, run the tests, and re-execute every notebook from the committed tables in `results/`: the story in `00_the_story` and the detail in 01–11.
-- **From the raw data.** This needs the OptionsDX files. Rebuild the tables in `results/` from the vendor archives, then compare them with the committed ones. The SPX test of 2020, the confirmatory result, takes under an hour; everything takes about 18 hours.
+- **From the raw data.** This needs the OptionsDX files. Rebuild the tables in `results/` from the vendor archives, then compare them with the committed ones. The SPX test of 2020, the confirmatory result, takes under an hour; everything takes about 13 hours.
 
-Run every command from the repository root. Each script's header gives its usage and its outputs. Times come from `results/runtime_log.csv`, on the author's machine (Windows 11, 6 cores), with one command at a time.
+Run every command from the repository root. Each script's header gives its usage and its outputs. Times come from the reproduction tests recorded at the end and from `results/runtime_log.csv`, on the author's machine (Windows 11, 6 cores), with one command at a time.
 
 **Memory.** The heaviest analysis steps (`stress_episodes.py`, `level_shape.py`, `parameter_stability.py`, `compare_published.py`, `run_walkforward_r5_r8.py` and the held-position paths of `run_extensions.py`) peak at 6.5–7.5 GB. On a 16 GB machine, run them one at a time. In the test run of 2026-11-07, running other stages alongside stretched `stress_episodes.py` from 3 minutes to 7.5 hours. The implied-volatility builds and the Heston calibration need under 2 GB per process; run them alongside other steps only if their combined memory use, including all calibration workers, fits available RAM.
 
@@ -99,7 +99,7 @@ uv run python -I scripts/run_learners_variants.py 2020
   - `results/dryrun_2019/`
   - `results/2020/`, with the verdict in `results/2020/verdict.csv`
 
-### Stage 3: SPX's other rules, the 2010–2023 walk-forward and its readings (about 2.5 hours)
+### Stage 3: SPX's other rules, the 2010–2023 walk-forward and its readings (about 1.7 hours)
 
 ```
 uv run python -I scripts/tune_r8.py 2015 2016
@@ -133,9 +133,9 @@ uv run python -I scripts/correction_curves.py
   - `results/short_dated/`
   - `results/2020/r9_r11.csv`
   - the remaining files in `results/rehearsal/`
-- **The longest steps:** the tuning and R9–R11. The 2010–2023 walk-forward itself (`run_walkforward.py`, the source of the README's yearly figure) takes 6 minutes.
+- **The longest steps:** the tuning and R9–R11. The 2010–2023 walk-forward itself (`run_walkforward.py`, the source of the README's yearly figure) takes about 4 minutes.
 
-### Stage 4: SPY (about 3.5 hours, two of them for the American-option implied volatilities)
+### Stage 4: SPY (about 2.8 hours, one of them for the American-option implied volatilities)
 
 SPY's rates and yields come from SPX's parity curves, so Stage 1 must have run.
 
@@ -175,7 +175,7 @@ uv run python -I scripts/stress_episodes.py --spy
 - **Plan commit:** 3431a8d is the commit recorded in the run log for SPY's runs under the plan's §16.3.
 - **Outputs:** `results/spy/` and `results/audit_light_spy.csv`.
 
-### Stage 5: the five underlyings (about 6 hours, most of it for the American-option implied volatilities)
+### Stage 5: the five underlyings (about 3.3 hours, most of it for the American-option implied volatilities)
 
 ```
 uv run python -I scripts/build_interim.py --raw data/raw/optionsdx_stocks --manifest results/stocks/data_manifest_stocks.csv
@@ -203,7 +203,7 @@ uv run python -I scripts/run_protocol_stocks.py u
 
 **Outputs:** `results/stocks/`.
 
-### Stage 6: books, data starvation and held positions (about 5 hours)
+### Stage 6: books, data starvation and held positions (about 4.4 hours)
 
 On SPX, every rule in these experiments is scored on the pairs that have Heston Greeks, so that all rules share one sample (`analysis_plan.md` §15, 2026-11-06). Heston's results were withdrawn from the submission, but its calibration still defines that sample, so it runs first. It takes about 100 minutes on 6 processes (the calibration's last argument is its number of worker processes), and its outputs (`results/heston2/`, `data/processed/heston2/`) are not committed. `heston2_hedge.py` reuses the Greeks it cached in `data/processed/heston2/greeks_YYYY.parquet` whenever they exist, even after a new calibration; delete those files to recompute them.
 
@@ -280,4 +280,13 @@ Twenty-two tables did not. The rebuild was right and the committed tables were s
   - `rehearsal/learners_2010.csv`.
 - **SPY's first exploratory run** (`run_spy.py`: `results/spy/gains.csv`, `coefficients_*.csv`, `monthly_*.csv`). It ran on 2026-11-04, before SPY's closes and Greeks were revised on 2026-11-05, and had not been rerun.
 
-The committed tables were replaced by the rebuilt ones (`analysis_plan.md` §15, 2026-11-07). Rerunning the R8 tuning on 2010 and `run_spy.py` on the author's machine, after its 2010–2013 and 2022–2023 pairs were rebuilt, reproduced the clone's tables byte for byte. The SPX 2020 verdict and the walk-forward of R2 against R1, R3 and R4 are unchanged. Outside SPY's first exploratory run, all changed results concern R8–R11. The run took 16.5 hours, close to the 18 hours of running every step in turn: steps ran in parallel, but competed for memory (see "Memory" above).
+The committed tables were replaced by the rebuilt ones (`analysis_plan.md` §15, 2026-11-07). Rerunning the R8 tuning on 2010 and `run_spy.py` on the author's machine, after its 2010–2013 and 2022–2023 pairs were rebuilt, reproduced the clone's tables byte for byte. The SPX 2020 verdict and the walk-forward of R2 against R1, R3 and R4 are unchanged. Outside SPY's first exploratory run, all changed results concern R8–R11. The run took 16.5 hours, against 12.2 hours for Stages 3–7 run one command at a time on 2026-11-08 (below): steps ran in parallel, but competed for memory (see "Memory" above).
+
+**2026-11-08, commit ffc2a91, the same clone, Stages 3–7, an independent reading.** A Codex session (GPT-6.1 Sol, at extra-high reasoning effort) read this file on its own and wrote a driver that ran the 111 commands of Stages 3–7 in order, one at a time. Its brief forbade reading the author's project folder, and its log shows no access to it. Stage 0 was run by the author's Claude session, because Codex's sandbox could not start Python; every input matched its checksum. Stages 1–2 were not rerun: the later stages read their outputs from the 2026-11-06 run, and no code that builds them changed between 3cfc09c and ffc2a91. `heston2_hedge.py` reused the Heston Greeks cached by the 2026-11-07 run, so they were not recomputed.
+
+- **Every command exited 0.** The run took 12.2 hours: 1.7 for Stage 3, 2.8 for Stage 4, 3.3 for Stage 5, 4.4 for Stage 6, and under a minute for Stage 7. The stage headings above use these times.
+- **Unchanged:** 433 of the 492 tracked files in `results/` and `notebooks/`. They include every result table (372 CSV and 24 JSON files), the five figures and the 32 tracked logs.
+- **Changed:**
+  - the run log, which gained 337 rows;
+  - the 46 tuning logs, only in Optuna's three time columns: all 2,760 trials kept their parameters, values and states;
+  - the 12 notebooks. Every code cell, displayed value and image matched. One difference was not on the expected list: notebook 02's pytest output had lost its colour codes, because pytest colours its output only when it writes to a terminal. Since then, notebook 02 runs pytest with `--color=no`.
