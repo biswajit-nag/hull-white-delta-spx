@@ -86,4 +86,4 @@ The story sections are those of the executive summary and notebook 00: 2 data, 3
 - OptionsDX. End-of-day option chains (data).
 - Erdős Institute Quantitative Finance Boot Camp, Fall 2026. Lecture 12 option-pricing library.
 
-**Use of AI tools.** This is an individual project. Claude (Anthropic) assisted with code, analysis and drafting. GPT-6 Astra (OpenAI) reviewed key steps and helped in wording the reports. The author directed the work and takes the responsibility for its correctness.
+**Use of AI tools.** This is an individual project. Claude (Anthropic) assisted with code, analysis and drafting. GPT-6 Astra (OpenAI) reviewed key steps and helped in wording the reports. The author directed the work and takes responsibility for its correctness.

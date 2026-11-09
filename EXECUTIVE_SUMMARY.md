@@ -145,15 +145,14 @@ The observed failure modes are:
 - the LightGBM corrections with market features extrapolating outside their training range in March 2020;
 - a fixed scaling of delta applied outside the market and period it was read from. Ruf and Wang’s 0.9/1.1 comes from S&P 500 options from 2010 to mid-2019. It fails on SPY calls and single stocks, and on SPX itself in 2022–2023, as the volatility response weakened.
 
-## 7. Reproducibility
-
-The repository is [github.com/biswajit-nag/hull-white-delta-spx](https://github.com/biswajit-nag/hull-white-delta-spx). Run `uv sync`, then the scripts in `scripts/` and the numbered notebooks, which are committed with outputs. `results/runtime_log.csv` records each run’s commit and wall time.
-
-This is an individual project. Claude (Anthropic) assisted with code, analysis and drafting. GPT-6 Astra (OpenAI) reviewed key steps and helped in wording the reports. The author directed the work and takes the responsibility for its correctness.
-
 ## References
 
 - Hull, J. and White, A. (2017). Optimal delta hedging for options. *Journal of Banking & Finance* 82, 180–190.
 - Ruf, J. and Wang, W. (2022). Hedging with linear regressions and neural networks. *Journal of Business & Economic Statistics* 40(4), 1442–1454.
 - OptionsDX. End-of-day option chains (data).
 - Erdős Institute Quantitative Finance Boot Camp, Fall 2026. Lecture 12 option-pricing library.
+
+
+**Use of AI tools.** This is an individual project. Claude (Anthropic) assisted with code, analysis and drafting. GPT-6 Astra (OpenAI) reviewed key steps and helped in wording the reports. The author directed the work and takes responsibility for its correctness.
+
+*Code, notebooks and reproduction steps: [github.com/biswajit-nag/hull-white-delta-spx](https://github.com/biswajit-nag/hull-white-delta-spx) (see `REPRODUCING.md`).*
